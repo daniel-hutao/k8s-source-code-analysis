@@ -1,0 +1,19 @@
+{
+    "plugins": [
+	"simple-page-toc",
+        "navigator",
+	"prism", "-highlight",
+	"editlink"
+    ],
+    "pluginsConfig": {
+        "simple-page-toc": {
+            "maxDepth": 3,
+            "skipFirstH1": true
+        },
+	"editlink": {
+            "base": "https://github.com/farmer-hutao/k8s-source-code-analysis/edit/master",
+	    "label": "编辑本页",
+            "multilingual": false
+    }
+    }
+}
