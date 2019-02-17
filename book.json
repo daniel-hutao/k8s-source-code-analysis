@@ -3,7 +3,9 @@
 	"simple-page-toc",
         "navigator",
 	"prism", "-highlight",
-	"editlink"
+	"editlink",
+	"github",
+	"donate"
     ],
     "pluginsConfig": {
         "simple-page-toc": {
@@ -14,6 +16,15 @@
             "base": "https://github.com/farmer-hutao/k8s-source-code-analysis/edit/master",
 	    "label": "编辑本页",
             "multilingual": false
-    }
+        },
+	"github": {
+            "url": "https://github.com/farmer-hutao/k8s-source-code-analysis"
+        },
+	"donate": {
+          "wechat": "/image/wx.jpg",
+          "title": "小额捐赠",
+          "button": "鼓励作者",
+          "wechatText": "微信小额捐赠，鼓励作者尽快更新～"
+        }
     }
 }
