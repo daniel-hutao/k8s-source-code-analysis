@@ -21,7 +21,7 @@
             "url": "https://github.com/farmer-hutao/k8s-source-code-analysis"
         },
 	"donate": {
-          "wechat": "/image/wx.jpg",
+          "wechat": "./image/wx.jpg",
           "title": "小额捐赠",
           "button": "鼓励作者",
           "wechatText": "微信小额捐赠，鼓励作者尽快更新～"
