@@ -2,7 +2,7 @@
 
 <!-- toc -->
 
-## 1、环境准备
+## 环境准备
 
 操作系统：我们使用Linux作为k8s源码分析和调试环境，fedora、centos、ubuntu都行，我这里使用fedora；
 
@@ -12,7 +12,7 @@ golang相关：
 - GOPATH=/root/go
 - go version go1.10.3 linux/amd64
 
-## 2、源码下载
+## 源码下载
 
 ```sh
 mkdir -p /root/go/src/k8s.io
@@ -24,7 +24,7 @@ git clone https://github.com/kubernetes/kubernetes.git
 
 ![1550208476439](./image/1550208476439.png)
 
-## 3、源码编译
+## 源码编译
 
 我们先看一下几个主要的目录：
 
@@ -45,7 +45,7 @@ git clone https://github.com/kubernetes/kubernetes.git
 
 注意到k8s是使用这种方式解决k8s.io下的依赖问题的，如果我们在windows下下载的代码，然后copy到linux下，就很容易遇到这些软链接丢失的情况，导致go找不到依赖，编译失败。
 
-## 4、IDE
+## IDE
 
 我们使用Goland看代码：
 

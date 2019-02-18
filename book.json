@@ -1,7 +1,7 @@
 {
     "plugins": [
-	"simple-page-toc",
         "navigator",
+	"simple-page-toc",
 	"prism", "-highlight",
 	"editlink",
 	"github",
