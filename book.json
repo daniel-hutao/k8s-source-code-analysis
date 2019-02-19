@@ -1,13 +1,26 @@
 {
+    "title": "《k8s-1.13版本源码分析》",
+    "author": "Tao Hu <farmer.hutao@outlook.com>",
+    "description": "k8s source code analysis",
     "plugins": [
+        "theme-comscore",
         "navigator",
 	"simple-page-toc",
+	"expandable-chapters-small",
+	"search-pro",
+	"splitter",
+	"multipart",
+	"tbfed-pagefooter",
 	"prism", "-highlight",
 	"editlink",
 	"github",
+	"github-buttons",
 	"donate"
     ],
     "pluginsConfig": {
+	"theme-default": {
+            "showLevel": true
+        },
         "simple-page-toc": {
             "maxDepth": 3,
             "skipFirstH1": true
@@ -20,11 +33,28 @@
 	"github": {
             "url": "https://github.com/farmer-hutao/k8s-source-code-analysis"
         },
+	"github-buttons": {
+            "buttons": [{
+            "user": "farmer-hutao",
+            "repo": "k8s-source-code-analysis",
+            "type": "star",
+            "size": "small"
+            }]
+        },
 	"donate": {
-          "wechat": "./image/wx.jpg",
-          "title": "小额捐赠",
-          "button": "鼓励作者",
-          "wechatText": "微信小额捐赠，鼓励作者尽快更新～"
+            "wechat": "./image/wx.jpg",
+            "title": "小额捐赠",
+            "button": "鼓励作者",
+            "wechatText": "微信小额捐赠，鼓励作者尽快更新～"
+        },
+	"search-pro": {
+            "cutWordLib": "nodejieba",
+            "defineWord" : ["Gitbook Use"]
+        },
+	"tbfed-pagefooter": {
+            "copyright":"Copyright &copy farmer.hutao@outlook.com 2019",
+            "modify_label": "该文件修订时间：",
+            "modify_format": "YYYY-MM-DD HH:mm:ss"
         }
     }
 }
