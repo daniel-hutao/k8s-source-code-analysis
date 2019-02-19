@@ -4,11 +4,11 @@
     <head>
         <meta charset="UTF-8">
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <title>apiserver · GitBook</title>
+        <title>apiserver · 《k8s-1.13版本源码分析》</title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="description" content="">
         <meta name="generator" content="GitBook 3.2.3">
-        
+        <meta name="author" content="Tao Hu <farmer.hutao@outlook.com>">
         
         
     
@@ -21,7 +21,7 @@
                 
             
                 
-                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-toggle-chapters/toggle.css">
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-expandable-chapters-small/expandable-chapters-small.css">
                 
             
                 
@@ -30,6 +30,10 @@
             
                 
                 <link rel="stylesheet" href="../../gitbook/gitbook-plugin-splitter/splitter.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-multipart/multipart.css">
                 
             
                 
@@ -50,6 +54,10 @@
             
                 
                 <link rel="stylesheet" href="../../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-theme-comscore/test.css">
                 
             
         
@@ -123,12 +131,16 @@
 
     
         
+        <li class="header">Part I - 准备工作</li>
+        
         
     
         <li class="chapter " data-level="1.1" data-path="../../">
             
                 <a href="../../">
             
+                    
+                        <b>1.1.</b>
                     
                     前言
             
@@ -142,6 +154,8 @@
             
                 <a href="../../prepare/">
             
+                    
+                        <b>1.2.</b>
                     
                     k8s源码分析准备工作
             
@@ -157,6 +171,8 @@
                 <a href="../../prepare/get-code.html">
             
                     
+                        <b>1.2.1.</b>
+                    
                     源码准备
             
                 </a>
@@ -169,6 +185,8 @@
             
                 <a href="../../prepare/debug-environment.html">
             
+                    
+                        <b>1.2.2.</b>
                     
                     调试环境搭建
             
@@ -183,24 +201,34 @@
             
         </li>
     
-        <li class="chapter " data-level="1.3" data-path="../">
+
+    
+        
+        <li class="header">Part II - 核心组件</li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="../">
             
                 <a href="../">
             
                     
-                    核心组件源码分析
+                        <b>2.1.</b>
+                    
+                    概述
             
                 </a>
             
 
             
-            <ul class="articles">
-                
+        </li>
     
-        <li class="chapter " data-level="1.3.1" data-path="../scheduler/">
+        <li class="chapter " data-level="2.2" data-path="../scheduler/">
             
                 <a href="../scheduler/">
             
+                    
+                        <b>2.2.</b>
                     
                     scheduler
             
@@ -211,10 +239,12 @@
             <ul class="articles">
                 
     
-        <li class="chapter " data-level="1.3.1.1" data-path="../scheduler/desigh.html">
+        <li class="chapter " data-level="2.2.1" data-path="../scheduler/desigh.html">
             
                 <a href="../scheduler/desigh.html">
             
+                    
+                        <b>2.2.1.</b>
                     
                     调度器设计
             
@@ -229,10 +259,12 @@
             
         </li>
     
-        <li class="chapter active" data-level="1.3.2" data-path="./">
+        <li class="chapter active" data-level="2.3" data-path="./">
             
                 <a href="./">
             
+                    
+                        <b>2.3.</b>
                     
                     apiserver
             
@@ -242,10 +274,12 @@
             
         </li>
     
-        <li class="chapter " data-level="1.3.3" data-path="../proxy/">
+        <li class="chapter " data-level="2.4" data-path="../proxy/">
             
                 <a href="../proxy/">
             
+                    
+                        <b>2.4.</b>
                     
                     proxy
             
@@ -255,10 +289,12 @@
             
         </li>
     
-        <li class="chapter " data-level="1.3.4" data-path="../kubelet/">
+        <li class="chapter " data-level="2.5" data-path="../kubelet/">
             
                 <a href="../kubelet/">
             
+                    
+                        <b>2.5.</b>
                     
                     kubelet
             
@@ -268,10 +304,12 @@
             
         </li>
     
-        <li class="chapter " data-level="1.3.5" data-path="../controller-manager/">
+        <li class="chapter " data-level="2.6" data-path="../controller-manager/">
             
                 <a href="../controller-manager/">
             
+                    
+                        <b>2.6.</b>
                     
                     controller-manager
             
@@ -282,39 +320,39 @@
         </li>
     
 
-            </ul>
-            
-        </li>
     
-        <li class="chapter " data-level="1.4" data-path="../../around/">
+        
+        <li class="header">Part III - 周边项目</li>
+        
+        
+    
+        <li class="chapter " data-level="3.1" data-path="../../around/">
             
                 <a href="../../around/">
             
                     
-                    周边项目源码分析
+                        <b>3.1.</b>
+                    
+                    概述
             
                 </a>
             
 
             
-            <ul class="articles">
-                
+        </li>
     
-        <li class="chapter " data-level="1.4.1" data-path="../../around/client-go/">
+        <li class="chapter " data-level="3.2" data-path="../../around/client-go/">
             
                 <a href="../../around/client-go/">
             
+                    
+                        <b>3.2.</b>
                     
                     client-go
             
                 </a>
             
 
-            
-        </li>
-    
-
-            </ul>
             
         </li>
     
@@ -428,7 +466,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"apiserver","level":"1.3.2","depth":2,"next":{"title":"proxy","level":"1.3.3","depth":2,"path":"core/proxy/README.md","ref":"core/proxy/README.md","articles":[]},"previous":{"title":"调度器设计","level":"1.3.1.1","depth":3,"path":"core/scheduler/desigh.md","ref":"core/scheduler/desigh.md","articles":[]},"dir":"ltr"},"config":{"plugins":["navigator","simple-page-toc","toggle-chapters","search-pro","splitter","tbfed-pagefooter","prism","-highlight","editlink","github","github-buttons","donate","livereload"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"tbfed-pagefooter":{"copyright":"Copyright &copy farmer.hutao@outlook.com 2019","modify_label":"该文件修订时间：","modify_format":"YYYY-MM-DD HH:mm:ss"},"prism":{},"github":{"url":"https://github.com/farmer-hutao/k8s-source-code-analysis"},"editlink":{"label":"编辑本页","multilingual":false,"base":"https://github.com/farmer-hutao/k8s-source-code-analysis/edit/master"},"livereload":{},"simple-page-toc":{"maxDepth":3,"skipFirstH1":true},"splitter":{},"search-pro":{"cutWordLib":"nodejieba","defineWord":["Gitbook Use"]},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"donate":{"alipay":"","alipayText":"支付宝打赏","button":"鼓励作者","title":"小额捐赠","wechat":"./image/wx.jpg","wechatText":"微信小额捐赠，鼓励作者尽快更新～"},"fontsettings":{"theme":"white","family":"sans","size":2},"navigator":{},"github-buttons":{"buttons":[{"user":"farmer-hutao","repo":"k8s-source-code-analysis","type":"star","size":"small"}]},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"toggle-chapters":{}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*","theme-default":{"showLevel":true}},"file":{"path":"core/apiserver/README.md","mtime":"2019-02-15T04:29:29.172Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-02-19T08:50:31.192Z"},"basePath":"../..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"apiserver","level":"2.3","depth":1,"next":{"title":"proxy","level":"2.4","depth":1,"path":"core/proxy/README.md","ref":"core/proxy/README.md","articles":[]},"previous":{"title":"调度器设计","level":"2.2.1","depth":2,"path":"core/scheduler/desigh.md","ref":"core/scheduler/desigh.md","articles":[]},"dir":"ltr"},"config":{"plugins":["theme-comscore","navigator","simple-page-toc","expandable-chapters-small","search-pro","splitter","multipart","tbfed-pagefooter","prism","-highlight","editlink","github","github-buttons","donate","livereload"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"tbfed-pagefooter":{"copyright":"Copyright &copy farmer.hutao@outlook.com 2019","modify_label":"该文件修订时间：","modify_format":"YYYY-MM-DD HH:mm:ss"},"prism":{},"github":{"url":"https://github.com/farmer-hutao/k8s-source-code-analysis"},"editlink":{"label":"编辑本页","multilingual":false,"base":"https://github.com/farmer-hutao/k8s-source-code-analysis/edit/master"},"livereload":{},"simple-page-toc":{"maxDepth":3,"skipFirstH1":true},"splitter":{},"search-pro":{"cutWordLib":"nodejieba","defineWord":["Gitbook Use"]},"search":{},"multipart":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"donate":{"alipay":"","alipayText":"支付宝打赏","button":"鼓励作者","title":"小额捐赠","wechat":"./image/wx.jpg","wechatText":"微信小额捐赠，鼓励作者尽快更新～"},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-comscore":{},"navigator":{},"github-buttons":{"buttons":[{"user":"farmer-hutao","repo":"k8s-source-code-analysis","type":"star","size":"small"}]},"expandable-chapters-small":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":true}},"theme":"default","author":"Tao Hu <farmer.hutao@outlook.com>","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"《k8s-1.13版本源码分析》","gitbook":"*","description":"k8s source code analysis"},"file":{"path":"core/apiserver/README.md","mtime":"2019-02-15T04:29:29.172Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-02-19T10:06:46.642Z"},"basePath":"../..","book":{"language":""}});
         });
     </script>
 </div>
@@ -438,7 +476,7 @@
     <script src="../../gitbook/theme.js"></script>
     
         
-        <script src="../../gitbook/gitbook-plugin-toggle-chapters/toggle.js"></script>
+        <script src="../../gitbook/gitbook-plugin-expandable-chapters-small/expandable-chapters-small.js"></script>
         
     
         
@@ -495,6 +533,10 @@
     
         
         <script src="../../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-theme-comscore/test.js"></script>
         
     
 
