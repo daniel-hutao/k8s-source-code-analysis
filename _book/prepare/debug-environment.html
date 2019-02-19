@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <title>apiserver · 《k8s-1.13版本源码分析》</title>
+        <title>调试环境搭建 · 《k8s-1.13版本源码分析》</title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="description" content="">
         <meta name="generator" content="GitBook 3.2.3">
@@ -12,52 +12,52 @@
         
         
     
-    <link rel="stylesheet" href="../../gitbook/style.css">
+    <link rel="stylesheet" href="../gitbook/style.css">
 
     
             
                 
-                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-navigator/plugin.css">
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-navigator/plugin.css">
                 
             
                 
-                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-expandable-chapters-small/expandable-chapters-small.css">
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-expandable-chapters-small/expandable-chapters-small.css">
                 
             
                 
-                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-search-pro/search.css">
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search-pro/search.css">
                 
             
                 
-                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-splitter/splitter.css">
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-splitter/splitter.css">
                 
             
                 
-                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-multipart/multipart.css">
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-multipart/multipart.css">
                 
             
                 
-                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-tbfed-pagefooter/footer.css">
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-tbfed-pagefooter/footer.css">
                 
             
                 
-                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-prism/prism.css">
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-prism/prism.css">
                 
             
                 
-                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-donate/plugin.css">
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-donate/plugin.css">
                 
             
                 
-                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-search/search.css">
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
                 
             
                 
-                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-fontsettings/website.css">
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
                 
             
                 
-                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-theme-comscore/test.css">
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-theme-comscore/test.css">
                 
             
         
@@ -86,14 +86,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../../gitbook/images/apple-touch-icon-precomposed-152.png">
-    <link rel="shortcut icon" href="../../gitbook/images/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
 
     
-    <link rel="next" href="../proxy/" />
+    <link rel="next" href="../core/" />
     
     
-    <link rel="prev" href="../scheduler/desigh.html" />
+    <link rel="prev" href="get-code.html" />
     
 
     <style>
@@ -104,7 +104,7 @@
     }
     </style>
     <script>
-        window["gitbook-plugin-github-buttons"] = {"buttons":[{"user":"farmer-hutao","repo":"k8s-source-code-analysis","type":"star","size":"small"}]};
+        window["gitbook-plugin-github-buttons"] = {"repo":"farmer-hutao/k8s-source-code-analysis","types":["star"],"size":"small"};
     </script>
 
     </head>
@@ -135,9 +135,9 @@
         
         
     
-        <li class="chapter " data-level="1.1" data-path="../../">
+        <li class="chapter " data-level="1.1" data-path="../">
             
-                <a href="../../">
+                <a href="../">
             
                     
                         <b>1.1.</b>
@@ -150,9 +150,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.2" data-path="../../prepare/">
+        <li class="chapter " data-level="1.2" data-path="./">
             
-                <a href="../../prepare/">
+                <a href="./">
             
                     
                         <b>1.2.</b>
@@ -166,9 +166,9 @@
             <ul class="articles">
                 
     
-        <li class="chapter " data-level="1.2.1" data-path="../../prepare/get-code.html">
+        <li class="chapter " data-level="1.2.1" data-path="get-code.html">
             
-                <a href="../../prepare/get-code.html">
+                <a href="get-code.html">
             
                     
                         <b>1.2.1.</b>
@@ -181,9 +181,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.2.2" data-path="../../prepare/debug-environment.html">
+        <li class="chapter active" data-level="1.2.2" data-path="debug-environment.html">
             
-                <a href="../../prepare/debug-environment.html">
+                <a href="debug-environment.html">
             
                     
                         <b>1.2.2.</b>
@@ -208,9 +208,9 @@
         
         
     
-        <li class="chapter " data-level="2.1" data-path="../">
+        <li class="chapter " data-level="2.1" data-path="../core/">
             
-                <a href="../">
+                <a href="../core/">
             
                     
                         <b>2.1.</b>
@@ -223,9 +223,9 @@
             
         </li>
     
-        <li class="chapter " data-level="2.2" data-path="../scheduler/">
+        <li class="chapter " data-level="2.2" data-path="../core/scheduler/">
             
-                <a href="../scheduler/">
+                <a href="../core/scheduler/">
             
                     
                         <b>2.2.</b>
@@ -239,9 +239,9 @@
             <ul class="articles">
                 
     
-        <li class="chapter " data-level="2.2.1" data-path="../scheduler/desigh.html">
+        <li class="chapter " data-level="2.2.1" data-path="../core/scheduler/desigh.html">
             
-                <a href="../scheduler/desigh.html">
+                <a href="../core/scheduler/desigh.html">
             
                     
                         <b>2.2.1.</b>
@@ -259,9 +259,9 @@
             
         </li>
     
-        <li class="chapter active" data-level="2.3" data-path="./">
+        <li class="chapter " data-level="2.3" data-path="../core/apiserver/">
             
-                <a href="./">
+                <a href="../core/apiserver/">
             
                     
                         <b>2.3.</b>
@@ -274,9 +274,9 @@
             
         </li>
     
-        <li class="chapter " data-level="2.4" data-path="../proxy/">
+        <li class="chapter " data-level="2.4" data-path="../core/proxy/">
             
-                <a href="../proxy/">
+                <a href="../core/proxy/">
             
                     
                         <b>2.4.</b>
@@ -289,9 +289,9 @@
             
         </li>
     
-        <li class="chapter " data-level="2.5" data-path="../kubelet/">
+        <li class="chapter " data-level="2.5" data-path="../core/kubelet/">
             
-                <a href="../kubelet/">
+                <a href="../core/kubelet/">
             
                     
                         <b>2.5.</b>
@@ -304,9 +304,9 @@
             
         </li>
     
-        <li class="chapter " data-level="2.6" data-path="../controller-manager/">
+        <li class="chapter " data-level="2.6" data-path="../core/controller-manager/">
             
-                <a href="../controller-manager/">
+                <a href="../core/controller-manager/">
             
                     
                         <b>2.6.</b>
@@ -326,9 +326,9 @@
         
         
     
-        <li class="chapter " data-level="3.1" data-path="../../around/">
+        <li class="chapter " data-level="3.1" data-path="../around/">
             
-                <a href="../../around/">
+                <a href="../around/">
             
                     
                         <b>3.1.</b>
@@ -341,9 +341,9 @@
             
         </li>
     
-        <li class="chapter " data-level="3.2" data-path="../../around/client-go/">
+        <li class="chapter " data-level="3.2" data-path="../around/client-go/">
             
-                <a href="../../around/client-go/">
+                <a href="../around/client-go/">
             
                     
                         <b>3.2.</b>
@@ -386,7 +386,7 @@
     <!-- Title -->
     <h1>
         <i class="fa fa-circle-o-notch fa-spin"></i>
-        <a href="../.." >apiserver</a>
+        <a href=".." >调试环境搭建</a>
     </h1>
 </div>
 
@@ -404,7 +404,7 @@
     
                                 <section class="normal markdown-section">
                                 
-                                <h1 id="apiserver">apiserver</h1>
+                                <h1 id="&#x8C03;&#x8BD5;&#x73AF;&#x5883;&#x642D;&#x5EFA;">&#x8C03;&#x8BD5;&#x73AF;&#x5883;&#x642D;&#x5EFA;</h1>
 <footer class="page-footer"><span class="copyright">Copyright &#xA9; farmer.hutao@outlook.com 2019 all right reserved&#xFF0C;powered by Gitbook</span><span class="footer-modification">&#x8BE5;&#x6587;&#x4EF6;&#x4FEE;&#x8BA2;&#x65F6;&#x95F4;&#xFF1A;
 2019-02-15 12:29:29
 </span></footer>
@@ -450,12 +450,12 @@
 
             
                 
-                <a href="../scheduler/desigh.html" class="navigation navigation-prev " aria-label="Previous page: 调度器设计">
+                <a href="get-code.html" class="navigation navigation-prev " aria-label="Previous page: 源码准备">
                     <i class="fa fa-angle-left"></i>
                 </a>
                 
                 
-                <a href="../proxy/" class="navigation navigation-next " aria-label="Next page: proxy">
+                <a href="../core/" class="navigation navigation-next " aria-label="Next page: 概述">
                     <i class="fa fa-angle-right"></i>
                 </a>
                 
@@ -466,77 +466,77 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"apiserver","level":"2.3","depth":1,"next":{"title":"proxy","level":"2.4","depth":1,"path":"core/proxy/README.md","ref":"core/proxy/README.md","articles":[]},"previous":{"title":"调度器设计","level":"2.2.1","depth":2,"path":"core/scheduler/desigh.md","ref":"core/scheduler/desigh.md","articles":[]},"dir":"ltr"},"config":{"plugins":["theme-comscore","navigator","simple-page-toc","expandable-chapters-small","search-pro","splitter","multipart","tbfed-pagefooter","prism","-highlight","editlink","github","github-buttons","donate","livereload"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"tbfed-pagefooter":{"copyright":"Copyright &copy farmer.hutao@outlook.com 2019","modify_label":"该文件修订时间：","modify_format":"YYYY-MM-DD HH:mm:ss"},"prism":{},"github":{"url":"https://github.com/farmer-hutao/k8s-source-code-analysis"},"editlink":{"label":"编辑本页","multilingual":false,"base":"https://github.com/farmer-hutao/k8s-source-code-analysis/edit/master"},"livereload":{},"simple-page-toc":{"maxDepth":3,"skipFirstH1":true},"splitter":{},"search-pro":{"cutWordLib":"nodejieba","defineWord":["Gitbook Use"]},"search":{},"multipart":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"donate":{"alipay":"","alipayText":"支付宝打赏","button":"鼓励作者","title":"小额捐赠","wechat":"./image/wx.jpg","wechatText":"微信小额捐赠，鼓励作者尽快更新～"},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-comscore":{},"navigator":{},"github-buttons":{"buttons":[{"user":"farmer-hutao","repo":"k8s-source-code-analysis","type":"star","size":"small"}]},"expandable-chapters-small":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":true}},"theme":"default","author":"Tao Hu <farmer.hutao@outlook.com>","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"《k8s-1.13版本源码分析》","gitbook":"*","description":"k8s source code analysis"},"file":{"path":"core/apiserver/README.md","mtime":"2019-02-15T04:29:29.172Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-02-19T10:06:46.642Z"},"basePath":"../..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"调试环境搭建","level":"1.2.2","depth":2,"next":{"title":"概述","level":"2.1","depth":1,"path":"core/README.md","ref":"core/README.md","articles":[]},"previous":{"title":"源码准备","level":"1.2.1","depth":2,"path":"prepare/get-code.md","ref":"prepare/get-code.md","articles":[]},"dir":"ltr"},"config":{"plugins":["theme-comscore","navigator","simple-page-toc","expandable-chapters-small","search-pro","splitter","multipart","tbfed-pagefooter","prism","-highlight","editlink","github","github-buttons@2.1.0","donate","livereload"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"tbfed-pagefooter":{"copyright":"Copyright &copy farmer.hutao@outlook.com 2019","modify_label":"该文件修订时间：","modify_format":"YYYY-MM-DD HH:mm:ss"},"prism":{},"github":{"url":"https://github.com/farmer-hutao/k8s-source-code-analysis"},"editlink":{"label":"编辑本页","multilingual":false,"base":"https://github.com/farmer-hutao/k8s-source-code-analysis/edit/master"},"livereload":{},"simple-page-toc":{"maxDepth":3,"skipFirstH1":true},"splitter":{},"search-pro":{"cutWordLib":"nodejieba","defineWord":["Gitbook Use"]},"search":{},"multipart":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"donate":{"alipay":"","alipayText":"支付宝打赏","button":"鼓励作者","title":"小额捐赠","wechat":"./image/wx.jpg","wechatText":"微信小额捐赠，鼓励作者尽快更新～"},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-comscore":{},"navigator":{},"github-buttons":{"repo":"farmer-hutao/k8s-source-code-analysis","types":["star"],"size":"small"},"expandable-chapters-small":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":true}},"theme":"default","author":"Tao Hu <farmer.hutao@outlook.com>","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"《k8s-1.13版本源码分析》","gitbook":"*","description":"k8s source code analysis"},"file":{"path":"prepare/debug-environment.md","mtime":"2019-02-15T04:29:29.177Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-02-19T10:14:25.575Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
 
         
-    <script src="../../gitbook/gitbook.js"></script>
-    <script src="../../gitbook/theme.js"></script>
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
     
         
-        <script src="../../gitbook/gitbook-plugin-expandable-chapters-small/expandable-chapters-small.js"></script>
-        
-    
-        
-        <script src="../../gitbook/gitbook-plugin-search-pro/jquery.mark.min.js"></script>
+        <script src="../gitbook/gitbook-plugin-expandable-chapters-small/expandable-chapters-small.js"></script>
         
     
         
-        <script src="../../gitbook/gitbook-plugin-search-pro/search.js"></script>
+        <script src="../gitbook/gitbook-plugin-search-pro/jquery.mark.min.js"></script>
         
     
         
-        <script src="../../gitbook/gitbook-plugin-splitter/splitter.js"></script>
+        <script src="../gitbook/gitbook-plugin-search-pro/search.js"></script>
         
     
         
-        <script src="../../gitbook/gitbook-plugin-editlink/plugin.js"></script>
+        <script src="../gitbook/gitbook-plugin-splitter/splitter.js"></script>
         
     
         
-        <script src="../../gitbook/gitbook-plugin-github/plugin.js"></script>
+        <script src="../gitbook/gitbook-plugin-editlink/plugin.js"></script>
         
     
         
-        <script src="../../gitbook/gitbook-plugin-github-buttons/plugin.js"></script>
+        <script src="../gitbook/gitbook-plugin-github/plugin.js"></script>
         
     
         
-        <script src="../../gitbook/gitbook-plugin-donate/plugin.js"></script>
+        <script src="../gitbook/gitbook-plugin-github-buttons/plugin.js"></script>
         
     
         
-        <script src="../../gitbook/gitbook-plugin-livereload/plugin.js"></script>
+        <script src="../gitbook/gitbook-plugin-donate/plugin.js"></script>
         
     
         
-        <script src="../../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        <script src="../gitbook/gitbook-plugin-livereload/plugin.js"></script>
         
     
         
-        <script src="../../gitbook/gitbook-plugin-search/search.js"></script>
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
         
     
         
-        <script src="../../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
         
     
         
-        <script src="../../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
         
     
         
-        <script src="../../gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
         
     
         
-        <script src="../../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        <script src="../gitbook/gitbook-plugin-sharing/buttons.js"></script>
         
     
         
-        <script src="../../gitbook/gitbook-plugin-theme-comscore/test.js"></script>
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-theme-comscore/test.js"></script>
         
     
 

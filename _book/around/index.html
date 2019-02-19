@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <title>k8s源码分析准备工作 · 《k8s-1.13版本源码分析》</title>
+        <title>概述 · 《k8s-1.13版本源码分析》</title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="description" content="">
         <meta name="generator" content="GitBook 3.2.3">
@@ -90,10 +90,10 @@
     <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
 
     
-    <link rel="next" href="get-code.html" />
+    <link rel="next" href="client-go/" />
     
     
-    <link rel="prev" href="../" />
+    <link rel="prev" href="../core/controller-manager/" />
     
 
     <style>
@@ -104,7 +104,7 @@
     }
     </style>
     <script>
-        window["gitbook-plugin-github-buttons"] = {"buttons":[{"user":"farmer-hutao","repo":"k8s-source-code-analysis","type":"star","size":"small"}]};
+        window["gitbook-plugin-github-buttons"] = {"repo":"farmer-hutao/k8s-source-code-analysis","types":["star"],"size":"small"};
     </script>
 
     </head>
@@ -150,9 +150,9 @@
             
         </li>
     
-        <li class="chapter active" data-level="1.2" data-path="./">
+        <li class="chapter " data-level="1.2" data-path="../prepare/">
             
-                <a href="./">
+                <a href="../prepare/">
             
                     
                         <b>1.2.</b>
@@ -166,9 +166,9 @@
             <ul class="articles">
                 
     
-        <li class="chapter " data-level="1.2.1" data-path="get-code.html">
+        <li class="chapter " data-level="1.2.1" data-path="../prepare/get-code.html">
             
-                <a href="get-code.html">
+                <a href="../prepare/get-code.html">
             
                     
                         <b>1.2.1.</b>
@@ -181,9 +181,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.2.2" data-path="debug-environment.html">
+        <li class="chapter " data-level="1.2.2" data-path="../prepare/debug-environment.html">
             
-                <a href="debug-environment.html">
+                <a href="../prepare/debug-environment.html">
             
                     
                         <b>1.2.2.</b>
@@ -326,9 +326,9 @@
         
         
     
-        <li class="chapter " data-level="3.1" data-path="../around/">
+        <li class="chapter active" data-level="3.1" data-path="./">
             
-                <a href="../around/">
+                <a href="./">
             
                     
                         <b>3.1.</b>
@@ -341,9 +341,9 @@
             
         </li>
     
-        <li class="chapter " data-level="3.2" data-path="../around/client-go/">
+        <li class="chapter " data-level="3.2" data-path="client-go/">
             
-                <a href="../around/client-go/">
+                <a href="client-go/">
             
                     
                         <b>3.2.</b>
@@ -386,7 +386,7 @@
     <!-- Title -->
     <h1>
         <i class="fa fa-circle-o-notch fa-spin"></i>
-        <a href=".." >k8s源码分析准备工作</a>
+        <a href=".." >概述</a>
     </h1>
 </div>
 
@@ -404,17 +404,10 @@
     
                                 <section class="normal markdown-section">
                                 
-                                <h1 id="k8s&#x6E90;&#x7801;&#x5206;&#x6790;&#x51C6;&#x5907;&#x5DE5;&#x4F5C;">k8s&#x6E90;&#x7801;&#x5206;&#x6790;&#x51C6;&#x5907;&#x5DE5;&#x4F5C;</h1>
-<h2 id="&#x6982;&#x8FF0;">1. &#x6982;&#x8FF0;</h2>
-<p>&#x51C6;&#x5907;&#x5DE5;&#x4F5C;&#x5206;&#x4E3A;2&#x90E8;&#x5206;&#xFF1A;</p>
-<ol>
-<li>&#x6E90;&#x7801;&#x51C6;&#x5907;</li>
-<li>&#x8C03;&#x8BD5;&#x73AF;&#x5883;&#x642D;&#x5EFA;</li>
-</ol>
-<p>&#x6E90;&#x7801;&#x51C6;&#x5907;&#x9636;&#x6BB5;&#x4E3B;&#x8981;&#x4ECB;&#x7ECD;k8s&#x6E90;&#x7801;&#x7684;&#x83B7;&#x53D6;&#x4E0E;&#x672C;&#x5730;golang&#x7F16;&#x8BD1;&#x73AF;&#x5883;&#x914D;&#x7F6E;&#x7B49;&#xFF1B;&#x8C03;&#x8BD5;&#x73AF;&#x5883;&#x642D;&#x5EFA;&#x662F;&#x4ECB;&#x7ECD;&#x5982;&#x4F55;&#x51C6;&#x5907;&#x4E00;&#x4E2A;k8s&#x73AF;&#x5883;&#xFF0C;&#x7528;&#x4E8E;&#x540E;&#x7EED;&#x7EC4;&#x4EF6;&#x7684;&#x4EE3;&#x7801;&#x8C03;&#x8BD5;&#x3002;&#x8C03;&#x8BD5;&#x73AF;&#x5883;&#x53EF;&#x4EE5;&#x5728;&#x5927;&#x4F53;&#x5B66;&#x4E60;&#x5B8C;&#x4E00;&#x4E2A;&#x7EC4;&#x4EF6;&#x6E90;&#x7801;&#x540E;&#x8FDB;&#x884C;&#xFF0C;&#x7528;&#x4E8E;&#x9A8C;&#x8BC1;&#x81EA;&#x5DF1;&#x5728;&#x770B;&#x6E90;&#x7801;&#x8FC7;&#x7A0B;&#x4E2D;&#x7684;&#x4E00;&#x4E9B;&#x60F3;&#x6CD5;&#x548C;&#x7591;&#x60D1;&#x3002;</p>
+                                <h1 id="&#x5468;&#x8FB9;&#x9879;&#x76EE;&#x6E90;&#x7801;&#x5206;&#x6790;">&#x5468;&#x8FB9;&#x9879;&#x76EE;&#x6E90;&#x7801;&#x5206;&#x6790;</h1>
 <footer class="page-footer"><span class="copyright">Copyright &#xA9; farmer.hutao@outlook.com 2019 all right reserved&#xFF0C;powered by Gitbook</span><span class="footer-modification">&#x8BE5;&#x6587;&#x4EF6;&#x4FEE;&#x8BA2;&#x65F6;&#x95F4;&#xFF1A;
-2019-02-19 12:17:11
-</span></footer><div id="anchors-navbar"><i class="fa fa-anchor"></i><ul><p><a href="#k8s&#x6E90;&#x7801;&#x5206;&#x6790;&#x51C6;&#x5907;&#x5DE5;&#x4F5C;">k8s&#x6E90;&#x7801;&#x5206;&#x6790;&#x51C6;&#x5907;&#x5DE5;&#x4F5C;</a></p><li><a href="#&#x6982;&#x8FF0;">1. &#x6982;&#x8FF0;</a></li></ul></div><a href="#&#x6982;&#x8FF0;" id="goTop"><i class="fa fa-arrow-up"></i></a>
+2019-02-19 12:30:13
+</span></footer>
                                 
                                 </section>
                             
@@ -457,12 +450,12 @@
 
             
                 
-                <a href="../" class="navigation navigation-prev " aria-label="Previous page: 前言">
+                <a href="../core/controller-manager/" class="navigation navigation-prev " aria-label="Previous page: controller-manager">
                     <i class="fa fa-angle-left"></i>
                 </a>
                 
                 
-                <a href="get-code.html" class="navigation navigation-next " aria-label="Next page: 源码准备">
+                <a href="client-go/" class="navigation navigation-next " aria-label="Next page: client-go">
                     <i class="fa fa-angle-right"></i>
                 </a>
                 
@@ -473,7 +466,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"k8s源码分析准备工作","level":"1.2","depth":1,"next":{"title":"源码准备","level":"1.2.1","depth":2,"path":"prepare/get-code.md","ref":"prepare/get-code.md","articles":[]},"previous":{"title":"前言","level":"1.1","depth":1,"path":"README.md","ref":"README.md","articles":[]},"dir":"ltr"},"config":{"plugins":["theme-comscore","navigator","simple-page-toc","expandable-chapters-small","search-pro","splitter","multipart","tbfed-pagefooter","prism","-highlight","editlink","github","github-buttons","donate","livereload"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"tbfed-pagefooter":{"copyright":"Copyright &copy farmer.hutao@outlook.com 2019","modify_label":"该文件修订时间：","modify_format":"YYYY-MM-DD HH:mm:ss"},"prism":{},"github":{"url":"https://github.com/farmer-hutao/k8s-source-code-analysis"},"editlink":{"label":"编辑本页","multilingual":false,"base":"https://github.com/farmer-hutao/k8s-source-code-analysis/edit/master"},"livereload":{},"simple-page-toc":{"maxDepth":3,"skipFirstH1":true},"splitter":{},"search-pro":{"cutWordLib":"nodejieba","defineWord":["Gitbook Use"]},"search":{},"multipart":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"donate":{"alipay":"","alipayText":"支付宝打赏","button":"鼓励作者","title":"小额捐赠","wechat":"./image/wx.jpg","wechatText":"微信小额捐赠，鼓励作者尽快更新～"},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-comscore":{},"navigator":{},"github-buttons":{"buttons":[{"user":"farmer-hutao","repo":"k8s-source-code-analysis","type":"star","size":"small"}]},"expandable-chapters-small":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":true}},"theme":"default","author":"Tao Hu <farmer.hutao@outlook.com>","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"《k8s-1.13版本源码分析》","gitbook":"*","description":"k8s source code analysis"},"file":{"path":"prepare/README.md","mtime":"2019-02-19T04:17:11.443Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-02-19T10:06:46.642Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"概述","level":"3.1","depth":1,"next":{"title":"client-go","level":"3.2","depth":1,"path":"around/client-go/README.md","ref":"around/client-go/README.md","articles":[]},"previous":{"title":"controller-manager","level":"2.6","depth":1,"path":"core/controller-manager/README.md","ref":"core/controller-manager/README.md","articles":[]},"dir":"ltr"},"config":{"plugins":["theme-comscore","navigator","simple-page-toc","expandable-chapters-small","search-pro","splitter","multipart","tbfed-pagefooter","prism","-highlight","editlink","github","github-buttons@2.1.0","donate","livereload"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"tbfed-pagefooter":{"copyright":"Copyright &copy farmer.hutao@outlook.com 2019","modify_label":"该文件修订时间：","modify_format":"YYYY-MM-DD HH:mm:ss"},"prism":{},"github":{"url":"https://github.com/farmer-hutao/k8s-source-code-analysis"},"editlink":{"label":"编辑本页","multilingual":false,"base":"https://github.com/farmer-hutao/k8s-source-code-analysis/edit/master"},"livereload":{},"simple-page-toc":{"maxDepth":3,"skipFirstH1":true},"splitter":{},"search-pro":{"cutWordLib":"nodejieba","defineWord":["Gitbook Use"]},"search":{},"multipart":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"donate":{"alipay":"","alipayText":"支付宝打赏","button":"鼓励作者","title":"小额捐赠","wechat":"./image/wx.jpg","wechatText":"微信小额捐赠，鼓励作者尽快更新～"},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-comscore":{},"navigator":{},"github-buttons":{"repo":"farmer-hutao/k8s-source-code-analysis","types":["star"],"size":"small"},"expandable-chapters-small":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":true}},"theme":"default","author":"Tao Hu <farmer.hutao@outlook.com>","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"《k8s-1.13版本源码分析》","gitbook":"*","description":"k8s source code analysis"},"file":{"path":"around/README.md","mtime":"2019-02-19T04:30:13.452Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-02-19T10:14:25.575Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>

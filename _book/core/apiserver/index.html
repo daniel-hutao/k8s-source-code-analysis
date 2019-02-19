@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <title>client-go · 《k8s-1.13版本源码分析》</title>
+        <title>apiserver · 《k8s-1.13版本源码分析》</title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="description" content="">
         <meta name="generator" content="GitBook 3.2.3">
@@ -90,8 +90,10 @@
     <link rel="shortcut icon" href="../../gitbook/images/favicon.ico" type="image/x-icon">
 
     
+    <link rel="next" href="../proxy/" />
     
-    <link rel="prev" href="../" />
+    
+    <link rel="prev" href="../scheduler/desigh.html" />
     
 
     <style>
@@ -102,7 +104,7 @@
     }
     </style>
     <script>
-        window["gitbook-plugin-github-buttons"] = {"buttons":[{"user":"farmer-hutao","repo":"k8s-source-code-analysis","type":"star","size":"small"}]};
+        window["gitbook-plugin-github-buttons"] = {"repo":"farmer-hutao/k8s-source-code-analysis","types":["star"],"size":"small"};
     </script>
 
     </head>
@@ -206,9 +208,9 @@
         
         
     
-        <li class="chapter " data-level="2.1" data-path="../../core/">
+        <li class="chapter " data-level="2.1" data-path="../">
             
-                <a href="../../core/">
+                <a href="../">
             
                     
                         <b>2.1.</b>
@@ -221,9 +223,9 @@
             
         </li>
     
-        <li class="chapter " data-level="2.2" data-path="../../core/scheduler/">
+        <li class="chapter " data-level="2.2" data-path="../scheduler/">
             
-                <a href="../../core/scheduler/">
+                <a href="../scheduler/">
             
                     
                         <b>2.2.</b>
@@ -237,9 +239,9 @@
             <ul class="articles">
                 
     
-        <li class="chapter " data-level="2.2.1" data-path="../../core/scheduler/desigh.html">
+        <li class="chapter " data-level="2.2.1" data-path="../scheduler/desigh.html">
             
-                <a href="../../core/scheduler/desigh.html">
+                <a href="../scheduler/desigh.html">
             
                     
                         <b>2.2.1.</b>
@@ -257,9 +259,9 @@
             
         </li>
     
-        <li class="chapter " data-level="2.3" data-path="../../core/apiserver/">
+        <li class="chapter active" data-level="2.3" data-path="./">
             
-                <a href="../../core/apiserver/">
+                <a href="./">
             
                     
                         <b>2.3.</b>
@@ -272,9 +274,9 @@
             
         </li>
     
-        <li class="chapter " data-level="2.4" data-path="../../core/proxy/">
+        <li class="chapter " data-level="2.4" data-path="../proxy/">
             
-                <a href="../../core/proxy/">
+                <a href="../proxy/">
             
                     
                         <b>2.4.</b>
@@ -287,9 +289,9 @@
             
         </li>
     
-        <li class="chapter " data-level="2.5" data-path="../../core/kubelet/">
+        <li class="chapter " data-level="2.5" data-path="../kubelet/">
             
-                <a href="../../core/kubelet/">
+                <a href="../kubelet/">
             
                     
                         <b>2.5.</b>
@@ -302,9 +304,9 @@
             
         </li>
     
-        <li class="chapter " data-level="2.6" data-path="../../core/controller-manager/">
+        <li class="chapter " data-level="2.6" data-path="../controller-manager/">
             
-                <a href="../../core/controller-manager/">
+                <a href="../controller-manager/">
             
                     
                         <b>2.6.</b>
@@ -324,9 +326,9 @@
         
         
     
-        <li class="chapter " data-level="3.1" data-path="../">
+        <li class="chapter " data-level="3.1" data-path="../../around/">
             
-                <a href="../">
+                <a href="../../around/">
             
                     
                         <b>3.1.</b>
@@ -339,9 +341,9 @@
             
         </li>
     
-        <li class="chapter active" data-level="3.2" data-path="./">
+        <li class="chapter " data-level="3.2" data-path="../../around/client-go/">
             
-                <a href="./">
+                <a href="../../around/client-go/">
             
                     
                         <b>3.2.</b>
@@ -384,7 +386,7 @@
     <!-- Title -->
     <h1>
         <i class="fa fa-circle-o-notch fa-spin"></i>
-        <a href="../.." >client-go</a>
+        <a href="../.." >apiserver</a>
     </h1>
 </div>
 
@@ -402,9 +404,9 @@
     
                                 <section class="normal markdown-section">
                                 
-                                <h1 id="client-go">client-go</h1>
+                                <h1 id="apiserver">apiserver</h1>
 <footer class="page-footer"><span class="copyright">Copyright &#xA9; farmer.hutao@outlook.com 2019 all right reserved&#xFF0C;powered by Gitbook</span><span class="footer-modification">&#x8BE5;&#x6587;&#x4EF6;&#x4FEE;&#x8BA2;&#x65F6;&#x95F4;&#xFF1A;
-2019-02-19 12:30:13
+2019-02-15 12:29:29
 </span></footer>
                                 
                                 </section>
@@ -448,10 +450,14 @@
 
             
                 
-                <a href="../" class="navigation navigation-prev navigation-unique" aria-label="Previous page: 概述">
+                <a href="../scheduler/desigh.html" class="navigation navigation-prev " aria-label="Previous page: 调度器设计">
                     <i class="fa fa-angle-left"></i>
                 </a>
                 
+                
+                <a href="../proxy/" class="navigation navigation-next " aria-label="Next page: proxy">
+                    <i class="fa fa-angle-right"></i>
+                </a>
                 
             
         
@@ -460,7 +466,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"client-go","level":"3.2","depth":1,"previous":{"title":"概述","level":"3.1","depth":1,"path":"around/README.md","ref":"around/README.md","articles":[]},"dir":"ltr"},"config":{"plugins":["theme-comscore","navigator","simple-page-toc","expandable-chapters-small","search-pro","splitter","multipart","tbfed-pagefooter","prism","-highlight","editlink","github","github-buttons","donate","livereload"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"tbfed-pagefooter":{"copyright":"Copyright &copy farmer.hutao@outlook.com 2019","modify_label":"该文件修订时间：","modify_format":"YYYY-MM-DD HH:mm:ss"},"prism":{},"github":{"url":"https://github.com/farmer-hutao/k8s-source-code-analysis"},"editlink":{"label":"编辑本页","multilingual":false,"base":"https://github.com/farmer-hutao/k8s-source-code-analysis/edit/master"},"livereload":{},"simple-page-toc":{"maxDepth":3,"skipFirstH1":true},"splitter":{},"search-pro":{"cutWordLib":"nodejieba","defineWord":["Gitbook Use"]},"search":{},"multipart":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"donate":{"alipay":"","alipayText":"支付宝打赏","button":"鼓励作者","title":"小额捐赠","wechat":"./image/wx.jpg","wechatText":"微信小额捐赠，鼓励作者尽快更新～"},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-comscore":{},"navigator":{},"github-buttons":{"buttons":[{"user":"farmer-hutao","repo":"k8s-source-code-analysis","type":"star","size":"small"}]},"expandable-chapters-small":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":true}},"theme":"default","author":"Tao Hu <farmer.hutao@outlook.com>","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"《k8s-1.13版本源码分析》","gitbook":"*","description":"k8s source code analysis"},"file":{"path":"around/client-go/README.md","mtime":"2019-02-19T04:30:13.452Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-02-19T10:06:46.642Z"},"basePath":"../..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"apiserver","level":"2.3","depth":1,"next":{"title":"proxy","level":"2.4","depth":1,"path":"core/proxy/README.md","ref":"core/proxy/README.md","articles":[]},"previous":{"title":"调度器设计","level":"2.2.1","depth":2,"path":"core/scheduler/desigh.md","ref":"core/scheduler/desigh.md","articles":[]},"dir":"ltr"},"config":{"plugins":["theme-comscore","navigator","simple-page-toc","expandable-chapters-small","search-pro","splitter","multipart","tbfed-pagefooter","prism","-highlight","editlink","github","github-buttons@2.1.0","donate","livereload"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"tbfed-pagefooter":{"copyright":"Copyright &copy farmer.hutao@outlook.com 2019","modify_label":"该文件修订时间：","modify_format":"YYYY-MM-DD HH:mm:ss"},"prism":{},"github":{"url":"https://github.com/farmer-hutao/k8s-source-code-analysis"},"editlink":{"label":"编辑本页","multilingual":false,"base":"https://github.com/farmer-hutao/k8s-source-code-analysis/edit/master"},"livereload":{},"simple-page-toc":{"maxDepth":3,"skipFirstH1":true},"splitter":{},"search-pro":{"cutWordLib":"nodejieba","defineWord":["Gitbook Use"]},"search":{},"multipart":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"donate":{"alipay":"","alipayText":"支付宝打赏","button":"鼓励作者","title":"小额捐赠","wechat":"./image/wx.jpg","wechatText":"微信小额捐赠，鼓励作者尽快更新～"},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-comscore":{},"navigator":{},"github-buttons":{"repo":"farmer-hutao/k8s-source-code-analysis","types":["star"],"size":"small"},"expandable-chapters-small":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":true}},"theme":"default","author":"Tao Hu <farmer.hutao@outlook.com>","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"《k8s-1.13版本源码分析》","gitbook":"*","description":"k8s source code analysis"},"file":{"path":"core/apiserver/README.md","mtime":"2019-02-15T04:29:29.172Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-02-19T10:14:25.575Z"},"basePath":"../..","book":{"language":""}});
         });
     </script>
 </div>
