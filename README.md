@@ -1,12 +1,12 @@
-![kubernetes](./image/name_blue.png)
+![kubernetes](./image/k8s-source-code.png)
 
-# 1、关于《k8s源码分析》
+# 1、关于本书
 
-本书将系统讲解kubernetes的核心组建源码
+本书将系统讲解kubernetes的核心组件源码，附带介绍相关的周边项目，比如client-go等。
 
 # 2、版本说明
 
-本书基于：v1.13版本源码讲解
+本书基于：v1.13版本源码讲解。
 
 # 3、协议
 
@@ -14,4 +14,4 @@
 
 # 4、贡献
 
-欢迎参与本书编写
+欢迎参与本书编写。
