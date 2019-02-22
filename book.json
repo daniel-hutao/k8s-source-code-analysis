@@ -4,6 +4,7 @@
     "description": "k8s source code analysis",
     "plugins": [
         "theme-comscore",
+	"codeblock-filename",
         "navigator",
 	"simple-page-toc",
 	"expandable-chapters-small",
@@ -14,8 +15,9 @@
 	"prism", "-highlight",
 	"editlink",
 	"github",
-	"github-buttons",
-	"donate"
+	"github-buttons@2.1.0",
+	"donate",
+	"copy-code-button"
     ],
     "pluginsConfig": {
 	"theme-default": {
@@ -34,12 +36,11 @@
             "url": "https://github.com/farmer-hutao/k8s-source-code-analysis"
         },
 	"github-buttons": {
-            "buttons": [{
-            "user": "farmer-hutao",
-            "repo": "k8s-source-code-analysis",
-            "type": "star",
+            "repo": "farmer-hutao/k8s-source-code-analysis",
+            "types": [
+                "star"
+            ],
             "size": "small"
-            }]
         },
 	"donate": {
             "wechat": "./image/wx.jpg",

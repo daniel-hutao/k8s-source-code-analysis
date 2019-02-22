@@ -1,4 +1,4 @@
-# 《k8s-1.13版本源码分析》
+# Summary
 
 ## Part I - 准备工作
 * [前言](README.md)
@@ -10,6 +10,7 @@
 * [概述](core/README.md)
 * [scheduler](core/scheduler/README.md)
     * [调度器设计](core/scheduler/desigh.md)
+    * [调度程序启动前逻辑](core/scheduler/before-scheduler-run.md)
 * [apiserver](core/apiserver/README.md)
 * [proxy](core/proxy/README.md)
 * [kubelet](core/kubelet/README.md)
