@@ -4,7 +4,7 @@
 * [前言](README.md)
 * [k8s源码分析准备工作](prepare/README.md)
     * [源码准备](prepare/get-code.md)
-    * [调试环境搭建](prepare/debug-environment.md)
+    * [测试环境搭建](prepare/debug-environment.md)
 
 ## Part II - 核心组件
 * [概述](core/README.md)
