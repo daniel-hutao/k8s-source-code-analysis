@@ -508,7 +508,7 @@
 setenforce 0
 <span class="token function">sed</span> -i <span class="token string">&apos;s/^SELINUX=enforcing$/SELINUX=permissive/&apos;</span> /etc/selinux/config
 <span class="token comment"># Stop and disable firewalld</span>
-systemctl <span class="token function">enable</span> firewalld --now
+systemctl <span class="token function">disable</span> firewalld --now
 </code></pre>
 <h3 id="&#x7CFB;&#x7EDF;&#x53C2;&#x6570;&#x4E0E;&#x5185;&#x6838;&#x6A21;&#x5757;">3.3. &#x7CFB;&#x7EDF;&#x53C2;&#x6570;&#x4E0E;&#x5185;&#x6838;&#x6A21;&#x5757;</h3>
 <pre class="language-"><code class="lang-shell"><span class="token comment"># &#x4FEE;&#x6539;&#x5185;&#x6838;&#x53C2;&#x6570;</span>
