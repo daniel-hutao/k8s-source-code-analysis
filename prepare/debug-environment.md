@@ -72,7 +72,7 @@ CentOS Linux release 7.5.1804 (Core)
 setenforce 0
 sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
 # Stop and disable firewalld
-systemctl enable firewalld --now
+systemctl disable firewalld --now
 ```
 
 ### 系统参数与内核模块
