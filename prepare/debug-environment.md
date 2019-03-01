@@ -18,7 +18,7 @@
 
 kubeadm是Kubernetes官方提供的用于快速安装Kubernetes集群的工具，这不是一个单独的项目哦，我们在kubernetes源码里可以看到这个组件（`kubernetes/cmd/kubeadm/`）：
 
-![1551073577795](./image/1551073577795.png)
+![1551073577795](./image/debug-environment/1551073577795.png)
 
 kubeadm这个工具可以通过简单的`kubeadm init`和`kubeadm join`命令来创建一个kubernetes集群，kubeadm提供的其他命令都比较通俗易懂：
 
@@ -124,7 +124,7 @@ yum repolist
 
 最终我们可以看到这些repo：
 
-![1551080083463](./image/1551080083463.png)
+![1551080083463](./image/debug-environment/1551080083463.png)
 
 ### 禁用swap
 
@@ -134,17 +134,11 @@ echo "vm.swappiness = 0">> /etc/sysctl.conf
 sysctl -p
 ```
 
-
-
-
-
-
-
 ## 安装docker
 
 先看一下有哪些可用版本：`yum list docker-ce --showduplicates | sort -r`
 
-![1551080183657](./image/1551080183657.png)
+![1551080183657](./image/debug-environment/1551080183657.png)
 
 - 我们选择一个版本安装：
 
@@ -156,7 +150,7 @@ sysctl -p
 
 - 可以用rpm命令看一下docker-ce这个rpm包带来了哪些文件：
 
-![1551083169412](./image/1551083169412.png)
+![1551083169412](./image/debug-environment/1551083169412.png)
 
 - 启动docker：
 
@@ -251,11 +245,11 @@ kube-master   Ready    master   23m   v1.13.3
 
 当node Ready的时候，我们可以看到pod也全部ready了：
 
-![1551086552070](./image/1551086552070.png)
+![1551086552070](./image/debug-environment/1551086552070.png)
 
 再看一下核心组件状态：
 
-![1551086591886](./image/1551086591886.png)
+![1551086591886](./image/debug-environment/1551086591886.png)
 
 最后注意到kube-master这个node上有一个Taint：
 
@@ -304,10 +298,10 @@ spec:
 
 如上内容保存为`tomcat-deploy.yaml`，执行`kubectl create -f tomcat-deploy.yaml`，然后看pod状态：
 
-![1551090396760](./image/1551090396760.png)
+![1551090396760](./image/debug-environment/1551090396760.png)
 
 确认了，是熟悉的Running，哈哈，基本算大功告成了！最后我们看一下tomcat服务能不能访问到：
 
-![1551090553402](./image/1551090553402.png)
+![1551090553402](./image/debug-environment/1551090553402.png)
 
 很完美，如果加个svc配置，就能够通过浏览器访问到汤姆猫界面了！

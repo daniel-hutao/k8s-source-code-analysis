@@ -12,7 +12,7 @@
 
 ### cobra是啥
 
-![1550801313662](./image/1550801313662.png)
+![1550801313662](./image/before-scheduler-run/1550801313662.png)
 
 从github上我们可以找到这个项目，截至今天已经有上万个star，一百多个contributors，可见来头不小！Cobra官方描述是：
 
@@ -53,7 +53,7 @@ go get -u github.com/spf13/cobra/cobra
 
 于是我们得到了这样一个可执行文件及项目源码：
 
-![1550805176140](./image/1550805176140.png)
+![1550805176140](./image/before-scheduler-run/1550805176140.png)
 
 我们试一下这个命令：`cobra init ${project-name}`
 
@@ -89,17 +89,17 @@ func main() {
 
 这里注意到调用了一个cmd的Execute()方法，我们继续看cmd是什么：
 
-![1550806123357](./image/1550806123357.png)
+![1550806123357](./image/before-scheduler-run/1550806123357.png)
 
 如上图，在`main.go`里面import了`myapp/cmd`，也就是这个`root.go`文件。所以Execute()函数就很好找了。在`Execute`里面调用了`rootCmd.Execute()`方法，这个`rootCmd`是`*cobra.Command`类型的。我们关注一下这个类型。
 
 下面我们继续使用cobra命令给myapp添加一个子命令：
 
-![1550809296691](./image/1550809296691.png)
+![1550809296691](./image/before-scheduler-run/1550809296691.png)
 
 如上，我们的程序可以使用version子命令了！我们看一下源码发生了什么变化：
 
-![1550809447903](./image/1550809447903.png)
+![1550809447903](./image/before-scheduler-run/1550809447903.png)
 
 多了一个`version.go`，在这个源文件的init()函数里面调用了一个`rootCmd.AddCommand(versionCmd)`，这里可以猜到是根命令下添加一个子命令的意思，根命令表示的就是我们直接执行这个可执行文件，子命令就是version，放在一起的感觉就类似大家使用`kubectl version`的感觉。
 
@@ -107,9 +107,9 @@ func main() {
 
 最后我们实践一下多级子命令：
 
-![1550809980172](./image/1550809980172.png)
+![1550809980172](./image/before-scheduler-run/1550809980172.png)
 
-![1550810044678](./image/1550810044678.png)
+![1550810044678](./image/before-scheduler-run/1550810044678.png)
 
 套路也就这样，通过`serverCmd.AddCommand(createCmd)`调用后就能够把`*cobra.Command`类型的createCmd变成serverCmd的子命令了，这个时候我们玩起来就像`kubectl get pods`.
 
