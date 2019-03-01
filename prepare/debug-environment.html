@@ -243,9 +243,9 @@
             <ul class="articles">
                 
     
-        <li class="chapter " data-level="2.2.1" data-path="../core/scheduler/desigh.html">
+        <li class="chapter " data-level="2.2.1" data-path="../core/scheduler/design.html">
             
-                <a href="../core/scheduler/desigh.html">
+                <a href="../core/scheduler/design.html">
             
                     
                         <b>2.2.1.</b>
@@ -266,6 +266,21 @@
                         <b>2.2.2.</b>
                     
                     调度程序启动前逻辑
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.3" data-path="../core/scheduler/scheduler-framework.html">
+            
+                <a href="../core/scheduler/scheduler-framework.html">
+            
+                    
+                        <b>2.2.3.</b>
+                    
+                    调度器框架
             
                 </a>
             
@@ -425,6 +440,25 @@
                                 
                                 <h1 id="&#x6D4B;&#x8BD5;&#x73AF;&#x5883;&#x642D;&#x5EFA;">&#x6D4B;&#x8BD5;&#x73AF;&#x5883;&#x642D;&#x5EFA;</h1>
 <p>&#xFF08;k8s-1.13&#x7248;&#x672C;&#x5355;&#x8282;&#x70B9;&#x73AF;&#x5883;&#x642D;&#x5EFA;&#xFF09;</p>
+<!-- toc -->
+<ul>
+<li><a href="#%E6%A6%82%E8%BF%B0">&#x6982;&#x8FF0;</a></li>
+<li><a href="#kubeadm%E7%AE%80%E4%BB%8B">kubeadm&#x7B80;&#x4ECB;</a></li>
+<li><a href="#%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%87%86%E5%A4%87">&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x51C6;&#x5907;</a><ul>
+<li><a href="#%E7%B3%BB%E7%BB%9F%E4%BF%A1%E6%81%AF">&#x7CFB;&#x7EDF;&#x4FE1;&#x606F;</a></li>
+<li><a href="#%E9%85%8D%E7%BD%AEselinux%E5%92%8Cfirewalld">&#x914D;&#x7F6E;selinux&#x548C;firewalld</a></li>
+<li><a href="#%E7%B3%BB%E7%BB%9F%E5%8F%82%E6%95%B0%E4%B8%8E%E5%86%85%E6%A0%B8%E6%A8%A1%E5%9D%97">&#x7CFB;&#x7EDF;&#x53C2;&#x6570;&#x4E0E;&#x5185;&#x6838;&#x6A21;&#x5757;</a></li>
+<li><a href="#%E9%85%8D%E7%BD%AEyum%E6%BA%90">&#x914D;&#x7F6E;yum&#x6E90;</a></li>
+<li><a href="#%E7%A6%81%E7%94%A8swap">&#x7981;&#x7528;swap</a></li>
+</ul>
+</li>
+<li><a href="#%E5%AE%89%E8%A3%85docker">&#x5B89;&#x88C5;docker</a></li>
+<li><a href="#%E5%AE%89%E8%A3%85kubeadmkubelet%E5%92%8Ckubectl">&#x5B89;&#x88C5;kubeadm&#x3001;kubelet&#x548C;kubectl</a></li>
+<li><a href="#%E9%95%9C%E5%83%8F%E5%87%86%E5%A4%87">&#x955C;&#x50CF;&#x51C6;&#x5907;</a></li>
+<li><a href="#%E5%AE%89%E8%A3%85k8s-master">&#x5B89;&#x88C5;k8s master</a></li>
+<li><a href="#%E7%8E%AF%E5%A2%83%E9%AA%8C%E8%AF%81">&#x73AF;&#x5883;&#x9A8C;&#x8BC1;</a></li>
+</ul>
+<!-- tocstop -->
 <h2 id="&#x6982;&#x8FF0;">1. &#x6982;&#x8FF0;</h2>
 <blockquote>
 <p>&#x5927;&#x5BB6;&#x6CE8;&#x610F;&#x54E6;&#xFF0C;&#x4E0D;&#x4E00;&#x5B9A;&#x8981;&#x5148;&#x642D;&#x5EFA;&#x597D;&#x73AF;&#x5883;&#x518D;&#x770B;&#x6E90;&#x7801;&#xFF0C;&#x5927;&#x53EF;&#x4EE5;&#x5148;&#x770B;&#x4E00;&#x4E2A;&#x7EC4;&#x4EF6;&#xFF0C;&#x611F;&#x89C9;&#x5DEE;&#x4E0D;&#x591A;&#x7406;&#x89E3;&#x4E86;&#xFF0C;&#x60F3;&#x8981;run&#x4E00;&#x628A;&#xFF0C;&#x60F3;&#x8981;&#x6539;&#x51E0;&#x884C;&#x8BD5;&#x8BD5;&#x7684;&#x65F6;&#x5019;&#x56DE;&#x8FC7;&#x5934;&#x6765;&#x642D;&#x5EFA;k8s&#x73AF;&#x5883;&#x3002;</p>
@@ -434,7 +468,7 @@
 <h2 id="kubeadm&#x7B80;&#x4ECB;">2. kubeadm&#x7B80;&#x4ECB;</h2>
 <p>&#x9009;&#x62E9;&#x4E00;&#x4E2A;&#x597D;&#x7684;&#x5DE5;&#x5177;&#x5F88;&#x91CD;&#x8981;&#xFF01;&#x5927;&#x5BB6;&#x5728;&#x521A;&#x5F00;&#x59CB;&#x5B66;&#x4E60;k8s&#x7684;&#x65F6;&#x5019;&#x5E94;&#x8BE5;&#x90FD;&#x7528;&#x4E8C;&#x8FDB;&#x5236;&#x6587;&#x4EF6;&#x4E00;&#x6B65;&#x4E00;&#x6B65;&#x642D;&#x5EFA;&#x8FC7;&#x96C6;&#x7FA4;&#x5427;&#xFF0C;&#x90A3;&#x4E2A;&#x8FC7;&#x7A0B;&#x662F;&#x4E0D;&#x662F;&#x5F88;&#x9178;&#x723D;&#xFF1F;&#x624B;&#x52A8;&#x4E00;&#x6B65;&#x4E00;&#x6B65;&#x642D;&#x5EFA;&#x73AF;&#x5883;&#x5BF9;&#x4E8E;&#x521D;&#x5B66;&#x8005;&#x6765;&#x8BF4;&#x786E;&#x5B9E;&#x5927;&#x6709;&#x88E8;&#x76CA;&#xFF0C;&#x53EF;&#x4EE5;&#x4E86;&#x89E3;&#x5404;&#x4E2A;&#x7EC4;&#x4EF6;&#x7684;&#x7EC6;&#x8282;&#x3002;&#x6211;&#x5DF2;&#x7ECF;&#x61D2;&#x6389;&#x4E86;&#xFF0C;&#x6211;&#x51B3;&#x5B9A;&#x4ECE;&#x4F17;&#x591A;k8s&#x81EA;&#x52A8;&#x5316;&#x5B89;&#x88C5;&#x65B9;&#x6848;&#x4E2D;&#x9009;&#x62E9;&#x4E00;&#x4E2A;&#x6765;&#x642D;&#x5EFA;&#x8FD9;&#x6B21;&#x7684;k8s&#x73AF;&#x5883;&#x3002;</p>
 <p>kubeadm&#x662F;Kubernetes&#x5B98;&#x65B9;&#x63D0;&#x4F9B;&#x7684;&#x7528;&#x4E8E;&#x5FEB;&#x901F;&#x5B89;&#x88C5;Kubernetes&#x96C6;&#x7FA4;&#x7684;&#x5DE5;&#x5177;&#xFF0C;&#x8FD9;&#x4E0D;&#x662F;&#x4E00;&#x4E2A;&#x5355;&#x72EC;&#x7684;&#x9879;&#x76EE;&#x54E6;&#xFF0C;&#x6211;&#x4EEC;&#x5728;kubernetes&#x6E90;&#x7801;&#x91CC;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x8FD9;&#x4E2A;&#x7EC4;&#x4EF6;&#xFF08;<code>kubernetes/cmd/kubeadm/</code>&#xFF09;&#xFF1A;</p>
-<p><img src="image/1551073577795.png" alt="1551073577795"></p>
+<p><img src="image/debug-environment/1551073577795.png" alt="1551073577795"></p>
 <p>kubeadm&#x8FD9;&#x4E2A;&#x5DE5;&#x5177;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;&#x7B80;&#x5355;&#x7684;<code>kubeadm init</code>&#x548C;<code>kubeadm join</code>&#x547D;&#x4EE4;&#x6765;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;kubernetes&#x96C6;&#x7FA4;&#xFF0C;kubeadm&#x63D0;&#x4F9B;&#x7684;&#x5176;&#x4ED6;&#x547D;&#x4EE4;&#x90FD;&#x6BD4;&#x8F83;&#x901A;&#x4FD7;&#x6613;&#x61C2;&#xFF1A;</p>
 <ul>
 <li><code>kubeadm init</code> &#x542F;&#x52A8;&#x4E00;&#x4E2A;master&#x8282;&#x70B9;&#xFF1B;</li>
@@ -508,7 +542,7 @@
 setenforce 0
 <span class="token function">sed</span> -i <span class="token string">&apos;s/^SELINUX=enforcing$/SELINUX=permissive/&apos;</span> /etc/selinux/config
 <span class="token comment"># Stop and disable firewalld</span>
-systemctl <span class="token function">disable</span> firewalld --now
+systemctl disable firewalld --now
 </code></pre>
 <h3 id="&#x7CFB;&#x7EDF;&#x53C2;&#x6570;&#x4E0E;&#x5185;&#x6838;&#x6A21;&#x5757;">3.3. &#x7CFB;&#x7EDF;&#x53C2;&#x6570;&#x4E0E;&#x5185;&#x6838;&#x6A21;&#x5757;</h3>
 <pre class="language-"><code class="lang-shell"><span class="token comment"># &#x4FEE;&#x6539;&#x5185;&#x6838;&#x53C2;&#x6570;</span>
@@ -550,7 +584,7 @@ yum makecache
 yum repolist
 </code></pre>
 <p>&#x6700;&#x7EC8;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x8FD9;&#x4E9B;repo&#xFF1A;</p>
-<p><img src="image/1551080083463.png" alt="1551080083463"></p>
+<p><img src="image/debug-environment/1551080083463.png" alt="1551080083463"></p>
 <h3 id="&#x7981;&#x7528;swap">3.5. &#x7981;&#x7528;swap</h3>
 <pre class="language-"><code class="lang-sh">swapoff -a
 <span class="token keyword">echo</span> <span class="token string">&quot;vm.swappiness = 0&quot;</span><span class="token operator">&gt;&gt;</span> /etc/sysctl.conf
@@ -558,7 +592,7 @@ sysctl -p
 </code></pre>
 <h2 id="&#x5B89;&#x88C5;docker">4. &#x5B89;&#x88C5;docker</h2>
 <p>&#x5148;&#x770B;&#x4E00;&#x4E0B;&#x6709;&#x54EA;&#x4E9B;&#x53EF;&#x7528;&#x7248;&#x672C;&#xFF1A;<code>yum list docker-ce --showduplicates | sort -r</code></p>
-<p><img src="image/1551080183657.png" alt="1551080183657"></p>
+<p><img src="image/debug-environment/1551080183657.png" alt="1551080183657"></p>
 <ul>
 <li>&#x6211;&#x4EEC;&#x9009;&#x62E9;&#x4E00;&#x4E2A;&#x7248;&#x672C;&#x5B89;&#x88C5;&#xFF1A;</li>
 </ul>
@@ -570,7 +604,7 @@ sysctl -p
 <ul>
 <li>&#x53EF;&#x4EE5;&#x7528;rpm&#x547D;&#x4EE4;&#x770B;&#x4E00;&#x4E0B;docker-ce&#x8FD9;&#x4E2A;rpm&#x5305;&#x5E26;&#x6765;&#x4E86;&#x54EA;&#x4E9B;&#x6587;&#x4EF6;&#xFF1A;</li>
 </ul>
-<p><img src="image/1551083169412.png" alt="1551083169412"></p>
+<p><img src="image/debug-environment/1551083169412.png" alt="1551083169412"></p>
 <ul>
 <li>&#x542F;&#x52A8;docker&#xFF1A;</li>
 </ul>
@@ -638,9 +672,9 @@ kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/bc79dd1505b0c8
 <p>kube-master   Ready    master   23m   v1.13.3</p>
 <p>&#x5982;&#x679C;&#x4F60;&#x7684;&#x73AF;&#x5883;&#x8FDF;&#x8FDF;&#x90FD;&#x662F;NotReady&#x72B6;&#x6001;&#xFF0C;&#x53EF;&#x4EE5;<code>kubectl get pod -n kube-system</code>&#x770B;&#x4E00;&#x4E0B;pod&#x72B6;&#x6001;&#xFF0C;&#x4E00;&#x822C;&#x53EF;&#x4EE5;&#x53D1;&#x73B0;&#x95EE;&#x9898;&#xFF0C;&#x6BD4;&#x5982;flannel&#x7684;&#x955C;&#x50CF;&#x4E0B;&#x8F7D;&#x5931;&#x8D25;&#x5566;&#xFF5E;</p>
 <p>&#x5F53;node Ready&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x770B;&#x5230;pod&#x4E5F;&#x5168;&#x90E8;ready&#x4E86;&#xFF1A;</p>
-<p><img src="image/1551086552070.png" alt="1551086552070"></p>
+<p><img src="image/debug-environment/1551086552070.png" alt="1551086552070"></p>
 <p>&#x518D;&#x770B;&#x4E00;&#x4E0B;&#x6838;&#x5FC3;&#x7EC4;&#x4EF6;&#x72B6;&#x6001;&#xFF1A;</p>
-<p><img src="image/1551086591886.png" alt="1551086591886"></p>
+<p><img src="image/debug-environment/1551086591886.png" alt="1551086591886"></p>
 <p>&#x6700;&#x540E;&#x6CE8;&#x610F;&#x5230;kube-master&#x8FD9;&#x4E2A;node&#x4E0A;&#x6709;&#x4E00;&#x4E2A;Taint&#xFF1A;</p>
 <p># kubectl describe node kube-master | grep Taints</p>
 <p>Taints: node-role.kubernetes.io/master:NoSchedule</p>
@@ -674,12 +708,12 @@ kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/bc79dd1505b0c8
         <span class="token punctuation">-</span> <span class="token key atrule">containerPort</span><span class="token punctuation">:</span> <span class="token number">8080</span>
 </code></pre>
 <p>&#x5982;&#x4E0A;&#x5185;&#x5BB9;&#x4FDD;&#x5B58;&#x4E3A;<code>tomcat-deploy.yaml</code>&#xFF0C;&#x6267;&#x884C;<code>kubectl create -f tomcat-deploy.yaml</code>&#xFF0C;&#x7136;&#x540E;&#x770B;pod&#x72B6;&#x6001;&#xFF1A;</p>
-<p><img src="image/1551090396760.png" alt="1551090396760"></p>
+<p><img src="image/debug-environment/1551090396760.png" alt="1551090396760"></p>
 <p>&#x786E;&#x8BA4;&#x4E86;&#xFF0C;&#x662F;&#x719F;&#x6089;&#x7684;Running&#xFF0C;&#x54C8;&#x54C8;&#xFF0C;&#x57FA;&#x672C;&#x7B97;&#x5927;&#x529F;&#x544A;&#x6210;&#x4E86;&#xFF01;&#x6700;&#x540E;&#x6211;&#x4EEC;&#x770B;&#x4E00;&#x4E0B;tomcat&#x670D;&#x52A1;&#x80FD;&#x4E0D;&#x80FD;&#x8BBF;&#x95EE;&#x5230;&#xFF1A;</p>
-<p><img src="image/1551090553402.png" alt="1551090553402"></p>
-<p>&#x5F88;&#x5B8C;&#x7F8E;&#xFF0C;&#x5982;&#x679C;&#x52A0;&#x4E2A;svc&#x914D;&#x7F6E;&#xFF0C;&#x5C31;&#x80FD;&#x591F;&#x901A;&#x8FC7;&#x6D4F;&#x89C8;&#x5668;&#x8BBF;&#x95EE;&#x5230;&#x6C64;&#x59C6;&#x732B;&#x754C;&#x9762;&#x4E86;&#xFF01; </p>
+<p><img src="image/debug-environment/1551090553402.png" alt="1551090553402"></p>
+<p>&#x5F88;&#x5B8C;&#x7F8E;&#xFF0C;&#x5982;&#x679C;&#x52A0;&#x4E2A;svc&#x914D;&#x7F6E;&#xFF0C;&#x5C31;&#x80FD;&#x591F;&#x901A;&#x8FC7;&#x6D4F;&#x89C8;&#x5668;&#x8BBF;&#x95EE;&#x5230;&#x6C64;&#x59C6;&#x732B;&#x754C;&#x9762;&#x4E86;&#xFF01;</p>
 <footer class="page-footer"><span class="copyright">Copyright &#xA9; farmer.hutao@outlook.com 2019 all right reserved&#xFF0C;powered by Gitbook</span><span class="footer-modification">&#x8BE5;&#x6587;&#x4EF6;&#x4FEE;&#x8BA2;&#x65F6;&#x95F4;&#xFF1A;
-2019-02-25 19:03:24
+2019-03-01 11:09:50
 </span></footer><div id="anchors-navbar"><i class="fa fa-anchor"></i><ul><p><a href="#&#x6D4B;&#x8BD5;&#x73AF;&#x5883;&#x642D;&#x5EFA;">&#x6D4B;&#x8BD5;&#x73AF;&#x5883;&#x642D;&#x5EFA;</a></p><li><a href="#&#x6982;&#x8FF0;">1. &#x6982;&#x8FF0;</a></li><li><a href="#kubeadm&#x7B80;&#x4ECB;">2. kubeadm&#x7B80;&#x4ECB;</a></li><li><a href="#&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x51C6;&#x5907;">3. &#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x51C6;&#x5907;</a></li><ul><li><a href="#&#x7CFB;&#x7EDF;&#x4FE1;&#x606F;">3.1. &#x7CFB;&#x7EDF;&#x4FE1;&#x606F;</a></li><li><a href="#&#x914D;&#x7F6E;selinux&#x548C;firewalld">3.2. &#x914D;&#x7F6E;selinux&#x548C;firewalld</a></li><li><a href="#&#x7CFB;&#x7EDF;&#x53C2;&#x6570;&#x4E0E;&#x5185;&#x6838;&#x6A21;&#x5757;">3.3. &#x7CFB;&#x7EDF;&#x53C2;&#x6570;&#x4E0E;&#x5185;&#x6838;&#x6A21;&#x5757;</a></li><li><a href="#&#x914D;&#x7F6E;yum&#x6E90;">3.4. &#x914D;&#x7F6E;yum&#x6E90;</a></li><li><a href="#&#x7981;&#x7528;swap">3.5. &#x7981;&#x7528;swap</a></li></ul><li><a href="#&#x5B89;&#x88C5;docker">4. &#x5B89;&#x88C5;docker</a></li><li><a href="#&#x5B89;&#x88C5;kubeadm&#x3001;kubelet&#x548C;kubectl">5. &#x5B89;&#x88C5;kubeadm&#x3001;kubelet&#x548C;kubectl</a></li><li><a href="#&#x955C;&#x50CF;&#x51C6;&#x5907;">6. &#x955C;&#x50CF;&#x51C6;&#x5907;</a></li><li><a href="#&#x5B89;&#x88C5;k8s_master">7. &#x5B89;&#x88C5;k8s master</a></li><li><a href="#&#x73AF;&#x5883;&#x9A8C;&#x8BC1;">8. &#x73AF;&#x5883;&#x9A8C;&#x8BC1;</a></li></ul></div><a href="#&#x6982;&#x8FF0;" id="goTop"><i class="fa fa-arrow-up"></i></a>
                                 
                                 </section>
@@ -739,7 +773,7 @@ kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/bc79dd1505b0c8
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"测试环境搭建","level":"1.2.2","depth":2,"next":{"title":"概述","level":"2.1","depth":1,"path":"core/README.md","ref":"core/README.md","articles":[]},"previous":{"title":"源码准备","level":"1.2.1","depth":2,"path":"prepare/get-code.md","ref":"prepare/get-code.md","articles":[]},"dir":"ltr"},"config":{"plugins":["theme-comscore","codeblock-filename","navigator","simple-page-toc","expandable-chapters-small","search-pro","splitter","multipart","tbfed-pagefooter","prism","-highlight","editlink","github","github-buttons@2.1.0","donate","copy-code-button","livereload"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"tbfed-pagefooter":{"copyright":"Copyright &copy farmer.hutao@outlook.com 2019","modify_label":"该文件修订时间：","modify_format":"YYYY-MM-DD HH:mm:ss"},"prism":{},"github":{"url":"https://github.com/farmer-hutao/k8s-source-code-analysis"},"editlink":{"label":"编辑本页","multilingual":false,"base":"https://github.com/farmer-hutao/k8s-source-code-analysis/edit/master"},"livereload":{},"simple-page-toc":{"maxDepth":3,"skipFirstH1":true},"splitter":{},"search-pro":{"cutWordLib":"nodejieba","defineWord":["Gitbook Use"]},"search":{},"multipart":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"donate":{"alipay":"","alipayText":"支付宝打赏","button":"鼓励作者","title":"催作者快快更新","wechat":"./image/wx.jpg","wechatText":"微信小额捐赠，鼓励作者尽快更新～"},"fontsettings":{"theme":"white","family":"sans","size":2},"codeblock-filename":{},"theme-comscore":{},"navigator":{},"github-buttons":{"repo":"farmer-hutao/k8s-source-code-analysis","types":["star"],"size":"small"},"expandable-chapters-small":{},"copy-code-button":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":true}},"theme":"default","author":"Tao Hu <farmer.hutao@outlook.com>","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"《k8s-1.13版本源码分析》","gitbook":"*","description":"k8s source code analysis"},"file":{"path":"prepare/debug-environment.md","mtime":"2019-02-25T11:03:24.352Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-02-25T10:30:45.060Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"测试环境搭建","level":"1.2.2","depth":2,"next":{"title":"概述","level":"2.1","depth":1,"path":"core/README.md","ref":"core/README.md","articles":[]},"previous":{"title":"源码准备","level":"1.2.1","depth":2,"path":"prepare/get-code.md","ref":"prepare/get-code.md","articles":[]},"dir":"ltr"},"config":{"plugins":["theme-comscore","codeblock-filename","navigator","simple-page-toc","expandable-chapters-small","search-pro","splitter","multipart","tbfed-pagefooter","prism","-highlight","editlink","github","github-buttons@2.1.0","donate","copy-code-button","livereload"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"tbfed-pagefooter":{"copyright":"Copyright &copy farmer.hutao@outlook.com 2019","modify_label":"该文件修订时间：","modify_format":"YYYY-MM-DD HH:mm:ss"},"prism":{},"github":{"url":"https://github.com/farmer-hutao/k8s-source-code-analysis"},"editlink":{"label":"编辑本页","multilingual":false,"base":"https://github.com/farmer-hutao/k8s-source-code-analysis/edit/master"},"livereload":{},"simple-page-toc":{"maxDepth":3,"skipFirstH1":true},"splitter":{},"search-pro":{"cutWordLib":"nodejieba","defineWord":["Gitbook Use"]},"search":{},"multipart":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"donate":{"alipay":"","alipayText":"支付宝打赏","button":"鼓励作者","title":"催作者快快更新","wechat":"./image/wx.jpg","wechatText":"微信小额捐赠，鼓励作者尽快更新～"},"fontsettings":{"theme":"white","family":"sans","size":2},"codeblock-filename":{},"theme-comscore":{},"navigator":{},"github-buttons":{"repo":"farmer-hutao/k8s-source-code-analysis","types":["star"],"size":"small"},"expandable-chapters-small":{},"copy-code-button":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":true}},"theme":"default","author":"Tao Hu <farmer.hutao@outlook.com>","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"《k8s-1.13版本源码分析》","gitbook":"*","description":"k8s source code analysis"},"file":{"path":"prepare/debug-environment.md","mtime":"2019-03-01T03:09:50.043Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-03-01T05:56:58.641Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
