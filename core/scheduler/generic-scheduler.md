@@ -4,9 +4,9 @@
 
 ## 进入Scheduler的第三层逻辑
 
-从这个方法开始，就算kube-scheduler的第三层逻辑了，今天我们找到预选和优选的入口，讲完太长，干脆后面单独分2节讲预选和优选过程。所以本小节会比较简短哦～
+今天分析的代码，就已经算kube-scheduler的第三层逻辑了，我们要找到预选和优选的入口，讲完太长，干脆后面单独分2节讲预选和优选过程。所以本小节会比较简短哦～
 
-今天的分析当然从`pkg/scheduler/core/generic_scheduler.go:139`开始，也就是从这个**generic scheduler的Schedule()方法**下手！
+今天我们从`pkg/scheduler/core/generic_scheduler.go:139`开始，也就是从这个**generic scheduler的Schedule()方法**下手！
 
 我们依旧关心主干先，这个方法主要涉及的是预选过程+优选过程，看下主要代码：
 
