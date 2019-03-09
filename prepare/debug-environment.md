@@ -172,25 +172,41 @@ kubeadm不管kubelet和kubectl，所以我们需要手动安装kubelet和kubectl
 
 `systemctl enable --now kubelet`
 
+## 增加阿里容器镜像加速器
+
+为解决国内访问docker.io速度不理想的问题，添加阿里容器镜像加速器
+```shell
+mkdir -p /etc/docker
+
+tee /etc/docker/daemon.json <<-'EOF'
+{
+  "registry-mirrors": ["https://as065r9f.mirror.aliyuncs.com"]
+}
+EOF
+
+systemctl daemon-reload
+systemctl restart docker
+```
+
 ## 镜像准备
 
 为了解决国内普遍访问不到k8s.gcr.io的问题，我们从mirrorgooglecontainers下载image，然后打个tag来绕过网络限制：
 
 ```shell
-docker pull docker.io/mirrorgooglecontainers/kube-apiserver-amd64:v1.13.3
-docker tag docker.io/mirrorgooglecontainers/kube-apiserver-amd64:v1.13.3 k8s.gcr.io/kube-apiserver:v1.13.3
-docker pull docker.io/mirrorgooglecontainers/kube-controller-manager-amd64:v1.13.3
-docker tag docker.io/mirrorgooglecontainers/kube-controller-manager-amd64:v1.13.3 k8s.gcr.io/kube-controller-manager:v1.13.3
-docker pull docker.io/mirrorgooglecontainers/kube-scheduler-amd64:v1.13.3
-docker tag docker.io/mirrorgooglecontainers/kube-scheduler-amd64:v1.13.3 k8s.gcr.io/kube-scheduler:v1.13.3
-docker pull docker.io/mirrorgooglecontainers/kube-proxy-amd64:v1.13.3
-docker tag docker.io/mirrorgooglecontainers/kube-proxy-amd64:v1.13.3 k8s.gcr.io/kube-proxy:v1.13.3
-docker pull docker.io/mirrorgooglecontainers/pause-amd64:3.1
-docker tag docker.io/mirrorgooglecontainers/pause-amd64:3.1 k8s.gcr.io/pause:3.1
-docker pull docker.io/mirrorgooglecontainers/etcd-amd64:3.2.24
-docker tag docker.io/mirrorgooglecontainers/etcd-amd64:3.2.24 k8s.gcr.io/etcd:3.2.24
-docker pull docker.io/coredns/coredns:1.2.6
-docker tag docker.io/coredns/coredns:1.2.6 k8s.gcr.io/coredns:1.2.6
+docker pull mirrorgooglecontainers/kube-apiserver-amd64:v1.13.3
+docker tag mirrorgooglecontainers/kube-apiserver-amd64:v1.13.3 k8s.gcr.io/kube-apiserver:v1.13.3
+docker pull mirrorgooglecontainers/kube-controller-manager-amd64:v1.13.3
+docker tag mirrorgooglecontainers/kube-controller-manager-amd64:v1.13.3 k8s.gcr.io/kube-controller-manager:v1.13.3
+docker pull mirrorgooglecontainers/kube-scheduler-amd64:v1.13.3
+docker tag mirrorgooglecontainers/kube-scheduler-amd64:v1.13.3 k8s.gcr.io/kube-scheduler:v1.13.3
+docker pull mirrorgooglecontainers/kube-proxy-amd64:v1.13.3
+docker tag mirrorgooglecontainers/kube-proxy-amd64:v1.13.3 k8s.gcr.io/kube-proxy:v1.13.3
+docker pull mirrorgooglecontainers/pause-amd64:3.1
+docker tag mirrorgooglecontainers/pause-amd64:3.1 k8s.gcr.io/pause:3.1
+docker pull mirrorgooglecontainers/etcd-amd64:3.2.24
+docker tag mirrorgooglecontainers/etcd-amd64:3.2.24 k8s.gcr.io/etcd:3.2.24
+docker pull coredns/coredns:1.2.6
+docker tag coredns/coredns:1.2.6 k8s.gcr.io/coredns:1.2.6
 ```
 
 ## 安装k8s master
