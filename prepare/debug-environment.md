@@ -172,25 +172,35 @@ kubeadm不管kubelet和kubectl，所以我们需要手动安装kubelet和kubectl
 
 `systemctl enable --now kubelet`
 
-## 增加阿里容器镜像加速器
+## 镜像准备
 
-为解决国内访问docker.io速度不理想的问题，添加阿里容器镜像加速器
-```shell
+### 阿里云镜像加速器配置（可选）
+
+如果访问dockerhub速度不理想，可以选择配置阿里容器镜像加速器。
+
+1. 访问阿里云官网：https://www.aliyun.com
+2. 注册登录（可以使用支付宝直接登录）
+3. 找到镜像加速器配置页面（如果一时找不到，可以在页面上使用搜索功能）：https://cr.console.aliyun.com/cn-hangzhou/mirrors
+4. 页面上有详细的配置指南，对着操作就可以了
+
+![1552138002220](image/debug-environment/1552138002220.png)
+
+如果懒得登录阿里云折腾，也可以直接使用我的配置：
+
+```sh
 mkdir -p /etc/docker
-
 tee /etc/docker/daemon.json <<-'EOF'
 {
-  "registry-mirrors": ["https://as065r9f.mirror.aliyuncs.com"]
+  "registry-mirrors": ["https://ih25wpox.mirror.aliyuncs.com"]
 }
 EOF
-
 systemctl daemon-reload
 systemctl restart docker
 ```
 
-## 镜像准备
+### 镜像下载
 
-为了解决国内普遍访问不到k8s.gcr.io的问题，我们从mirrorgooglecontainers下载image，然后打个tag来绕过网络限制：
+然后我们就可以下载image，下载完记得打个tag：
 
 ```shell
 docker pull mirrorgooglecontainers/kube-apiserver-amd64:v1.13.3
@@ -211,13 +221,19 @@ docker tag coredns/coredns:1.2.6 k8s.gcr.io/coredns:1.2.6
 
 ## 安装k8s master
 
-`kubeadm init --pod-network-cidr=10.100.0.0/16`
+tip：下面的ip地址(192.168.19.100)大家需要替换成自己机器上的！
+
+`kubeadm init --pod-network-cidr=10.100.0.0/16 --kubernetes-version=v1.13.3 --apiserver-advertise-address 192.168.19.100`
+
+- --kubernetes-version: 用于指定k8s版本；
+- --apiserver-advertise-address：用于指定kube-apiserver监听的ip地址；
+- --pod-network-cidr：用于指定Pod的网络范围；
 
 如上，跑`kubeadm init`命令后等几分钟。
 
 如果遇到报错，对着错误信息修正一下。比如没有关闭swap会遇到error，系统cpu不够会遇到error，网络不通等等都会出错，仔细看一下错误信息一般都好解决～
 
-跑完上面的init命令后，会看到类似如下的输出：
+跑完上面的命令后，会看到类似如下的输出：
 
 ```sh
 Your Kubernetes master has initialized successfully!
