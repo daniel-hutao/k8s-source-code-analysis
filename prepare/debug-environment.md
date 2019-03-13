@@ -144,7 +144,7 @@ sysctl -p
 
 `yum install docker-ce-<VERSION STRING>`
 
-- 这里我选择18.03.1，所以我用的命令是：
+- 这里我选择18.06.3，所以我用的命令是：
 
 `yum install docker-ce-18.06.3.ce`
 

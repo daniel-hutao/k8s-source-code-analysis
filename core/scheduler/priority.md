@@ -18,7 +18,7 @@ priorityList, err := PrioritizeNodes(pod, g.cachedNodeInfoMap, metaPrioritiesInt
 
 !FILENAME pkg/scheduler/core/generic_scheduler.go:624
 
-```GO
+```go
 func PrioritizeNodes(
 	pod *v1.Pod,
 	nodeNameToInfo map[string]*schedulercache.NodeInfo,
@@ -174,6 +174,8 @@ for i := range priorityConfigs {
 
 简单说map-reduce就是：Map是映射，Reduce是规约；map是统计一本书中的一页出现了多少次k8s这个词，reduce是将这些词加在一起得到最终结果。（map一般都是将一个算法作用于一堆数据集的每一个元素，得到一个结果集，reduce有各种形式，我没有深入看map-reduce的思想，也没有玩过大数据领域的Hadoop和MapReduce，这里可能理解有出入）
 
+#### Map-reduce方式的优选过程
+
 看看在Scheduler里面是怎么用Map-Reduce的吧：
 
 ```go
@@ -235,15 +237,15 @@ if len(errs) != 0 {
 
 看来只能看几个Reduce函数的实例才能理解Reduce在这个场景的作用了～
 
-### CalculateAntiAffinityPriority
+#### Map-Reduce形式的priority函数
 
-map函数
+**CalculateAntiAffinityPriority**计算反亲的目的是让“同一个service下的pod尽量分散在给定的nodes上”。下面我们来看这个策略的Map和Reduce过程分别是怎么写的：
+
+**map函数**
 
 !FILENAME pkg/scheduler/algorithm/priorities/selector_spreading.go:221
 
 ```go
-// CalculateAntiAffinityPriorityMap spreads pods by minimizing the number of pods belonging to the same service
-// on given machine
 func (s *ServiceAntiAffinity) CalculateAntiAffinityPriorityMap(pod *v1.Pod, meta interface{}, nodeInfo *schedulercache.NodeInfo) (schedulerapi.HostPriority, error) {
 	var firstServiceSelector labels.Selector
 
@@ -257,13 +259,65 @@ func (s *ServiceAntiAffinity) CalculateAntiAffinityPriorityMap(pod *v1.Pod, meta
 	} else {
 		firstServiceSelector = getFirstServiceSelector(pod, s.serviceLister)
 	}
-	//pods matched namespace,selector on current node
+    // 查找给定node在给定namespace下符合selector的pod，返回值是[]*v1.Pod
 	matchedPodsOfNode := filteredPod(pod.Namespace, firstServiceSelector, nodeInfo)
 
 	return schedulerapi.HostPriority{
 		Host:  node.Name,
+        // 返回值中Score设置成上面找到的pod的数量
 		Score: int(len(matchedPodsOfNode)),
 	}, nil
 }
 ```
 
+这个函数比较短，可以看到在指定node上查询到匹配selector的pod越多，分值就越高。假设找到了20个，那么这里的分值就是20；假设找到的是2，那这里的分值就是2.
+
+**reduce函数**
+
+!FILENAME pkg/scheduler/algorithm/priorities/selector_spreading.go:245
+
+```go
+func (s *ServiceAntiAffinity) CalculateAntiAffinityPriorityReduce(pod *v1.Pod, meta interface{}, nodeNameToInfo map[string]*schedulercache.NodeInfo, result schedulerapi.HostPriorityList) error {
+   var numServicePods int
+   var label string
+   podCounts := map[string]int{}
+   labelNodesStatus := map[string]string{}
+   maxPriorityFloat64 := float64(schedulerapi.MaxPriority)
+
+   for _, hostPriority := range result {
+       // Score为n就是map函数中写入的匹配pod的数量为n;
+       // 累加也就得到了所有node的匹配pod数量之和；
+      numServicePods += hostPriority.Score
+       // 如果nodes上的labels中不包含当前服务指定的反亲和label，则continue；
+      if !labels.Set(nodeNameToInfo[hostPriority.Host].Node().Labels).Has(s.label) {
+         continue
+      }
+       // 这里也就是没有continue的逻辑，说明在当前node上找到了反亲和的label，通过Get获取label值；
+      label = labels.Set(nodeNameToInfo[hostPriority.Host].Node().Labels).Get(s.label)
+       // 存一个host name和label值的map；
+      labelNodesStatus[hostPriority.Host] = label
+       // label和pod数的map；
+      podCounts[label] += hostPriority.Score
+   }
+
+   // 遍历result也就是遍历每个node
+   for i, hostPriority := range result {
+       // 如果这个node上有设置的label
+      label, ok := labelNodesStatus[hostPriority.Host]
+      if !ok {
+         result[i].Host = hostPriority.Host
+         result[i].Score = int(0)
+         continue
+      }
+      // 设置fScore为默认最大值10.0
+      fScore := maxPriorityFloat64
+      if numServicePods > 0 {
+         fScore = maxPriorityFloat64 * (float64(numServicePods-podCounts[label]) / float64(numServicePods))
+      }
+      result[i].Host = hostPriority.Host
+      result[i].Score = int(fScore)
+   }
+
+   return nil
+}
+```
