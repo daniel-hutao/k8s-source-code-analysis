@@ -2,15 +2,15 @@
 
 Scheduler部分我们先从设计原理上介绍，然后分析源码，再准备环境调试，最后修改一下源码，实现一个自己的调度器。
 
-## 分析过程
+## 本章规划
 
-- [design](./design.md)
-- [scheduler-framework](./scheduler-framework.md)
-- [before-scheduler-run](./before-scheduler-run.md)
-- [generic-scheduler](./generic-scheduler.md)
-- [predicate](./predicate.md)
-- [priority](./priority.md)
-- [preempt](./preempt.md)
+- [调度器设计](./design.md)
+- [调度程序启动前逻辑](./before-scheduler-run.md)
+- [调度器框架](./scheduler-framework.md)
+- [一般调度过程](./generic-scheduler.md)
+- [预选过程](./predicate.md)
+- [优选过程](./priority.md)
+- [抢占调度](./preempt.md)
 
 ## FAQ
 
