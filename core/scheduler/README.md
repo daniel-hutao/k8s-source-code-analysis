@@ -5,9 +5,9 @@ Scheduler部分我们先从设计原理上介绍，然后分析源码，再准�
 ## 分析过程
 
 - [design](./design.md)
-- [scheduler-framework](./scheduler-framework.md.md)
-- [before-scheduler-run](./before-scheduler-run.md.md)
-- [generic-scheduler](./generic-scheduler.md.md)
+- [scheduler-framework](./scheduler-framework.md)
+- [before-scheduler-run](./before-scheduler-run.md)
+- [generic-scheduler](./generic-scheduler.md)
 - [predicate](./predicate.md)
 - [priority](./priority.md)
 - [preempt](./preempt.md)
