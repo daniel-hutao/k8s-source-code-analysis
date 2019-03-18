@@ -24,7 +24,7 @@
             "showLevel": true
         },
         "simple-page-toc": {
-            "maxDepth": 3,
+            "maxDepth": 4,
             "skipFirstH1": true
         },
 	"editlink": {

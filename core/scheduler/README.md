@@ -2,6 +2,16 @@
 
 Scheduler部分我们先从设计原理上介绍，然后分析源码，再准备环境调试，最后修改一下源码，实现一个自己的调度器。
 
+## 分析过程
+
+- [design](./design.md)
+- [scheduler-framework](./scheduler-framework.md)
+- [before-scheduler-run](./before-scheduler-run.md)
+- [generic-scheduler](./generic-scheduler.md)
+- [predicate](./predicate.md)
+- [priority](./priority.md)
+- [preempt](./preempt.md)
+
 ## FAQ
 
 **读者A提问**：如果一个pod的资源占用只有100M，能够运行在一个node上，但是配置成了1000M，这个时候node上其实没有1000M，那么predicate过程还能不能过滤通过？
