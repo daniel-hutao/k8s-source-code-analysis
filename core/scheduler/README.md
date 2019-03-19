@@ -4,14 +4,13 @@ Scheduler部分我们先从设计原理上介绍，然后分析源码，再准�
 
 ## 本章规划
 
-- [调度器设计](./design.md)
-- [调度程序启动前逻辑](./before-scheduler-run.md)
-- [调度器框架](./scheduler-framework.md)
-- [一般调度过程](./generic-scheduler.md)
-- [预选过程](./predicate.md)
-- [优选过程](./priority.md)
-- [抢占调度](./preempt.md)
-
+1. [调度器设计](./design.md)
+2. [调度程序启动前逻辑](./before-scheduler-run.md)
+3. [调度器框架](./scheduler-framework.md)
+4. [一般调度过程](./generic-scheduler.md)
+5. [预选过程](./predicate.md)
+6. [优选过程](./priority.md)
+7. [抢占调度](./preempt.md)
 ## FAQ
 
 **读者A提问**：如果一个pod的资源占用只有100M，能够运行在一个node上，但是配置成了1000M，这个时候node上其实没有1000M，那么predicate过程还能不能过滤通过？
