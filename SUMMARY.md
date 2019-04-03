@@ -18,6 +18,7 @@
     * [预选过程](core/scheduler/predicate.md)
     * [优选过程](core/scheduler/priority.md)
     * [抢占调度](core/scheduler/preempt.md)
+    * [调度器初始化](core/scheduler/init.md)
     * [关键数据结构分析](core/scheduler/struct.md)
 * [apiserver](core/apiserver/README.md)
 * [proxy](core/proxy/README.md)
