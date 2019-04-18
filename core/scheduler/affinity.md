@@ -1,10 +1,8 @@
-#                 专题-亲和性调度                                                                                                            
+# 专题-亲和性调度(Author - XiaoYang)
 
 <!-- toc -->
 
-
-## 一 简介
-
+## 简介
 
 在未分析和深入理解scheduler源码逻辑之前，本人在操作配置亲和性上，由于官方和第三方文档者说明不清楚等原因，在亲和性理解上有遇到过一些困惑，如： 
 
@@ -13,14 +11,14 @@
 2. 所有能查到的文档描述pod亲和性的topoloykey有三个： 
    *kubernetes.io/hostname* 
    *failure-domain.beta.kubernetes.io/zone* 
-    *failure-domain.beta.kubernetes.io/region* 
+   *failure-domain.beta.kubernetes.io/region* 
    为什么？真的只支持这三个key？不能自定义？ 
 
 3. Pod与Node亲和性两种类型的差异是什么？而Pod亲和性正真要去匹配的是什么，其内在逻辑是？ 
    不知道你们是否有同样类似的问题或困惑呢？当你清晰的理解了代码逻辑实现后，那么你会觉得一切是那么的 
    清楚明确了，不再有“隐性知识”问题存在。所以我希望本文所述内容能给大家在kubernetes亲和性的解惑上有所帮助。 
 
-### 1.1 约束调度
+### 约束调度
 
   在展开源码分析之前为更好的理解亲和性代码逻辑，补充一些kubernetes调度相关的基础知识： 
 
@@ -44,13 +42,13 @@
 | InterPodAffinityPriority | PodAffinity.PreferredDuringScheduling<br />IgnoredDuringExecution |    1     |
 |   NodeAffinityPriority   | NodeAffinity.PreferredDuringScheduling<br />IgnoredDuringExecution |    1     |
 
-### 1.2  Labels.selector标签选择器
+### Labels.selector标签选择器
 
 labels selector是亲和性代码底层使用最基础的代码工具，不论是nodeAffinity还是podAffinity都是需要用到它。在使用yml类型deployment定义一个pod，配置其亲和性时须指定匹配表达式，其根本的匹配都是要对Node或pod的labels标签进行条件匹配。而这些labels标签匹配计算就必须要用到labels.selector工具(公共使用部分)。 所以在将此块最底层的匹配计算分析部分放在最前面，以便于后面源码分析部分更容易理解。 
 
 > labels.selector接口定义，关键的方法是Matchs()
 
-!FILENAME: vendor/k8s.io/apimachinery/pkg/labels/selector.go:36
+!FILENAME vendor/k8s.io/apimachinery/pkg/labels/selector.go:36
 
 ```go
 type Selector interface {
@@ -66,7 +64,6 @@ type Selector interface {
 > 看一下调用端，如下面的几个实例的func，调用labels.NewSelector()实例化一个labels.selector对象返回.
 
 ```go
-
 func LabelSelectorAsSelector(ps *LabelSelector) (labels.Selector, error) {
   ...
 	selector := labels.NewSelector()   
@@ -91,7 +88,7 @@ func TopologySelectorRequirementsAsSelector(tsm []v1.TopologySelectorLabelRequir
 >
 > 类型的列表。 
 
-!FILENAME: vendor/k8s.io/apimachinery/pkg/labels/selector.go:79
+!FILENAME vendor/k8s.io/apimachinery/pkg/labels/selector.go:79
 
 ```go
 func NewSelector() Selector {
@@ -103,7 +100,7 @@ type internalSelector []Requirement
 
 > InternelSelector类的Matches()底层实现是遍历调用requirement.Matches()
 
-!FILENAME:  vendor/k8s.io/apimachinery/pkg/labels/selector.go:340
+!FILENAME   vendor/k8s.io/apimachinery/pkg/labels/selector.go:340
 
 ```go
 func (lsel internalSelector) Matches(l Labels) bool {
@@ -119,7 +116,7 @@ func (lsel internalSelector) Matches(l Labels) bool {
 
 > 再来看下requirment结构定义(key、操作符、值 )       *"这就是配置的亲和匹配条件表达式"*
 
-!FILENAME:  vendor/k8s.io/apimachinery/pkg/labels/selector.go:114
+!FILENAME   vendor/k8s.io/apimachinery/pkg/labels/selector.go:114
 
 ```go
 type Requirement struct {
@@ -134,7 +131,7 @@ type Requirement struct {
 
 > requirment.matchs() 真正的条件表达式操作实现,基于表达式`operator`,计算`key/value`,返回匹配`与否`
 
-!FILENAME: vendor/k8s.io/apimachinery/pkg/labels/selector.go:192
+!FILENAME  vendor/k8s.io/apimachinery/pkg/labels/selector.go:192
 
 ```go
 func (r *Requirement) Matches(ls Labels) bool {
@@ -189,7 +186,7 @@ func (r *Requirement) Matches(ls Labels) bool {
 
 
 
-## 二 Node亲和性
+## Node亲和性
 
 Node亲和性基础描述:
 
@@ -227,7 +224,7 @@ spec:
     image: gcr.io/google_containers/pause:2.0
 ```
 
-### 2.1 Node亲和性`预选策略MatchNodeSelectorPred` 
+### Node亲和性`预选策略MatchNodeSelectorPred` 
 
 **策略说明：**
 
@@ -241,7 +238,7 @@ NodeAffinity.`Required`DuringSchedulingIgnoredDuringExecution
 
 1. ***策略注册***： defaults.init()注册了一条名为“MatchNodeSelectorPred”预选策略项,策略Func是PodMatchNodeSelector()
 
-!FILENAME: pkg/scheduler/algorithmprovider/defaults/defaults.go:78
+!FILENAME  pkg/scheduler/algorithmprovider/defaults/defaults.go:78
 
 ```go
 func init() {
@@ -255,7 +252,7 @@ factory.RegisterFitPredicate(predicates.MatchNodeSelectorPred, predicates.PodMat
 
 获取目标Node信息,调用podMatchesNodeSelectorAndAffinityTerms()对被调度pod和目标node进行亲和性匹配。 如果符合则返回true,反之false并记录错误信息。 
 
-!FILENAME: pkg/scheduler/algorithm/predicates/predicates.go:853
+!FILENAME  pkg/scheduler/algorithm/predicates/predicates.go:853
 
 ```go
 func PodMatchNodeSelector(pod *v1.Pod, meta algorithm.PredicateMetadata, nodeInfo *schedulercache.NodeInfo) (bool, []algorithm.PredicateFailureReason, error) {
@@ -277,7 +274,7 @@ func PodMatchNodeSelector(pod *v1.Pod, meta algorithm.PredicateMetadata, nodeInf
 >
 > ​    NodeSelector和NodeAffinity定义的"必要条件"配置匹配检测
 
-!FILENAME: pkg/scheduler/algorithm/predicates/predicates.go:807
+!FILENAME  pkg/scheduler/algorithm/predicates/predicates.go:807
 
 ```go
 func podMatchesNodeSelectorAndAffinityTerms(pod *v1.Pod, node *v1.Node) bool {
@@ -328,7 +325,7 @@ func podMatchesNodeSelectorAndAffinityTerms(pod *v1.Pod, node *v1.Node) bool {
 *-“requiredDuringSchedulingIgnoredDuringExecution.**matchExpressions**”定义检测(匹配key与value)*
 *-“requiredDuringSchedulingIgnoredDuringExecution.**matchFileds**”定义检测(不匹配key，只value)*
 
-!FILENAME: pkg/scheduler/algorithm/predicates/predicates.go:797
+!FILENAME  pkg/scheduler/algorithm/predicates/predicates.go:797
 
 ```go
 func nodeMatchesNodeSelectorTerms(node *v1.Node, nodeSelectorTerms []v1.NodeSelectorTerm) bool {
@@ -376,7 +373,7 @@ func MatchNodeSelectorTerms( nodeSelectorTerms []v1.NodeSelectorTerm,
 ①  *NodeSelectorRequirementAsSelector()*
 是对“requiredDuringSchedulingIgnoredDuringExecution.matchExpressions"所配置的表达式进行Selector表达式进行格式化加工，返回一个labels.Selector实例化对象. [*本文开头1.2章节有分析*]
 
-!FILENAME:  pkg/apis/core/v1/helper/helpers.go:222
+!FILENAME   pkg/apis/core/v1/helper/helpers.go:222
 
 ```go
 func NodeSelectorRequirementsAsSelector(nsm []v1.NodeSelectorRequirement) (labels.Selector, error) {
@@ -416,7 +413,7 @@ func NodeSelectorRequirementsAsSelector(nsm []v1.NodeSelectorRequirement) (label
  ② *NodeSelectorRequirementAs`Field`Selector()*
 是对“requiredDuringSchedulingIgnoredDuringExecution.matchFields"所配置的表达式进行Selector表达式进行格式化加工，返回一个Fields.Selector实例化对象.
 
-!FILENAME: pkg/apis/core/v1/helper/helpers.go:256
+!FILENAME  pkg/apis/core/v1/helper/helpers.go:256
 
 ```go
 func NodeSelectorRequirementsAsFieldSelector(nsm []v1.NodeSelectorRequirement) (fields.Selector, error) {
@@ -453,7 +450,7 @@ func NodeSelectorRequirementsAsFieldSelector(nsm []v1.NodeSelectorRequirement) (
 3. **关键数据结构**
    **NodeSelector**相关结构的定义
 
-!FILENAME:  vendor/k8s.io/api/core/v1/types.go:2436
+!FILENAME   vendor/k8s.io/api/core/v1/types.go:2436
 
 ```go
 type NodeSelector struct {
@@ -484,7 +481,7 @@ const (
 
 **FieldsSelector**实现类的结构定义（`Match value`)
 
-!FILENAME:  vendor/k8s.io/apimachinery/pkg/fields/selector.go:78
+!FILENAME   vendor/k8s.io/apimachinery/pkg/fields/selector.go:78
 
 ```go
 type hasTerm struct {
@@ -504,7 +501,7 @@ func (t *notHasTerm) Matches(ls Fields) bool {
 }
 ```
 
-### 2.2 Node亲和性`优选策略NodeAffinityPriority`
+### Node亲和性`优选策略NodeAffinityPriority`
 
 **策略说明：**
 
@@ -521,7 +518,7 @@ NodeAffinity.PreferredDuringSchedulingIgnoredDuringExecution
    - CalculateNodeAffinityPriorityMap()  map计算， 对潜在被调度Node进行亲和匹配，并为其计权重得分. 
    - CalculateNodeAffinityPriorityReduce()  reduce计算，重新统计得分,取值区间0~10. 
 
-!FILENAME:  pkg/scheduler/algorithmprovider/defaults/defaults.go:266
+!FILENAME   pkg/scheduler/algorithmprovider/defaults/defaults.go:266
 
 ```go
 //k8s.io/kubernetes/pkg/scheduler/algorithmprovider/defaults/defaults.go/algorithmprovider/defaults.go 
@@ -540,7 +537,7 @@ factory.RegisterPriorityFunction2("NodeAffinityPriority", priorities.CalculateNo
    > `map计算`  **CalculateNodeAffinityPriorityMap()**
    >        遍历affinity.NodeAffinity.PreferredDuringSchedulingIgnoredDuringExecution所 定义的Terms解NodeSelector对象(labels.selector)后，对潜在被调度Node的labels进行Match匹配检测，如果匹配则将条件所给定的Weight权重值累计。 最后将返回各潜在的被调度Node最后分值。 
 
-!FILENAME:  pkg/scheduler/algorithm/priorities/node_affinity.go:34
+!FILENAME   pkg/scheduler/algorithm/priorities/node_affinity.go:34
 
 ```go
 func CalculateNodeAffinityPriorityMap(pod *v1.Pod, meta interface{}, nodeInfo *schedulercache.NodeInfo) (schedulerapi.HostPriority, error) {
@@ -596,7 +593,7 @@ func CalculateNodeAffinityPriorityMap(pod *v1.Pod, meta interface{}, nodeInfo *s
 >
 >  代码内给定一个NormalizeReduce()方法，MaxPriority值为10,reverse取反false关闭
 
-!FILENAME:  pkg/scheduler/algorithm/priorities/node_affinity.go:77
+!FILENAME   pkg/scheduler/algorithm/priorities/node_affinity.go:77
 
 ```go
 const	MaxPriority = 10
@@ -608,7 +605,7 @@ NormalizeReduce()
 - 结果评分取值0〜MaxPriority
 - reverse取反为true时，最终评分=(MaxPriority-其原评分值） 
 
-!FILENAME:  pkg/scheduler/algorithm/priorities/reduce.go:29
+!FILENAME   pkg/scheduler/algorithm/priorities/reduce.go:29
 
 ```go
 func NormalizeReduce(maxPriority int, reverse bool) algorithm.PriorityReduceFunction {
@@ -653,7 +650,7 @@ func NormalizeReduce(maxPriority int, reverse bool) algorithm.PriorityReduceFunc
 
 
 
-## 三 POD亲和性
+## Pod亲和性
 
 Pod亲和性基础描述:
 
@@ -695,7 +692,7 @@ spec:
             topologyKey: kubernetes.io/hostname
 ```
 
-### 3.1 Pod亲和性`预选策略MatchInterPodAffinityPred` 
+### Pod亲和性`预选策略MatchInterPodAffinityPred` 
 
 **策略说明：**
 
@@ -710,7 +707,7 @@ PodAntiAffinity.`Required`DuringSchedulingIgnoredDuringExecution
 
 1. ***策略注册***：defaultPredicates()注册了一条名为“MatchInterPodAffinity”预选策略项.
 
-!FILENAME: pkg/scheduler/algorithmprovider/defaults/defaults.go:143
+!FILENAME  pkg/scheduler/algorithmprovider/defaults/defaults.go:143
 
 ```go
 func defaultPredicates() sets.String {
@@ -729,7 +726,7 @@ factory.RegisterFitPredicateFactory(
 2. **策略Func**: **checker.InterPodAffinityMatches()**
    Func是通过NewPodAffinityProdicate()实例化PodAffinityChecker类对象后返回。
 
-!FILENAME: pkg/scheduler/algorithm/predicates/predicates.go:1138
+!FILENAME  pkg/scheduler/algorithm/predicates/predicates.go:1138
 
 ```go
 type PodAffinityChecker struct {
@@ -752,7 +749,7 @@ func NewPodAffinityPredicate(info NodeInfo, podLister algorithm.PodLister) algor
 > 1. satisfiesExistingPodsAntiAffinity()  满足存在的Pods反亲和配置. 
 > 2. satisfiesPodsAffinityAntiAffinity()   满足Pods亲和与反亲和配置. 
 
-!FILENAME: pkg/scheduler/algorithm/predicates/predicates.go:1155
+!FILENAME  pkg/scheduler/algorithm/predicates/predicates.go:1155
 
 ```go
 func (c *PodAffinityChecker) InterPodAffinityMatches(pod *v1.Pod, meta algorithm.PredicateMetadata, nodeInfo *schedulercache.NodeInfo) (bool, []algorithm.PredicateFailureReason, error) {
@@ -786,7 +783,7 @@ func (c *PodAffinityChecker) InterPodAffinityMatches(pod *v1.Pod, meta algorithm
 *即：当调度一个pod到目标Node上，而某个或某些Pod定义了反亲和配置与被*
         *调度的Pod相匹配(触犯)，那么就不应该将此Node加入到可选的潜在调度Nodes列表内.*
 
-!FILENAME: pkg/scheduler/algorithm/predicates/predicates.go:1293
+!FILENAME  pkg/scheduler/algorithm/predicates/predicates.go:1293
 
 ```go
 func (c *PodAffinityChecker) satisfiesExistingPodsAntiAffinity(pod *v1.Pod, meta algorithm.PredicateMetadata, nodeInfo *schedulercache.NodeInfo) (algorithm.PredicateFailureReason, error) {
@@ -830,7 +827,7 @@ func (c *PodAffinityChecker) satisfiesExistingPodsAntiAffinity(pod *v1.Pod, meta
 getMatchingAntiAffinityTopologyPairsOfPods()
 获取被调度Pod与其它存在反亲和配置的Pods匹配的topologyMaps
 
-!FILENAME: pkg/scheduler/algorithm/predicates/predicates.go:1270
+!FILENAME  pkg/scheduler/algorithm/predicates/predicates.go:1270
 
 ```go
 func (c *PodAffinityChecker) getMatchingAntiAffinityTopologyPairsOfPods(pod *v1.Pod, existingPods []*v1.Pod) (*topologyPairsMaps, error) {
@@ -887,7 +884,7 @@ func getMatchingAntiAffinityTopologyPairsOfPod(newPod *v1.Pod, existingPod *v1.P
 满足Pods亲和与反亲和配置.
 我们先看一下代码结构，我将共分为两个部分if{}部分,else{}部分,依赖于是否指定了预处理的预选metadata.
 
-!FILENAME: pkg/scheduler/algorithm/predicates/predicates.go:1367
+!FILENAME  pkg/scheduler/algorithm/predicates/predicates.go:1367
 
 ```go 
 func (c *PodAffinityChecker) satisfiesPodsAffinityAntiAffinity(pod *v1.Pod,
@@ -946,7 +943,7 @@ func (c *PodAffinityChecker) satisfiesPodsAffinityAntiAffinity(pod *v1.Pod,
 *GetPodAffinityTerms()* 
 *如果存在podAffinity硬件配置，获取所有"匹配必要条件”Terms*
 
-!FILENAME: pkg/scheduler/algorithm/predicates/predicates.go:1217
+!FILENAME  pkg/scheduler/algorithm/predicates/predicates.go:1217
 
 ```go 
 func GetPodAffinityTerms(podAffinity *v1.PodAffinity) (terms []v1.PodAffinityTerm) {
@@ -962,7 +959,7 @@ func GetPodAffinityTerms(podAffinity *v1.PodAffinity) (terms []v1.PodAffinityTer
 *nodeMatchesAllTopologyTerms()* 
 *判断目标Node是否**匹配所有**亲和性配置的定义Terms的topology值*.
 
-!FILENAME: pkg/scheduler/algorithm/predicates/predicates.go:1336
+!FILENAME  pkg/scheduler/algorithm/predicates/predicates.go:1336
 
 ```go
 // 目标Node须匹配所有Affinity terms所定义的TopologyKey，且值须与nodes(运行被亲和匹配表达式匹配的Pods)
@@ -998,7 +995,7 @@ type topologyPairsMaps struct {
 *targetPodMatchesAffinityOfPod()*
 根据pod的亲和定义检测目标pod的NameSpace是否符合条件以及 Labels.selector条件表达式是否匹配. 
 
-!FILENAME: pkg/scheduler/algorithm/predicates/metadata.go:498
+!FILENAME  pkg/scheduler/algorithm/predicates/metadata.go:498
 
 ```go 
 func targetPodMatchesAffinityOfPod(pod, targetPod *v1.Pod) bool {
@@ -1074,7 +1071,7 @@ func PodMatchesTermsNamespaceAndSelector(pod *v1.Pod, namespaces sets.String, se
 *GetPodAntiAffinityTerms()*
 *获取pod反亲和配置所有的必要条件Terms*
 
-!FILENAME:  pkg/scheduler/algorithm/predicates/predicates.go:1231
+!FILENAME   pkg/scheduler/algorithm/predicates/predicates.go:1231
 
 ```go
 func GetPodAntiAffinityTerms(podAntiAffinity *v1.PodAntiAffinity) (terms []v1.PodAffinityTerm) {
@@ -1090,7 +1087,7 @@ func GetPodAntiAffinityTerms(podAntiAffinity *v1.PodAntiAffinity) (terms []v1.Po
 *nodeMatchesAnyTopologyTerm()*
 判断目标Node是否**有匹配了**反亲和的定义Terms的topology值*.
 
-!FILENAME: pkg/scheduler/algorithm/predicates/predicates.go:1353
+!FILENAME  pkg/scheduler/algorithm/predicates/predicates.go:1353
 
 ```go
 //  Node只须匹配任何一条AnitAffinity terms所定义的TopologyKey则为True
@@ -1179,7 +1176,7 @@ else {
 *podMatchesPodAffinityTerms()* 
 *通过获取亲和配置定义的所有namespaces和标签条件表达式进行匹配目标pod,完全符合则获取此目标pod的运行node的topologykey（此为affinity指定的topologykey）的`值`和潜在Node的topologykey的`值`比对是否一致.*
 
-!FILENAME: pkg/scheduler/algorithm/predicates/predicates.go:1189
+!FILENAME  pkg/scheduler/algorithm/predicates/predicates.go:1189
 
 ```go
 func (c *PodAffinityChecker) podMatchesPodAffinityTerms(pod, targetPod *v1.Pod, nodeInfo *schedulercache.NodeInfo, terms []v1.PodAffinityTerm) (bool, bool, error) {
@@ -1217,7 +1214,7 @@ func (c *PodAffinityChecker) podMatchesPodAffinityTerms(pod, targetPod *v1.Pod, 
 priorityutil.NodesHaveSameTopologyKey()* *正真的toplogykey比较实现的逻辑代码块。*
 **从此代码可以看出deployment的yml对topologykey设定的可以支持自定义的**
 
-!FILENAME: pkg/scheduler/algorithm/priorities/util/topologies.go:53
+!FILENAME  pkg/scheduler/algorithm/priorities/util/topologies.go:53
 
 ```
 // 判断两者的topologyKey定义的值是否一致。
@@ -1242,7 +1239,7 @@ func NodesHaveSameTopologyKey(nodeA, nodeB *v1.Node, topologyKey string) bool {
 }
 ```
 
-### 3.2 Pod亲和性`优选策略InterPodAffinityPriority` 
+### Pod亲和性`优选策略InterPodAffinityPriority` 
 
 **策略说明：**
 并发遍历所有潜在的目标Nodes，对Pods与需被调度Pod的亲和和反亲性检测，对亲性匹配则增，对反亲性
@@ -1256,7 +1253,7 @@ PodAntiAffinity.`Preferred`DuringSchedulingIgnoredDuringExecution
 
 1. ***策略注册***：defaultPriorities()注册了一条名为“InterPodAffinityPriority”优选策略项.
 
-!FILENAME: pkg/scheduler/algorithmprovider/defaults/defaults.go:145
+!FILENAME  pkg/scheduler/algorithmprovider/defaults/defaults.go:145
 
 ```go
 // k8s.io/kubernetes/pkg/scheduler/algorithmprovider/defaults/defaults.go
@@ -1280,7 +1277,7 @@ func defaultPriorities() sets.String {
 2. **策略Func**: **interPodAffinity.CalculateInterPodAffinityPriority()**
    通过NewPodAffinityPriority()实例化interPodAffinityod类对象及CalculateInterPodAffinityPriority()策略Func返回。
 
-!FILENAME: pkg/scheduler/algorithm/priorities/interpod_affinity.go:45
+!FILENAME  pkg/scheduler/algorithm/priorities/interpod_affinity.go:45
 
 ```go
 func NewInterPodAffinityPriority(
@@ -1398,7 +1395,7 @@ func (ipa *InterPodAffinity) CalculateInterPodAffinityPriority(pod *v1.Pod, node
    > >
    > > `                          此处则可清楚的理解pod亲和性配置匹配的内在含义与逻辑。`
 
-!FILENAME: pkg/scheduler/algorithm/priorities/interpod_affinity.go:107
+!FILENAME  pkg/scheduler/algorithm/priorities/interpod_affinity.go:107
 
 ```go
 func (p *podAffinityPriorityMap) processTerms(terms []v1.WeightedPodAffinityTerm, podDefiningAffinityTerm, podToCheck *v1.Pod, fixedNode *v1.Node, multiplier int) {
@@ -1437,7 +1434,7 @@ func (p *podAffinityPriorityMap) processTerm(term *v1.PodAffinityTerm, podDefini
 *GetNamespaceFromPodAffinitTerm()*
 返回Namespaces列表（如果term未指定Namespace则使用被调度pod的Namespace）
 
-!FILENAME: pkg/scheduler/algorithm/priorities/util/topologies.go:28
+!FILENAME  pkg/scheduler/algorithm/priorities/util/topologies.go:28
 
 ```go
 func GetNamespacesFromPodAffinityTerm(pod *v1.Pod, podAffinityTerm *v1.PodAffinityTerm) sets.String {
@@ -1454,7 +1451,7 @@ func GetNamespacesFromPodAffinityTerm(pod *v1.Pod, podAffinityTerm *v1.PodAffini
 *PodMatchesTermsNamespaceAndSelector()*
 检测NameSpace一致性和Labels.selector是否匹配.
 
-!FILENAME: pkg/scheduler/algorithm/priorities/util/topologies.go:40
+!FILENAME  pkg/scheduler/algorithm/priorities/util/topologies.go:40
 
 ```go
 func PodMatchesTermsNamespaceAndSelector(pod *v1.Pod, namespaces sets.String, selector labels.Selector) bool {
@@ -1471,7 +1468,7 @@ func PodMatchesTermsNamespaceAndSelector(pod *v1.Pod, namespaces sets.String, se
 
 ② **processPod() ** 处理亲和和反亲和逻辑层，调用processTerms()进行检测与统计权重值。
 
-!FILENAME: pkg/scheduler/algorithm/priorities/interpod_affinity.go:136
+!FILENAME  pkg/scheduler/algorithm/priorities/interpod_affinity.go:136
 
 ```go
 	processPod := func(existingPod *v1.Pod) error {
@@ -1518,7 +1515,7 @@ func PodMatchesTermsNamespaceAndSelector(pod *v1.Pod, namespaces sets.String, se
 
 ③ **processNode ** 如果"被调度pod"未定义亲和配置，则检测潜在Nodes的亲和性定义.
 
-!FILENAME: pkg/scheduler/algorithm/priorities/interpod_affinity.go:193
+!FILENAME  pkg/scheduler/algorithm/priorities/interpod_affinity.go:193
 
 ```go
 	processNode := func(i int) {
@@ -1556,14 +1553,14 @@ const (
 
 
 
-## 四  Service亲和性
+## Service亲和性
 
 在default调度器代码内并未注册此预选策略，仅有代码实现。连google/baidu上都无法查询到相关使用案例，配置用法不予分析，仅看下面源码详细分析。 
 
 代码场景应用注释译文：
 *一个服务的第一个Pod被调度到带有Label “region=foo”的Nodes（资源集群）上， 那么其服务后面的其它Pod都将调度至Label “region=foo”的Nodes。* 
 
-### 4.1 Serice亲和性`预选策略checkServiceAffinity ` 
+### Serice亲和性`预选策略checkServiceAffinity ` 
 
 > 通过NewServiceAffinityPredicate()创建一个ServiceAffinity类对象，并返回两个预选策略所必须的处理Func:
 >
@@ -1573,7 +1570,7 @@ const (
 >
 > *后面将详述处理func* 
 
-!FILENAME: pkg/scheduler/algorithm/predicates/predicates.go:955
+!FILENAME  pkg/scheduler/algorithm/predicates/predicates.go:955
 
 ```go
 func NewServiceAffinityPredicate(podLister algorithm.PodLister, serviceLister algorithm.ServiceLister, nodeInfo NodeInfo, labels []string) (algorithm.FitPredicate, PredicateMetadataProducer) {
@@ -1594,7 +1591,7 @@ func NewServiceAffinityPredicate(podLister algorithm.PodLister, serviceLister al
 1. 基于预选MetaData的pod信息查询出services 
 2. 基于预选MetaData的pod Lables获取所有匹配的pods,且过滤掉仅剩在同一个Namespace的pods。 
 
-!FILENAME: pkg/scheduler/algorithm/predicates/predicates.go:934
+!FILENAME  pkg/scheduler/algorithm/predicates/predicates.go:934
 
 ```go
 func (s *ServiceAffinity) serviceAffinityMetadataProducer(pm *predicateMetadata) {
@@ -1632,7 +1629,7 @@ func (s *ServiceAffinity) serviceAffinityMetadataProducer(pm *predicateMetadata)
 > > B: `需被调度pod`定义的服务亲和`affinityLabels配置` 
 > > C: 被选定的`亲和目标Node`的` Lables `
 
-!FILENAME: pkg/scheduler/algorithm/predicates/predicates.go:992
+!FILENAME  pkg/scheduler/algorithm/predicates/predicates.go:992
 
 ```go
 func (s *ServiceAffinity) checkServiceAffinity(pod *v1.Pod, meta algorithm.PredicateMetadata, nodeInfo *schedulercache.NodeInfo) (bool, []algorithm.PredicateFailureReason, error) {
@@ -1686,7 +1683,7 @@ func (s *ServiceAffinity) checkServiceAffinity(pod *v1.Pod, meta algorithm.Predi
 筛选掉存在于Node（nodeinfo）上pods，且与之进行podKey比对不相等的pods
 filteredPods = 未在Node上的pods + 在node上但podKey相同的pods
 
-!FILENAME: pkg/scheduler/cache/node_info.go:656
+!FILENAME  pkg/scheduler/cache/node_info.go:656
 
 ```go
 func (n *NodeInfo) FilterOutPods(pods []*v1.Pod) []*v1.Pod {
@@ -1723,7 +1720,7 @@ func (n *NodeInfo) FilterOutPods(pods []*v1.Pod) []*v1.Pod {
 参数二： (A)被调度pod的定义NodeSelector配置Selector
 检测存在的于NodeSelector的亲和性Labels配置，则取两者的交集部分. （A ∩ B） 
 
-!FILENAME: pkg/scheduler/algorithm/predicates/utils.go:26
+!FILENAME  pkg/scheduler/algorithm/predicates/utils.go:26
 
 ```go
 func FindLabelsInSet(labelsToKeep []string, selector labels.Set) map[string]string {
@@ -1743,7 +1740,7 @@ func FindLabelsInSet(labelsToKeep []string, selector labels.Set) map[string]stri
 参数三： (C)"被选出的亲和Node"上的Lables
  检测存在的于"被选出的亲和Node"上的亲和性配置Labels，则取两者的交集部分存放至N.      (B ∩ C)=>N
 
-!FILENAME: pkg/scheduler/algorithm/predicates/utils.go:37
+!FILENAME  pkg/scheduler/algorithm/predicates/utils.go:37
 
 ```go
 // 输入：交集Labels、服务亲和Labels、被选出的亲和Node Lables
@@ -1764,7 +1761,7 @@ func AddUnsetLabelsToMap(aL map[string]string, labelsToAdd []string, labelSet la
 
 ④ *CreateSelectorFromLabels().Match()*  返回labels.Selector对象
 
-!FILENAME: pkg/scheduler/algorithm/predicates/utils.go:62
+!FILENAME  pkg/scheduler/algorithm/predicates/utils.go:62
 
 ```go
 func CreateSelectorFromLabels(aL map[string]string) labels.Selector {
@@ -1775,6 +1772,4 @@ func CreateSelectorFromLabels(aL map[string]string) labels.Selector {
 }
 ```
 
-
-
-###End
+**End**
