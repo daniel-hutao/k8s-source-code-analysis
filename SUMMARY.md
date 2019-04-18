@@ -19,7 +19,7 @@
     * [优选过程](core/scheduler/priority.md)
     * [抢占调度](core/scheduler/preempt.md)
     * [调度器初始化](core/scheduler/init.md)
-    * [关键数据结构分析](core/scheduler/struct.md)
+    * [专题-亲和性调度](core/scheduler/affinity.md)
 * [controller-manager](core/controller-manager/README.md)
     * [控制器概述](core/controller-manager/controller.md)
 * [apiserver](core/apiserver/README.md)
