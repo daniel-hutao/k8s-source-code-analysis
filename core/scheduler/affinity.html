@@ -94,7 +94,7 @@
     <link rel="shortcut icon" href="../../gitbook/images/favicon.ico" type="image/x-icon">
 
     
-    <link rel="next" href="../controller-manager/" />
+    <link rel="next" href="summarize.html" />
     
     
     <link rel="prev" href="init.html" />
@@ -408,6 +408,21 @@
             
         </li>
     
+        <li class="chapter " data-level="2.2.10" data-path="summarize.html">
+            
+                <a href="summarize.html">
+            
+                    
+                        <b>2.2.10.</b>
+                    
+                    scheduler 总结
+            
+                </a>
+            
+
+            
+        </li>
+    
 
             </ul>
             
@@ -437,6 +452,21 @@
                         <b>2.3.1.</b>
                     
                     控制器概述
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.3.2" data-path="../controller-manager/custom-controller.html">
+            
+                <a href="../controller-manager/custom-controller.html">
+            
+                    
+                        <b>2.3.2.</b>
+                    
+                    自定义控制器
             
                 </a>
             
@@ -539,7 +569,7 @@
                     
                         <b>3.2.1.</b>
                     
-                    Informer机制
+                    Informer
             
                 </a>
             
@@ -2227,7 +2257,7 @@ filteredPods = &#x672A;&#x5728;Node&#x4E0A;&#x7684;pods + &#x5728;node&#x4E0A;&#
 </code></pre>
 <p><strong>End</strong> </p>
 <footer class="page-footer"><span class="copyright">Copyright &#xA9; farmer.hutao@outlook.com 2019 all right reserved&#xFF0C;powered by Gitbook</span><span class="footer-modification">&#x8BE5;&#x6587;&#x4EF6;&#x4FEE;&#x8BA2;&#x65F6;&#x95F4;&#xFF1A;
-2019-04-18 15:55:20
+2019-04-25 13:43:34
 </span></footer><div id="anchors-navbar"><i class="fa fa-anchor"></i><ul><p><a href="#&#x4E13;&#x9898;-&#x4EB2;&#x548C;&#x6027;&#x8C03;&#x5EA6;(Author_-_XiaoYang)">&#x4E13;&#x9898;-&#x4EB2;&#x548C;&#x6027;&#x8C03;&#x5EA6;(Author - XiaoYang)</a></p><li><a href="#&#x7B80;&#x4ECB;">1. &#x7B80;&#x4ECB;</a></li><ul><li><a href="#&#x7EA6;&#x675F;&#x8C03;&#x5EA6;">1.1. &#x7EA6;&#x675F;&#x8C03;&#x5EA6;</a></li><li><a href="#Labels_selector&#x6807;&#x7B7E;&#x9009;&#x62E9;&#x5668;">1.2. Labels.selector&#x6807;&#x7B7E;&#x9009;&#x62E9;&#x5668;</a></li></ul><li><a href="#Node&#x4EB2;&#x548C;&#x6027;">2. Node&#x4EB2;&#x548C;&#x6027;</a></li><ul><li><a href="#Node&#x4EB2;&#x548C;&#x6027;&#x9884;&#x9009;&#x7B56;&#x7565;MatchNodeSelectorPred">2.1. Node&#x4EB2;&#x548C;&#x6027;&#x9884;&#x9009;&#x7B56;&#x7565;MatchNodeSelectorPred</a></li><li><a href="#Node&#x4EB2;&#x548C;&#x6027;&#x4F18;&#x9009;&#x7B56;&#x7565;NodeAffinityPriority">2.2. Node&#x4EB2;&#x548C;&#x6027;&#x4F18;&#x9009;&#x7B56;&#x7565;NodeAffinityPriority</a></li></ul><li><a href="#Pod&#x4EB2;&#x548C;&#x6027;">3. Pod&#x4EB2;&#x548C;&#x6027;</a></li><ul><li><a href="#Pod&#x4EB2;&#x548C;&#x6027;&#x9884;&#x9009;&#x7B56;&#x7565;MatchInterPodAffinityPred">3.1. Pod&#x4EB2;&#x548C;&#x6027;&#x9884;&#x9009;&#x7B56;&#x7565;MatchInterPodAffinityPred</a></li><li><a href="#Pod&#x4EB2;&#x548C;&#x6027;&#x4F18;&#x9009;&#x7B56;&#x7565;InterPodAffinityPriority">3.2. Pod&#x4EB2;&#x548C;&#x6027;&#x4F18;&#x9009;&#x7B56;&#x7565;InterPodAffinityPriority</a></li></ul><li><a href="#Service&#x4EB2;&#x548C;&#x6027;">4. Service&#x4EB2;&#x548C;&#x6027;</a></li><ul><li><a href="#Serice&#x4EB2;&#x548C;&#x6027;&#x9884;&#x9009;&#x7B56;&#x7565;checkServiceAffinity">4.1. Serice&#x4EB2;&#x548C;&#x6027;&#x9884;&#x9009;&#x7B56;&#x7565;checkServiceAffinity</a></li></ul></ul></div><a href="#&#x7B80;&#x4ECB;" id="goTop"><i class="fa fa-arrow-up"></i></a>
                                 
                                 </section>
@@ -2276,7 +2306,7 @@ filteredPods = &#x672A;&#x5728;Node&#x4E0A;&#x7684;pods + &#x5728;node&#x4E0A;&#
                 </a>
                 
                 
-                <a href="../controller-manager/" class="navigation navigation-next " aria-label="Next page: controller-manager">
+                <a href="summarize.html" class="navigation navigation-next " aria-label="Next page: scheduler 总结">
                     <i class="fa fa-angle-right"></i>
                 </a>
                 
@@ -2287,7 +2317,7 @@ filteredPods = &#x672A;&#x5728;Node&#x4E0A;&#x7684;pods + &#x5728;node&#x4E0A;&#
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"专题-亲和性调度","level":"2.2.9","depth":2,"next":{"title":"controller-manager","level":"2.3","depth":1,"path":"core/controller-manager/README.md","ref":"core/controller-manager/README.md","articles":[{"title":"控制器概述","level":"2.3.1","depth":2,"path":"core/controller-manager/controller.md","ref":"core/controller-manager/controller.md","articles":[]}]},"previous":{"title":"调度器初始化","level":"2.2.8","depth":2,"path":"core/scheduler/init.md","ref":"core/scheduler/init.md","articles":[]},"dir":"ltr"},"config":{"plugins":["theme-comscore","codeblock-filename","navigator","simple-page-toc","expandable-chapters-small","search-pro","splitter","multipart","tbfed-pagefooter","prism","-highlight","editlink","github","github-buttons@2.1.0","donate","copy-code-button"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"tbfed-pagefooter":{"copyright":"Copyright &copy farmer.hutao@outlook.com 2019","modify_label":"该文件修订时间：","modify_format":"YYYY-MM-DD HH:mm:ss"},"prism":{},"github":{"url":"https://github.com/farmer-hutao/k8s-source-code-analysis"},"editlink":{"label":"编辑本页","multilingual":false,"base":"https://github.com/farmer-hutao/k8s-source-code-analysis/edit/master"},"simple-page-toc":{"maxDepth":4,"skipFirstH1":true},"splitter":{},"search-pro":{"cutWordLib":"nodejieba","defineWord":["Gitbook Use"]},"search":{},"multipart":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"donate":{"alipay":"","alipayText":"支付宝打赏","button":"鼓励作者","title":"催作者快快更新","wechat":"./image/wx.jpg","wechatText":"微信小额捐赠，鼓励作者尽快更新～"},"fontsettings":{"theme":"white","family":"sans","size":2},"codeblock-filename":{},"theme-comscore":{},"navigator":{},"github-buttons":{"repo":"farmer-hutao/k8s-source-code-analysis","types":["star"],"size":"small"},"expandable-chapters-small":{},"copy-code-button":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":true}},"theme":"default","author":"Tao Hu <farmer.hutao@outlook.com>","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"《k8s-1.13版本源码分析》","gitbook":"*","description":"k8s source code analysis"},"file":{"path":"core/scheduler/affinity.md","mtime":"2019-04-18T07:55:20.499Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-04-18T08:01:18.625Z"},"basePath":"../..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"专题-亲和性调度","level":"2.2.9","depth":2,"next":{"title":"scheduler 总结","level":"2.2.10","depth":2,"path":"core/scheduler/summarize.md","ref":"core/scheduler/summarize.md","articles":[]},"previous":{"title":"调度器初始化","level":"2.2.8","depth":2,"path":"core/scheduler/init.md","ref":"core/scheduler/init.md","articles":[]},"dir":"ltr"},"config":{"plugins":["theme-comscore","codeblock-filename","navigator","simple-page-toc","expandable-chapters-small","search-pro","splitter","multipart","tbfed-pagefooter","prism","-highlight","editlink","github","github-buttons@2.1.0","donate","copy-code-button"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"tbfed-pagefooter":{"copyright":"Copyright &copy farmer.hutao@outlook.com 2019","modify_label":"该文件修订时间：","modify_format":"YYYY-MM-DD HH:mm:ss"},"prism":{},"github":{"url":"https://github.com/farmer-hutao/k8s-source-code-analysis"},"editlink":{"label":"编辑本页","multilingual":false,"base":"https://github.com/farmer-hutao/k8s-source-code-analysis/edit/master"},"simple-page-toc":{"maxDepth":4,"skipFirstH1":true},"splitter":{},"search-pro":{"cutWordLib":"nodejieba","defineWord":["Gitbook Use"]},"search":{},"multipart":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"donate":{"alipay":"","alipayText":"支付宝打赏","button":"鼓励作者","title":"催作者快快更新","wechat":"./image/wx.jpg","wechatText":"微信小额捐赠，鼓励作者尽快更新～"},"fontsettings":{"theme":"white","family":"sans","size":2},"codeblock-filename":{},"theme-comscore":{},"navigator":{},"github-buttons":{"repo":"farmer-hutao/k8s-source-code-analysis","types":["star"],"size":"small"},"expandable-chapters-small":{},"copy-code-button":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":true}},"theme":"default","author":"Tao Hu <farmer.hutao@outlook.com>","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"《k8s-1.13版本源码分析》","gitbook":"*","description":"k8s source code analysis"},"file":{"path":"core/scheduler/affinity.md","mtime":"2019-04-25T05:43:34.572Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-04-25T05:45:37.501Z"},"basePath":"../..","book":{"language":""}});
         });
     </script>
 </div>
