@@ -25,7 +25,8 @@
     * [控制器概述](core/controller-manager/controller.md)
     * [自定义控制器](core/controller-manager/custom-controller.md)
 * [apiserver](core/apiserver/README.md)
-* [proxy](core/proxy/README.md)
+* [kube-proxy](core/kube-proxy/README.md)
+    * [Proxy 服务框架](core/kube-proxy/arch.md)
 * [kubelet](core/kubelet/README.md)
 
 ## Part III - 周边项目
