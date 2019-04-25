@@ -1,250 +1,297 @@
-# Informer机制
+# Custom Controller 之 Informer
 
 <!-- toc -->
 
 ## 概述
 
-讲 Informer 还是比较有压力的，client-go 中的逻辑确实有点复杂，我甚至怀疑有“炫技”的成分。Informer 在很多组件的源码中可以看到，尤其是 kube-controller-manager (写这篇文章时我已经基本写完 kube-scheduler 的源码分析，准备着手写 kube-controller-manager 了，鉴于 controlelr 和 client-go 关联太大，跳过来先讲讲 Informer).
+本节标题写的是 Informer，不过我们的内容不局限于狭义的 Informer 部分，只是 Informer 最有代表性，其他的 Reflector 等也不好独立开来讲。
 
-Informer 是 client-go 中一个比较核心的工具，通过 Informer 我们可以轻松 List/Get 某个资源对象，可以监听资源对象的各种事件(比如创建和删除)然后触发回调函数，让我们能够在各种事件发生的时候能够作出相应的逻辑处理。举个例字，当 pod 数量变化的时候 deployment 是不是需要判断自己名下的 pod 数量是否还和预期的一样？如果少了是不是要考虑创建？
+Informer 在很多组件的源码中可以看到，尤其是 kube-controller-manager (写这篇文章时我已经基本写完 kube-scheduler 的源码分析，着手写 kube-controller-manager 了，鉴于 controlelr 和 client-go 关联比较大，跳过来先讲讲典型的控制器工作流程中涉及到的 client-go 部分).
+
+Informer 是 client-go 中一个比较核心的工具，通过 Informer(实际我们用到的都不是单纯的 informer，而是组合了各种工具的 sharedInformerFactory) 我们可以轻松 List/Get 某个资源对象，可以监听资源对象的各种事件(比如创建和删除)然后触发回调函数，让我们能够在各种事件发生的时候能够作出相应的逻辑处理。举个例字，当 pod 数量变化的时候 deployment 是不是需要判断自己名下的 pod 数量是否还和预期的一样？如果少了是不是要考虑创建？
 
 ## 架构概览
 
-![1555502518252](image/informer/1555502518252.png)
+自定义控制器的工作流程基本如下图所示，我们今天要分析图中上半部分的逻辑。
 
-如上图，Informer 可以 watch API Server，监听各种事件，然后回调事件 handler。这些事件 handler 可以做一些简单的过滤，最终要将 item 放到 workequeue 中，这个 workerqueue 也是 client-go 提供的工具。最终用户写的 controller 负责启动 worker 去消费这 workqueue 中的 item.
+![1555996411720](image/informer/1555996411720.png)
 
-## SharedInformerFactory
+我们开发自定义控制器的时候用到的“机制”主要定义在 client-go 的 tool/cache下：
 
-SharedInformerFactory 提供所有 API group 资源的 shared informers，也就是说通过这个 factory 可以使用 DeploymentInformer、ConfigMapInformer 等等各种 Informer，从而能够实现针对各种资源的逻辑处理。
+![1556075198766](image/informer/1556075198766.png)
 
-!FILENAME informers/factory.go:185
+我们根据图中的9个步骤来跟源码
+
+## reflector - List & Watch API Server
+
+Reflector 会监视特定的资源，将变化写入给定的存储中，也就是 Delta FIFO queue.
+
+### Reflector 对象
+
+Reflector 的中文含义是反射器，我们先看一下类型定义：
+
+!FILENAME tools/cache/reflector.go:47
 
 ```go
-type SharedInformerFactory interface {
-	internalinterfaces.SharedInformerFactory
-	ForResource(resource schema.GroupVersionResource) (GenericInformer, error)
-	WaitForCacheSync(stopCh <-chan struct{}) map[reflect.Type]bool
-
-	Admissionregistration() admissionregistration.Interface
-	Apps() apps.Interface
-	Auditregistration() auditregistration.Interface
-	Autoscaling() autoscaling.Interface
-	Batch() batch.Interface
-	Certificates() certificates.Interface
-	Coordination() coordination.Interface
-	Core() core.Interface
-	// ……
+type Reflector struct {
+   name string
+   metrics *reflectorMetrics
+   expectedType reflect.Type
+    
+   store Store
+   listerWatcher ListerWatcher
+    
+   period       time.Duration
+   resyncPeriod time.Duration
+   ShouldResync func() bool
+   clock clock.Clock
+   lastSyncResourceVersion string
+   lastSyncResourceVersionMutex sync.RWMutex
 }
 ```
 
-这个 interface 我们关注3个点：
+`reflector.go`中主要就 Reflector 这个 struct 和相关的一些函数：
 
-1. `internalinterfaces.SharedInformerFactory`接口
-2. `ForResource()`方法
-3. 其他方法的类型
+![1556075898739](image/informer/1556075898739.png)
 
-### 同质的方法
+### ListAndWatch
 
-我们先看第三点，找个特例，从这个接口的一个方法往里面看一下类型含义，比如`Apps() apps.Interface`吧：
+ListAndWatch 首先 list 所有 items，获取当前的资源版本信息，然后使用这个版本信息来 watch(也就是从这个版本开始的所有资源变化会被关注)。我们看一下这里的 ListAndWatch 方法主要逻辑：
 
-!FILENAME informers/apps/interface.go:29
+!FILENAME tools/cache/reflector.go:168
 
 ```go
-type Interface interface {
-   // V1 provides access to shared informers for resources in V1.
-   V1() v1.Interface
-   // V1beta1 provides access to shared informers for resources in V1beta1.
-   V1beta1() v1beta1.Interface
-   // V1beta2 provides access to shared informers for resources in V1beta2.
-   V1beta2() v1beta2.Interface
-}
-```
-
-很自然我们想到要继续看`v1.Interface`：
-
-!FILENAME informers/apps/v1/interface.go:26
-
-```go
-type Interface interface {
-   // ControllerRevisions returns a ControllerRevisionInformer.
-   ControllerRevisions() ControllerRevisionInformer
-   // DaemonSets returns a DaemonSetInformer.
-   DaemonSets() DaemonSetInformer
-   // Deployments returns a DeploymentInformer.
-   Deployments() DeploymentInformer
-   // ReplicaSets returns a ReplicaSetInformer.
-   ReplicaSets() ReplicaSetInformer
-   // StatefulSets returns a StatefulSetInformer.
-   StatefulSets() StatefulSetInformer
-}
-```
-
-DeploymentInformer 又是什么类型呢？
-
-!FILENAME informers/apps/v1/deployment.go:36
-
-```go
-type DeploymentInformer interface {
-   Informer() cache.SharedIndexInformer
-   Lister() v1.DeploymentLister
-}
-```
-
-可以看到这个 interface 的两个方法的特点，这个接口要提供的是针对 Deployments 的 shared informer 和 lister. 我们先不纠结细节，到这里我们先理解**SharedInformerFactory 提供所有 API group 资源的 shared informers**这句话。
-
-### ForResource()方法
-
-这个方法返回指定类型的 shared informer 的通用访问方式，从实现中可以看到一些端倪：
-
-!FILENAME informers/generic.go:80
-
-```go
-func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource) (GenericInformer, error) {
-   switch resource {
-   // Group=admissionregistration.k8s.io, Version=v1alpha1
-   case v1alpha1.SchemeGroupVersion.WithResource("initializerconfigurations"):
-      return &genericInformer{resource: resource.GroupResource(), informer: f.Admissionregistration().V1alpha1().InitializerConfigurations().Informer()}, nil
-   // ……
+func (r *Reflector) ListAndWatch(stopCh <-chan struct{}) error {
+   // list 资源
+   list, err := r.listerWatcher.List(options)
+   // 提取 items
+   items, err := meta.ExtractList(list)
+    // 更新存储(Delta FIFO)中的 items
+   if err := r.syncWith(items, resourceVersion); err != nil {
+      return fmt.Errorf("%s: Unable to sync list result: %v", r.name, err)
    }
-```
+   r.setLastSyncResourceVersion(resourceVersion)
 
-这里的返回值是 GenericInformer 类型，很简洁：
+   // ……
 
-!FILENAME informers/generic.go:58
+   for {
+      select {
+      case <-stopCh:
+         return nil
+      default:
+      }
 
-```go
-type GenericInformer interface {
-   Informer() cache.SharedIndexInformer
-   Lister() cache.GenericLister
+      timeoutSeconds := int64(minWatchTimeout.Seconds() * (rand.Float64() + 1.0))
+      options = metav1.ListOptions{
+         ResourceVersion: resourceVersion,
+         TimeoutSeconds: &timeoutSeconds,
+      }
+
+      r.metrics.numberOfWatches.Inc()
+       // 开始 watch
+      w, err := r.listerWatcher.Watch(options)
+       // ……
+       // w 交给 watchHandler 处理
+      if err := r.watchHandler(w, &resourceVersion, resyncerrc, stopCh); err != nil {
+         if err != errorStopRequested {
+            klog.Warningf("%s: watch of %v ended with: %v", r.name, r.expectedType, err)
+         }
+         return nil
+      }
+   }
 }
 ```
 
-### internalinterfaces.SharedInformerFactory
+## watchHandler - add obj to delta fifo
 
-!FILENAME informers/internalinterfaces/factory_interfaces.go:34
+前面讲到 ListAndWatch 函数的最后一步逻辑是 watchHandler，在 ListAndWatch 中先是更新了 Delta FIFO 中的 item，然后 watch 资源对象，最后交给 watchHandler 处理，所以 watchHandler 基本可以猜到是将有变化的资源添加到 Delta FIFO 中了。
+
+!FILENAME tools/cache/reflector.go:287
 
 ```go
-type SharedInformerFactory interface {
-   Start(stopCh <-chan struct{})
-   InformerFor(obj runtime.Object, newFunc NewInformerFunc) cache.SharedIndexInformer
+func (r *Reflector) watchHandler(w watch.Interface, resourceVersion *string, errc chan error, stopCh <-chan struct{}) error {
+   // ……
+loop:
+    // 这里进入一个无限循环
+   for {
+      select {
+      case <-stopCh:
+         return errorStopRequested
+      case err := <-errc:
+         return err
+          // watch 返回值中的一个 channel
+      case event, ok := <-w.ResultChan():
+         // ……
+         newResourceVersion := meta.GetResourceVersion()
+          // 根据事件类型处理，有 Added Modified Deleted 3种
+          // 3 种事件分别对应 store 中的增改删操作
+         switch event.Type {
+         case watch.Added:
+            err := r.store.Add(event.Object)
+            
+         case watch.Modified:
+            err := r.store.Update(event.Object)
+            
+         case watch.Deleted:
+            err := r.store.Delete(event.Object)
+            
+         default:
+            utilruntime.HandleError(fmt.Errorf("%s: unable to understand watch event %#v", r.name, event))
+         }
+         *resourceVersion = newResourceVersion
+         r.setLastSyncResourceVersion(newResourceVersion)
+         eventCount++
+      }
+   }
+
+   // ……
+    
+   return nil
 }
 ```
 
-这里的 InformerFor() 方法和前面的 ForResource() 有点像，这里的返回值是 SharedIndexInformer，GenericInformer 的 Informer() 方法返回值也是 SharedIndexInformer：
+## Informer (controller) - pop obj from delta fifo
 
-!FILENAME tools/cache/shared_informer.go:66
+### Controller
 
-```go
-type SharedIndexInformer interface {
-   SharedInformer
-   // AddIndexers add indexers to the informer before it starts.
-   AddIndexers(indexers Indexers) error
-   GetIndexer() Indexer
-}
-```
+一个 Informer 需要实现 Controller 接口：
 
-### sharedInformerFactory
-
-sharedInformerFactory 对象是 SharedInformerFactory 接口的具体实现，从这个 struct 的属性中我们可以看到一些有用的信息：
-
-!FILENAME informers/factory.go:53
+!FILENAME tools/cache/controller.go:82
 
 ```go
-type sharedInformerFactory struct {
-   client           kubernetes.Interface
-   namespace        string
-   tweakListOptions internalinterfaces.TweakListOptionsFunc
-   lock             sync.Mutex
-   defaultResync    time.Duration
-   customResync     map[reflect.Type]time.Duration
-   informers map[reflect.Type]cache.SharedIndexInformer
-   startedInformers map[reflect.Type]bool
-}
-```
-
-这里主要注意 client 和 informers，client 先不细说，大家从字面理解，当作一个可以和 api server 交互(CURD)的工具先就行。`informers map[reflect.Type]cache.SharedIndexInformer`明显是存放了多个不同类型的 informers，这个 map 的 key 表达一种 obj 的类型，value 是 SharedIndexInformer，后面我们会讲。
-
-## SharedIndexInformer
-
-看 client-go 的过程中我一直在想到底哪个对象最能代表 Informer，后来觉得 SharedIndexInformer 应该可以被认为就是广义的 Informer 了。
-
-我们在前面看到 GenericInformer 的代码，再附加对应 struct 贴一份：
-
-```go
-type GenericInformer interface {
-   Informer() cache.SharedIndexInformer
-   Lister() cache.GenericLister
-}
-
-type genericInformer struct {
-   informer cache.SharedIndexInformer
-   resource schema.GroupResource
-}
-```
-
-我们编码的时候直接使用的都是 SharedInformerFactory，往里面跟可以认为 GenericInformer 是第一层，这个接口的方法很清晰表达了意图。这里涉及到 informer+lister，我们一一来看。
-
-SharedIndexInformer 的定义如下：
-
-!FILENAME tools/cache/shared_informer.go:66
-
-```go
-type SharedIndexInformer interface {
-   SharedInformer
-   AddIndexers(indexers Indexers) error
-   GetIndexer() Indexer
-}
-```
-
-这里包了一个 Interface：
-
-!FILENAME tools/cache/shared_informer.go:43
-
-```go
-type SharedInformer interface {
-    // 留意这个方法
-   AddEventHandler(handler ResourceEventHandler)
-   AddEventHandlerWithResyncPeriod(handler ResourceEventHandler, resyncPeriod time.Duration)
-   GetStore() Store
-   GetController() Controller
+type Controller interface {
    Run(stopCh <-chan struct{})
    HasSynced() bool
    LastSyncResourceVersion() string
 }
 ```
 
-从函数名得不到太多直观的信息，我们从 SharedIndexInformer 的实现 sharedIndexInformer 入手：
+一个基础的 Controller 实现如下：
 
-!FILENAME tools/cache/shared_informer.go:127
+!FILENAME tools/cache/controller.go:75
 
 ```go
-type sharedIndexInformer struct {
-	indexer    Indexer
-	controller Controller
-	processor             *sharedProcessor
-	cacheMutationDetector CacheMutationDetector
-	listerWatcher ListerWatcher
-	objectType    runtime.Object
-	resyncCheckPeriod time.Duration
-	defaultEventHandlerResyncPeriod time.Duration
-	clock clock.Clock
-	started, stopped bool
-	startedLock      sync.Mutex
-	blockDeltas sync.Mutex
+type controller struct {
+   config         Config
+   reflector      *Reflector
+   reflectorMutex sync.RWMutex
+   clock          clock.Clock
 }
 ```
 
-从 sharedIndexInformer 的属性中可以看到几个实实在在的对象：
+controller 类型结构如下：
 
-- indexer
-- controller
-- processor
-- listerWatcher
+![1556088003902](image/informer/1556088003902.png)
 
-### indexer
+可以看到主要对外暴露的逻辑是 Run() 方法，我们看一下 Run() 中的逻辑：
 
-Indexer 接口提供了各种 index 函数，让我们在 list 一个对象时可以使用这些索引函数：
+!FILENAME tools/cache/controller.go:100
+
+```go
+func (c *controller) Run(stopCh <-chan struct{}) {
+   defer utilruntime.HandleCrash()
+   go func() {
+      <-stopCh
+      c.config.Queue.Close()
+   }()
+    // 内部 Reflector 创建
+   r := NewReflector(
+      c.config.ListerWatcher,
+      c.config.ObjectType,
+      c.config.Queue,
+      c.config.FullResyncPeriod,
+   )
+   r.ShouldResync = c.config.ShouldResync
+   r.clock = c.clock
+
+   c.reflectorMutex.Lock()
+   c.reflector = r
+   c.reflectorMutex.Unlock()
+
+   var wg wait.Group
+   defer wg.Wait()
+
+   wg.StartWithChannel(stopCh, r.Run)
+	// 循环调用 processLoop
+   wait.Until(c.processLoop, time.Second, stopCh)
+}
+```
+
+### processLoop
+
+!FILENAME tools/cache/controller.go:148
+
+```go
+func (c *controller) processLoop() {
+   for {
+       // 主要逻辑
+      obj, err := c.config.Queue.Pop(PopProcessFunc(c.config.Process))
+       // 异常处理
+   }
+}
+```
+
+这里的 Queue 就是 Delta FIFO，Pop 是个阻塞方法，内部实现时会逐个 pop 队列中的数据，交给 PopProcessFunc 处理。我们先不看 Pop 的实现，关注一下 PopProcessFunc 是如何处理 Pop 中从队列拿出来的 item 的。
+
+PopProcessFunc 是一个类型：
+
+`type PopProcessFunc func(interface{}) error`
+
+所以这里只是一个类型转换，我们关注`c.config.Process`就行：
+
+!FILENAME tools/cache/controller.go:367
+
+```go
+Process: func(obj interface{}) error {
+	for _, d := range obj.(Deltas) {
+		switch d.Type {
+            // 更新、添加、同步、删除等操作
+		case Sync, Added, Updated:
+			if old, exists, err := clientState.Get(d.Object); err == nil && exists {
+				if err := clientState.Update(d.Object); err != nil {
+					return err
+				}
+				h.OnUpdate(old, d.Object)
+			} else {
+				if err := clientState.Add(d.Object); err != nil {
+					return err
+				}
+				h.OnAdd(d.Object)
+			}
+		case Deleted:
+			if err := clientState.Delete(d.Object); err != nil {
+				return err
+			}
+			h.OnDelete(d.Object)
+		}
+	}
+	return nil
+},
+```
+
+这里涉及到2个点：
+
+- clientState
+- ResourceEventHandler (h)
+
+我们一一来看
+
+## Add obj to Indexer (Thread safe store)
+
+前面说到 clientState，这个变量的初始化是`clientState := NewIndexer(DeletionHandlingMetaNamespaceKeyFunc, indexers)`
+
+NewIndexer 代码如下：
+
+!FILENAME tools/cache/store.go:239
+
+```go
+func NewIndexer(keyFunc KeyFunc, indexers Indexers) Indexer {
+   return &cache{
+      cacheStorage: NewThreadSafeStore(indexers, Indices{}),
+      keyFunc:      keyFunc,
+   }
+}
+```
 
 !FILENAME tools/cache/index.go:27
 
@@ -260,384 +307,118 @@ type Indexer interface {
 }
 ```
 
-这个接口的实现是 cache：
+顺带看一下 NewThreadSafeStore()
 
-!FILENAME tools/cache/store.go:112
-
-```go
-type cache struct {
-   cacheStorage ThreadSafeStore
-   keyFunc KeyFunc
-}
-```
-
-另外我们注意到包了一个接口 Store：
+!FILENAME tools/cache/thread_safe_store.go:298
 
 ```go
-type Store interface {
-   Add(obj interface{}) error
-   Update(obj interface{}) error
-   Delete(obj interface{}) error
-   List() []interface{}
-   ListKeys() []string
-   Get(obj interface{}) (item interface{}, exists bool, err error)
-   GetByKey(key string) (item interface{}, exists bool, err error)
-
-   Replace([]interface{}, string) error
-   Resync() error
-}
-```
-
-Store 是一个一般对象的存储接口，Reflector(后面介绍)知道怎样 watch server 然后更新 store. Reflector 能够将 store 当作一个本地缓存系统，进而以类似队列的方式工作(队列中存的是等待被处理的对象)。
-
-我们来看 Store 接口的一个实现：
-
-```go
-type DeltaFIFO struct {
-    items map[string]Deltas
-	queue []string
-    //……
-}
-```
-
-### reflector
-
-前面说到 Store 要给 Reflector 服务，我们看一下 Reflector 的定义：
-
-!FILENAME tools/cache/reflector.go:47
-
-```go
-type Reflector struct {
-   name string
-   metrics *reflectorMetrics
-   expectedType reflect.Type
-   // The destination to sync up with the watch source
-   store Store
-   // listerWatcher is used to perform lists and watches.
-   listerWatcher ListerWatcher
-  // ……
-}
-```
-
-Reflector 要做的事情是 watch 一个指定的资源，然后将这个资源的变化反射到给定的store中。很明显这里的两个属性 listerWatcher 和 store 就是这些逻辑的关键。
-
-我们简单看一下往 store 中添加数据的代码：
-
-!FILENAME tools/cache/reflector.go:324
-
-```go
-switch event.Type {
-case watch.Added:
-   err := r.store.Add(event.Object)
-   // ……
-case watch.Modified:
-   err := r.store.Update(event.Object)
-   // ……
-case watch.Deleted:
-   // ……
-   err := r.store.Delete(event.Object)
-   
-```
-
-这个 store 一般用的是 DeltaFIFO，到这里大概就知道 Refactor 从 API Server watch 资源，然后写入 DeltaFIFO 的过程了，大概长这个样子：
-
-![1555420426565](image/informer/1555420426565.png)
-
-然后我们关注一下 DeltaFIFO 的 knownObjects 属性，在创建一个 DeltaFIFO 实例的时候有这样的逻辑：
-
-!FILENAME tools/cache/delta_fifo.go:59
-
-```go
-func NewDeltaFIFO(keyFunc KeyFunc, knownObjects KeyListerGetter) *DeltaFIFO {
-   f := &DeltaFIFO{
-      items:        map[string]Deltas{},
-      queue:        []string{},
-      keyFunc:      keyFunc,
-      knownObjects: knownObjects,
-   }
-   f.cond.L = &f.lock
-   return f
-}
-```
-
-这里接收了 KeyListerGetter 类型的 knownObjects，继续往前跟可以看到我们前面提到的 SharedIndexInformer 的初始化逻辑中将 indexer 对象当作了这里的 knownObjects 的实参：
-
-!FILENAME tools/cache/shared_informer.go:192
-
-```go
-fifo := NewDeltaFIFO(MetaNamespaceKeyFunc, s.indexer)
-```
-
-s.indexer 来自于：NewSharedIndexInformer() 函数的逻辑：
-
-```go
-func NewSharedIndexInformer(lw ListerWatcher, objType runtime.Object, defaultEventHandlerResyncPeriod time.Duration, indexers Indexers) SharedIndexInformer {
-   realClock := &clock.RealClock{}
-   sharedIndexInformer := &sharedIndexInformer{
-      processor:                       &sharedProcessor{clock: realClock},
-      indexer:                         NewIndexer(DeletionHandlingMetaNamespaceKeyFunc, indexers),
-      listerWatcher:                   lw,
-      objectType:                      objType,
-      resyncCheckPeriod:               defaultEventHandlerResyncPeriod,
-      defaultEventHandlerResyncPeriod: defaultEventHandlerResyncPeriod,
-      cacheMutationDetector:           NewCacheMutationDetector(fmt.Sprintf("%T", objType)),
-      clock:                           realClock,
-   }
-   return sharedIndexInformer
-}
-```
-
-这里的 NewIndexer() 函数中就可以看到我们前面提到的 Indexer 接口的实现 cache 对象了：
-
-!FILENMAE tools/cache/store.go:239
-
-```go
-func NewIndexer(keyFunc KeyFunc, indexers Indexers) Indexer {
-   return &cache{
-      cacheStorage: NewThreadSafeStore(indexers, Indices{}),
-      keyFunc:      keyFunc,
+func NewThreadSafeStore(indexers Indexers, indices Indices) ThreadSafeStore {
+   return &threadSafeMap{
+      items:    map[string]interface{}{},
+      indexers: indexers,
+      indices:  indices,
    }
 }
 ```
 
-Ok，我们可以基于前面的图加一个框框了：
+然后关注一下 Process 中的`err := clientState.Add(d.Object)`的 Add() 方法：
 
-![1555420360544](image/informer/1555420360544.png)
-
-### ResourceEventHandler
-
-在 SharedInformer 接口中有一个方法`AddEventHandler(handler ResourceEventHandler)`，我们看一下这个方法的一些细节。先来看 ResourceEventHandler 接口的定义：
-
-!FILENAME tools/cache/controller.go:177
+!FILENAME tools/cache/store.go:123
 
 ```go
-type ResourceEventHandler interface {
-   OnAdd(obj interface{})
-   OnUpdate(oldObj, newObj interface{})
-   OnDelete(obj interface{})
-}
-
-// adaptor
-type ResourceEventHandlerFuncs struct {
-	AddFunc    func(obj interface{})
-	UpdateFunc func(oldObj, newObj interface{})
-	DeleteFunc func(obj interface{})
+func (c *cache) Add(obj interface{}) error {
+    // 计算key；一般是namespace/name
+   key, err := c.keyFunc(obj)
+   if err != nil {
+      return KeyError{obj, err}
+   }
+    // Add
+   c.cacheStorage.Add(key, obj)
+   return nil
 }
 ```
 
-ResourceEventHandler 要做的事情是 handle 一个资源对象的事件通知，在这个资源对象发生增加、修改、删除的时候分别对应上面3个方法的逻辑。下面在 processor 部分我们继续看 ResourceEventHandler.
+cacheStorage 是一个 ThreadSafeStore 实例，这个 Add() 代码如下：
 
-### controller
-
-controller 对应这里的 Controller 接口：
-
-!FILENAME tools/cache/controller.go:82
+!FILENAME tools/cache/thread_safe_store.go:68
 
 ```go
-type Controller interface {
+func (c *threadSafeMap) Add(key string, obj interface{}) {
+   c.lock.Lock()
+   defer c.lock.Unlock()
+    // 拿出 old obj
+   oldObject := c.items[key]
+    // 写入 new obj
+   c.items[key] = obj
+    // 更新索引，有一堆逻辑
+   c.updateIndices(oldObject, obj, key)
+}
+```
+
+第四步和第五步的内容先分析到这里，后面关注 threadSafeMap 实现的时候再继续深入。
+
+## sharedIndexInformer
+
+第六步是 Dispatch Event Handler functions(Send Object to Custom Controller)
+
+我们先看一个接口 SharedInformer：
+
+!FILENAME tools/cache/shared_informer.go:43
+
+```go
+type SharedInformer interface {
+   AddEventHandler(handler ResourceEventHandler)
+   AddEventHandlerWithResyncPeriod(handler ResourceEventHandler, resyncPeriod time.Duration)
+   GetStore() Store
+   GetController() Controller
    Run(stopCh <-chan struct{})
    HasSynced() bool
    LastSyncResourceVersion() string
 }
 ```
 
-这里有个`Run()`方法比较显眼，我们看一下 sharedIndexInformer 对 Run() 方法的实现：
+SharedInformer 有一个共享的 data cache，能够分发 changes 通知到缓存，到通过 AddEventHandler 注册了的 listerners. 当你接收到一个通知，缓存的内容能够保证至少和通知中的一样新。
 
-!FILENAME tools/cache/shared_informer.go:189
+再看一下 SharedIndexInformer 接口：
+
+!FILENAME tools/cache/shared_informer.go:66
 
 ```go
-func (s *sharedIndexInformer) Run(stopCh <-chan struct{}) {
-   // ……
-   cfg := &Config{
-      Queue:            fifo,
-      ListerWatcher:    s.listerWatcher,
-      ObjectType:       s.objectType,
-      FullResyncPeriod: s.resyncCheckPeriod,
-      RetryOnError:     false,
-      ShouldResync:     s.processor.shouldResync,
-
-      Process: s.HandleDeltas,
-   }
-
-   func() {
-      // ……
-      s.controller = New(cfg)
-      // ……
-   }()
-   // ……
-   s.controller.Run(stopCh)
+type SharedIndexInformer interface {
+   SharedInformer
+   // AddIndexers add indexers to the informer before it starts.
+   AddIndexers(indexers Indexers) error
+   GetIndexer() Indexer
 }
 ```
 
-关注这里基于 Config 创建了一个  Controller 赋值给 s.controller，然后调用了这个 s.controller.Run() 方法。我们看一下 New 里面是什么：
+相比 SharedInformer 增加了一个 Indexer. 然后看具体的实现 sharedIndexInformer 吧：
 
-!FILENAME tools/cache/controller.go:89
+!FILENAME tools/cache/shared_informer.go:127
 
 ```go
-// New makes a new Controller from the given Config.
-func New(c *Config) Controller {
-   ctlr := &controller{
-      config: *c,
-      clock:  &clock.RealClock{},
-   }
-   return ctlr
+type sharedIndexInformer struct {
+   indexer    Indexer
+   controller Controller
+   processor             *sharedProcessor
+   cacheMutationDetector CacheMutationDetector
+   listerWatcher ListerWatcher
+    
+   objectType    runtime.Object
+   resyncCheckPeriod time.Duration
+   defaultEventHandlerResyncPeriod time.Duration
+   clock clock.Clock
+   started, stopped bool
+   startedLock      sync.Mutex
+   blockDeltas sync.Mutex
 }
 ```
 
-这里的 controller 类型是：
+这个类型内包了很多我们前面看到过的对象，indexer、controller、listeratcher 都不陌生，我们看这里的 processor 是做什么的：
 
-!FILENAME tools/cache/controller.go:75
+### sharedProcessor
 
-```go
-type controller struct {
-   config         Config
-   reflector      *Reflector
-   reflectorMutex sync.RWMutex
-   clock          clock.Clock
-}
-```
-
-#### controller.Run()
-
-我们接着关注这个 controller 是怎么实现 Run() 方法的：
-
-!FILENAME tools/cache/controller.go:100
-
-```go
-func (c *controller) Run(stopCh <-chan struct{}) {
-   defer utilruntime.HandleCrash()
-   go func() {
-      <-stopCh
-      c.config.Queue.Close()
-   }()
-    // listerWatcher 和 queue 等都用于创建这里的r eflector 了
-   r := NewReflector(
-      c.config.ListerWatcher,
-      c.config.ObjectType,
-      c.config.Queue,
-      c.config.FullResyncPeriod,
-   )
-   r.ShouldResync = c.config.ShouldResync
-   r.clock = c.clock
-
-   c.reflectorMutex.Lock()
-    // reflector 是 controller 的一个关键属性
-   c.reflector = r
-   c.reflectorMutex.Unlock()
-
-   var wg wait.Group
-   defer wg.Wait()
-
-   wg.StartWithChannel(stopCh, r.Run)
-   // 逻辑到了 processLoop 里面
-   wait.Until(c.processLoop, time.Second, stopCh)
-}
-```
-
-这个 loop 是用来消费 queue  的：
-
-!FILENAME tools/cache/controller.go:148
-
-```go
-func (c *controller) processLoop() {
-   for {
-       // 这里的 Pop() 明显是阻塞式的
-       // type PopProcessFunc func(interface{}) error
-       // PopProcessFunc 用于处理 queue 中 pop 出来的 element
-      obj, err := c.config.Queue.Pop(PopProcessFunc(c.config.Process))
-      if err != nil {
-         if err == FIFOClosedError {
-            return
-         }
-         if c.config.RetryOnError {
-            // This is the safe way to re-enqueue.
-            c.config.Queue.AddIfNotPresent(obj)
-         }
-      }
-   }
-}
-```
-
-这里的 PopProcessFunc 可能会让人一时摸不着头脑，其实这这值是一个函数类型`func(interface{}) error`，这里`PopProcessFunc(c.config.Process)`也就是把`c.config.Process`转为了`PopProcessFunc`类型而已。
-
-我们在前面有贴 sharedIndexInformer.Run() 这个函数，里面的`Process: s.HandleDeltas,`这一行其实就交代了这里的 PopProcessFunc 类型实例来源。
-
-#### sharedIndexInformer.HandleDeltas()
-
-!FILENAME tools/cache/shared_informer.go:344
-
-```go
-func (s *sharedIndexInformer) HandleDeltas(obj interface{}) error {
-   s.blockDeltas.Lock()
-   defer s.blockDeltas.Unlock()
-    // from oldest to newest
-    // 循环处理这个对象的一系列状态
-   for _, d := range obj.(Deltas) {
-      switch d.Type {
-      case Sync, Added, Updated:
-         isSync := d.Type == Sync
-         s.cacheMutationDetector.AddObject(d.Object)
-         if old, exists, err := s.indexer.Get(d.Object); err == nil && exists {
-            if err := s.indexer.Update(d.Object); err != nil {
-               return err
-            }
-             // distribute
-            s.processor.distribute(updateNotification{oldObj: old, newObj: d.Object}, isSync)
-         } else {
-            if err := s.indexer.Add(d.Object); err != nil {
-               return err
-            }
-             // distribute
-            s.processor.distribute(addNotification{newObj: d.Object}, isSync)
-         }
-      case Deleted:
-         if err := s.indexer.Delete(d.Object); err != nil {
-            return err
-         }
-          // distribute
-         s.processor.distribute(deleteNotification{oldObj: d.Object}, false)
-      }
-   }
-   return nil
-}
-```
-
-先关注这里的 distribute 过程，注意到这个 distribute 的参数是 xxxNotification，下面 processor 部分会讲到这些信号被处理的逻辑。
-
-!FILENAME tools/cache/shared_informer.go:400
-
-```go
-func (p *sharedProcessor) distribute(obj interface{}, sync bool) {
-   p.listenersLock.RLock()
-   defer p.listenersLock.RUnlock()
-
-   if sync {
-      for _, listener := range p.syncingListeners {
-          // add
-         listener.add(obj)
-      }
-   } else {
-      for _, listener := range p.listeners {
-          // add
-         listener.add(obj)
-      }
-   }
-}
-```
-
-!FILENAME tools/cache/shared_informer.go:506
-
-```go
-func (p *processorListener) add(notification interface{}) {
-   p.addCh <- notification
-}
-```
-
-这里的 p.addCh 接收到信号，也就是下面 processor 部分的逻辑`processorListener.pop()`逻辑的起点。
-
-### processor
-
-在 sharedIndexInformer 对象中有一个属性`processor *sharedProcessor`，这个 sharedProcessor 类型定义如下：
+类型定义如下：
 
 !FILENAME tools/cache/shared_informer.go:375
 
@@ -652,7 +433,9 @@ type sharedProcessor struct {
 }
 ```
 
-这里的重点明显是 listeners 属性了，我们继续看 listeners 的类型中 processorListener 的定义：
+这里的重点明显是 listeners 属性了，我们继续看 listeners 的类型中的 processorListener：
+
+#### processorListener
 
 !FILENAME tools/cache/shared_informer.go:466
 
@@ -662,43 +445,20 @@ type processorListener struct {
    addCh  chan interface{}
 
    handler ResourceEventHandler
+   // 一个 ring buffer，保存未分发的通知
+   pendingNotifications buffer.RingGrowing
    // ……
 }
 ```
 
-这里有一个我们前面提到的 handler，下面结合在一起跟一下handler 方法调用逻辑。
+processorListener 主要有2个方法：
 
-#### sharedProcessor.run()
-
-从 processor 的 run() 方法开始看：
-
-!FILENAME tools/cache/shared_informer.go:415
-
-```go
-func (p *sharedProcessor) run(stopCh <-chan struct{}) {
-   func() {
-      p.listenersLock.RLock()
-      defer p.listenersLock.RUnlock()
-      for _, listener := range p.listeners {
-         p.wg.Start(listener.run)
-         p.wg.Start(listener.pop)
-      }
-      p.listenersStarted = true
-   }()
-   <-stopCh
-  // ……
-}
-```
-
-撇开细节，可以看到这里调用了内部所有 listener 的 run() 和 pop() 方法。
-
-#### sharedIndexInformer.Run()
-
-我们前面写 controller 时提到过这个Run() ，现在只关注一点，sharedIndexInformer 的 run 会调用到`s.processor.run`，也就是上面写的 `sharedProcessor.run()`.
+- run()
+- pop()
 
 #### processorListener.run()
 
-`sharedProcessor.run()`往里调到了 processorListener.run() 和 `processorListener.pop()`，先看一下这个 run 做了什么：
+先看一下这个 run 做了什么：
 
 !FILENAME tools/cache/shared_informer.go:540
 
@@ -754,7 +514,9 @@ type deleteNotification struct {
 }
 ```
 
-另外注意到`for next := range p.nextCh`是下面的 case 执行的前提，也就是说触发点是 p.nextCh，我们接着看 pop 过程( pod的代码花了我不少时间，这里的逻辑不简单)：
+另外注意到`for next := range p.nextCh`是下面的 case 执行的前提，也就是说触发点是 p.nextCh，我们接着看 pop 过程(这里的逻辑不简单，可能得多花点精力)
+
+#### processorListener.pop()
 
 !FILENAME tools/cache/shared_informer.go:510
 
@@ -798,95 +560,164 @@ func (p *processorListener) pop() {
 }
 ```
 
-这里的 pop 逻辑的入口是`<-p.addCh`，我们前面 controller 部分讲到了这个 addCh 的来源。继续看其他逻辑。
+这里的 pop 逻辑的入口是`<-p.addCh`，我们继续向上找一下这个 addCh 的来源：
 
-### listerwatcher
+#### processorListener.add()
 
-ListerWatcher 的出镜率还是挺高的，大家应该在很多文章里都有看到过这个词。我们先看一下接口定义：
-
-!FILENAME tools/cache/listwatch.go:31
+!FILENAME tools/cache/shared_informer.go:506
 
 ```go
-type ListerWatcher interface {
-   // List should return a list type object; 
-   List(options metav1.ListOptions) (runtime.Object, error)
-   // Watch should begin a watch at the specified version.
-   Watch(options metav1.ListOptions) (watch.Interface, error)
-}
-
-type ListFunc func(options metav1.ListOptions) (runtime.Object, error)
-
-type WatchFunc func(options metav1.ListOptions) (watch.Interface, error)
-
-type ListWatch struct {
-	ListFunc  ListFunc
-	WatchFunc WatchFunc
-	// DisableChunking requests no chunking for this list watcher.
-	DisableChunking bool
+func (p *processorListener) add(notification interface{}) {
+   p.addCh <- notification
 }
 ```
 
-从这些代码中我们能够体会到一些 ListerWatcher 的用意，但心里应该还是纠结的。我们看一下 deployment 的 list-watch.
+这个 add() 方法又在哪里被调用呢？
 
-我们是从 sharedIndexInformer 中看到有个属性 listerWatcher，DeploymentInformer 的创建代码如下：
+#### sharedProcessor.distribute()
 
-!FILENAME informers/apps/v1beta2/deployment.go:50
+!FILENAME tools/cache/shared_informer.go:400
 
 ```go
-// 注意到返回值类型是 SharedIndexInformer，也就是说这里的初始化肯定需要给 listerWatcher 属性赋值
-func NewDeploymentInformer(client kubernetes.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-   return NewFilteredDeploymentInformer(client, namespace, resyncPeriod, indexers, nil)
-}
+func (p *sharedProcessor) distribute(obj interface{}, sync bool) {
+   p.listenersLock.RLock()
+   defer p.listenersLock.RUnlock()
 
-func NewFilteredDeploymentInformer(client kubernetes.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
-   return cache.NewSharedIndexInformer(
-       // 这里初始化一个 ListWatch 类型实例
-      &cache.ListWatch{
-          // ListFunc 和 WatchFunc 的赋值
-         ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
-            if tweakListOptions != nil {
-               tweakListOptions(&options)
+   if sync {
+      for _, listener := range p.syncingListeners {
+         listener.add(obj)
+      }
+   } else {
+      for _, listener := range p.listeners {
+         listener.add(obj)
+      }
+   }
+}
+```
+
+这个方法逻辑比较简洁，分发对象。我们继续看哪里进入的 distribute：
+
+### sharedIndexInformer.HandleDeltas()
+
+!FILENAME tools/cache/shared_informer.go:344
+
+```go
+func (s *sharedIndexInformer) HandleDeltas(obj interface{}) error {
+   s.blockDeltas.Lock()
+   defer s.blockDeltas.Unlock()
+
+   // from oldest to newest
+   for _, d := range obj.(Deltas) {
+      switch d.Type { // 根据 DeltaType 选择 case
+      case Sync, Added, Updated:
+         isSync := d.Type == Sync
+         s.cacheMutationDetector.AddObject(d.Object)
+         if old, exists, err := s.indexer.Get(d.Object); err == nil && exists {
+             // indexer 更新的是本地 store
+            if err := s.indexer.Update(d.Object); err != nil {
+               return err
             }
-             // 逻辑是通过client的 xxx 实现的，这个 client 其实就是 Clientset
-            return client.AppsV1beta2().Deployments(namespace).List(options)
-         },
-         WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
-            if tweakListOptions != nil {
-               tweakListOptions(&options)
+             // 前面分析的 distribute；update
+            s.processor.distribute(updateNotification{oldObj: old, newObj: d.Object}, isSync)
+         } else {
+            if err := s.indexer.Add(d.Object); err != nil {
+               return err
             }
-            return client.AppsV1beta2().Deployments(namespace).Watch(options)
-         },
-      },
-      &appsv1beta2.Deployment{},
-      resyncPeriod,
-      indexers,
-   )
+             // 前面分析的 distribute；add
+            s.processor.distribute(addNotification{newObj: d.Object}, isSync)
+         }
+      case Deleted:
+         if err := s.indexer.Delete(d.Object); err != nil {
+            return err
+         }
+          // 前面分析的 distribute；delete
+         s.processor.distribute(deleteNotification{oldObj: d.Object}, false)
+      }
+   }
+   return nil
 }
 ```
 
-以 list 为例，`client.AppsV1beta2().Deployments(namespace).List(options)`其实是 client 提供的逻辑了，我们可以看一下 List() 方法对应的接口：
+继续往前看代码逻辑。
+
+### sharedIndexInformer.Run()
+
+!FILENAME tools/cache/shared_informer.go:189
 
 ```go
-// DeploymentInterface has methods to work with Deployment resources.
-type DeploymentInterface interface {
-   Create(*v1beta2.Deployment) (*v1beta2.Deployment, error)
-   Update(*v1beta2.Deployment) (*v1beta2.Deployment, error)
-   UpdateStatus(*v1beta2.Deployment) (*v1beta2.Deployment, error)
-   Delete(name string, options *v1.DeleteOptions) error
-   DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error
-   Get(name string, options v1.GetOptions) (*v1beta2.Deployment, error)
-   List(opts v1.ListOptions) (*v1beta2.DeploymentList, error)
-   Watch(opts v1.ListOptions) (watch.Interface, error)
-   Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1beta2.Deployment, err error)
-   DeploymentExpansion
+func (s *sharedIndexInformer) Run(stopCh <-chan struct{}) {
+   defer utilruntime.HandleCrash()
+	// new DeltaFIFO
+   fifo := NewDeltaFIFO(MetaNamespaceKeyFunc, s.indexer)
+
+   cfg := &Config{
+       // DeltaFIFO
+      Queue:            fifo,
+      ListerWatcher:    s.listerWatcher,
+      ObjectType:       s.objectType,
+      FullResyncPeriod: s.resyncCheckPeriod,
+      RetryOnError:     false,
+      ShouldResync:     s.processor.shouldResync,
+       // 前面分析的 HandleDeltas()
+      Process: s.HandleDeltas,
+   }
+
+   func() {
+      s.startedLock.Lock()
+      defer s.startedLock.Unlock()
+		// 创建 Informer
+      s.controller = New(cfg)
+      s.controller.(*controller).clock = s.clock
+      s.started = true
+   }()
+
+   processorStopCh := make(chan struct{})
+   var wg wait.Group
+   defer wg.Wait()              // Wait for Processor to stop
+   defer close(processorStopCh) // Tell Processor to stop
+   wg.StartWithChannel(processorStopCh, s.cacheMutationDetector.Run)
+    // 关注一下 s.processor.run
+   wg.StartWithChannel(processorStopCh, s.processor.run)
+
+   defer func() {
+      s.startedLock.Lock()
+      defer s.startedLock.Unlock()
+      s.stopped = true
+   }()
+    // Run informer
+   s.controller.Run(stopCh)
 }
 ```
 
-顺着这个接口再往里跟很快就到 http 协议层了，要了然整个 list-watch 的原理还得结合 API Server 的代码，我们今天先不讲。
+看到这里已经挺和谐了，在 sharedIndexInformer 的 Run() 方法中先是创建一个 DeltaFIFO，然后和 lw 一起初始化 cfg，利用 cfg 创建 controller，最后 Run 这个 controller，也就是最基础的 informer.
 
-## 小结
+在这段代码里我们还注意到有一步是`s.processor.run`，我们看一下这个 run 的逻辑。
 
-Informer 的实现还是有点复杂的，啃的过程中很容易一个不小心就被绕晕了。今天我们以开头的那张图结尾。以后讲Operator 的时候会基于这个图增加几个框框。
+#### sharedProcessor.run()
 
-![1555502518252](image/informer/1555502518252.png)
+!FILENAME tools/cache/shared_informer.go:415
+
+```go
+func (p *sharedProcessor) run(stopCh <-chan struct{}) {
+   func() {
+      p.listenersLock.RLock()
+      defer p.listenersLock.RUnlock()
+      for _, listener := range p.listeners {
+          // 前面详细讲过 listener.run
+         p.wg.Start(listener.run)
+          // 前面详细讲过 listener.pop
+         p.wg.Start(listener.pop)
+      }
+      p.listenersStarted = true
+   }()
+   <-stopCh
+  // ……
+}
+```
+
+撇开细节，可以看到这里调用了内部所有 listener 的 run() 和 pop() 方法，和前面的分析呼应上了。
+
+到这里，我们基本讲完了自定义 controller 的时候 client-go 里相关的逻辑，也就是图中的上半部分：
+
+![1556161315850](image/informer/1556161315850.png)
 

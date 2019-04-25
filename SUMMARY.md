@@ -20,8 +20,10 @@
     * [抢占调度](core/scheduler/preempt.md)
     * [调度器初始化](core/scheduler/init.md)
     * [专题-亲和性调度](core/scheduler/affinity.md)
+    * [scheduler 总结](core/scheduler/summarize.md)
 * [controller-manager](core/controller-manager/README.md)
     * [控制器概述](core/controller-manager/controller.md)
+    * [自定义控制器](core/controller-manager/custom-controller.md)
 * [apiserver](core/apiserver/README.md)
 * [proxy](core/proxy/README.md)
 * [kubelet](core/kubelet/README.md)
@@ -29,5 +31,5 @@
 ## Part III - 周边项目
 * [概述](around/README.md)
 * [client-go](around/client-go/README.md)
-    * [Informer机制](around/client-go/informer.md)
+    * [Informer](around/client-go/informer.md)
 
