@@ -32,5 +32,6 @@
 ## Part III - 周边项目
 * [概述](around/README.md)
 * [client-go](around/client-go/README.md)
-    * [Informer](around/client-go/informer.md)
+    * [Informer (一)](around/client-go/informer.md)
+    * [Informer(二)](around/client-go/informer2.md)
 
