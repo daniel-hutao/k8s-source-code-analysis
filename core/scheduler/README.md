@@ -1,5 +1,7 @@
 # scheduler
 
+**<u>本章 owner：farmer-hutao</u>**
+
 Scheduler部分我们先从设计原理上介绍，然后分析源码，最后针对一些主要算法做专题分析。
 
 ## 本章规划
