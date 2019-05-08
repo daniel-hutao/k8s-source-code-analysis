@@ -1,0 +1,92 @@
+{
+  "_args": [
+    [
+      {
+        "name": "gitbook-plugin-navigator",
+        "raw": "gitbook-plugin-navigator@1.1.1",
+        "rawSpec": "1.1.1",
+        "scope": null,
+        "spec": "1.1.1",
+        "type": "version"
+      },
+      "/root/github/k8s-source-code-analysis"
+    ]
+  ],
+  "_from": "gitbook-plugin-navigator@1.1.1",
+  "_id": "gitbook-plugin-navigator@1.1.1",
+  "_inCache": true,
+  "_installable": true,
+  "_location": "/gitbook-plugin-navigator",
+  "_nodeVersion": "6.2.2",
+  "_npmOperationalInternal": {
+    "host": "packages-16-east.internal.npmjs.com",
+    "tmp": "tmp/gitbook-plugin-navigator-1.1.1.tgz_1469966396590_0.8014155651908368"
+  },
+  "_npmUser": {
+    "email": "mathzqy@gmail.com",
+    "name": "zhiqiang"
+  },
+  "_npmVersion": "3.10.5",
+  "_phantomChildren": {},
+  "_requested": {
+    "name": "gitbook-plugin-navigator",
+    "raw": "gitbook-plugin-navigator@1.1.1",
+    "rawSpec": "1.1.1",
+    "scope": null,
+    "spec": "1.1.1",
+    "type": "version"
+  },
+  "_requiredBy": [
+    "#USER"
+  ],
+  "_resolved": "https://registry.npmjs.org/gitbook-plugin-navigator/-/gitbook-plugin-navigator-1.1.1.tgz",
+  "_shasum": "b5e17ce78d89cbecce430599f91c9ee0450a0b95",
+  "_shrinkwrap": null,
+  "_spec": "gitbook-plugin-navigator@1.1.1",
+  "_where": "/root/github/k8s-source-code-analysis",
+  "author": {
+    "name": "zhangzq"
+  },
+  "bugs": {
+    "url": "https://github.com/zhangzq/gitbook-plugin-navigator/issues"
+  },
+  "dependencies": {
+    "cheerio": "*"
+  },
+  "description": "add toc navigator",
+  "devDependencies": {},
+  "directories": {},
+  "dist": {
+    "shasum": "b5e17ce78d89cbecce430599f91c9ee0450a0b95",
+    "tarball": "https://registry.npmjs.org/gitbook-plugin-navigator/-/gitbook-plugin-navigator-1.1.1.tgz"
+  },
+  "engines": {
+    "gitbook": "*"
+  },
+  "gitHead": "dc24cd6b946f068376e486755369e013341130dd",
+  "homepage": "https://github.com/zhangzq/gitbook-plugin-navigator#readme",
+  "keywords": [
+    "gitbook",
+    "plugin",
+    "ftp"
+  ],
+  "license": "GPL-3.0",
+  "main": "index.js",
+  "maintainers": [
+    {
+      "email": "mathzqy@gmail.com",
+      "name": "zhiqiang"
+    }
+  ],
+  "name": "gitbook-plugin-navigator",
+  "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zhangzq/gitbook-plugin-navigator.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "1.1.1"
+}

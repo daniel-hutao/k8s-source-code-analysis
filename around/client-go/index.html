@@ -1,0 +1,828 @@
+
+<!DOCTYPE HTML>
+<html lang="" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>client-go · 《k8s-1.13版本源码分析》</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        <meta name="author" content="Tao Hu <farmer.hutao@outlook.com>">
+        
+        
+    
+    <link rel="stylesheet" href="../../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-codeblock-filename/block.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-navigator/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-expandable-chapters-small/expandable-chapters-small.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-search-pro/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-splitter/splitter.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-multipart/multipart.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-tbfed-pagefooter/footer.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-prism/prism.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-donate/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-theme-comscore/test.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="informer.html" />
+    
+    
+    <link rel="prev" href="../" />
+    
+
+    <style>
+    @media only screen and (max-width: 640px) {
+        .book-header .hidden-mobile {
+            display: none;
+        }
+    }
+    </style>
+    <script>
+        window["gitbook-plugin-github-buttons"] = {"repo":"farmer-hutao/k8s-source-code-analysis","types":["star"],"size":"small"};
+    </script>
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        <li class="header">Part I - 准备工作</li>
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../../">
+            
+                <a href="../../">
+            
+                    
+                        <b>1.1.</b>
+                    
+                    前言
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="../../prepare/">
+            
+                <a href="../../prepare/">
+            
+                    
+                        <b>1.2.</b>
+                    
+                    k8s源码分析准备工作
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.2.1" data-path="../../prepare/get-code.html">
+            
+                <a href="../../prepare/get-code.html">
+            
+                    
+                        <b>1.2.1.</b>
+                    
+                    源码准备
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.2" data-path="../../prepare/debug-environment.html">
+            
+                <a href="../../prepare/debug-environment.html">
+            
+                    
+                        <b>1.2.2.</b>
+                    
+                    测试环境搭建-单节点
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.3" data-path="../../prepare/debug-environment-3node.html">
+            
+                <a href="../../prepare/debug-environment-3node.html">
+            
+                    
+                        <b>1.2.3.</b>
+                    
+                    测试环境搭建-三节点
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.4" data-path="../../prepare/debug.html">
+            
+                <a href="../../prepare/debug.html">
+            
+                    
+                        <b>1.2.4.</b>
+                    
+                    源码调试
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part II - 核心组件</li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="../../core/">
+            
+                <a href="../../core/">
+            
+                    
+                        <b>2.1.</b>
+                    
+                    概述
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2" data-path="../../core/scheduler/">
+            
+                <a href="../../core/scheduler/">
+            
+                    
+                        <b>2.2.</b>
+                    
+                    scheduler
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.2.1" data-path="../../core/scheduler/design.html">
+            
+                <a href="../../core/scheduler/design.html">
+            
+                    
+                        <b>2.2.1.</b>
+                    
+                    调度器设计
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.2" data-path="../../core/scheduler/before-scheduler-run.html">
+            
+                <a href="../../core/scheduler/before-scheduler-run.html">
+            
+                    
+                        <b>2.2.2.</b>
+                    
+                    调度程序启动前逻辑
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.3" data-path="../../core/scheduler/scheduler-framework.html">
+            
+                <a href="../../core/scheduler/scheduler-framework.html">
+            
+                    
+                        <b>2.2.3.</b>
+                    
+                    调度器框架
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.4" data-path="../../core/scheduler/generic-scheduler.html">
+            
+                <a href="../../core/scheduler/generic-scheduler.html">
+            
+                    
+                        <b>2.2.4.</b>
+                    
+                    一般调度过程
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.5" data-path="../../core/scheduler/predicate.html">
+            
+                <a href="../../core/scheduler/predicate.html">
+            
+                    
+                        <b>2.2.5.</b>
+                    
+                    预选过程
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.6" data-path="../../core/scheduler/priority.html">
+            
+                <a href="../../core/scheduler/priority.html">
+            
+                    
+                        <b>2.2.6.</b>
+                    
+                    优选过程
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.7" data-path="../../core/scheduler/preempt.html">
+            
+                <a href="../../core/scheduler/preempt.html">
+            
+                    
+                        <b>2.2.7.</b>
+                    
+                    抢占调度
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.8" data-path="../../core/scheduler/init.html">
+            
+                <a href="../../core/scheduler/init.html">
+            
+                    
+                        <b>2.2.8.</b>
+                    
+                    调度器初始化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.9" data-path="../../core/scheduler/affinity.html">
+            
+                <a href="../../core/scheduler/affinity.html">
+            
+                    
+                        <b>2.2.9.</b>
+                    
+                    专题-亲和性调度
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.10" data-path="../../core/scheduler/summarize.html">
+            
+                <a href="../../core/scheduler/summarize.html">
+            
+                    
+                        <b>2.2.10.</b>
+                    
+                    scheduler 总结
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.3" data-path="../../core/controller-manager/">
+            
+                <a href="../../core/controller-manager/">
+            
+                    
+                        <b>2.3.</b>
+                    
+                    controller-manager
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.3.1" data-path="../../core/controller-manager/controller.html">
+            
+                <a href="../../core/controller-manager/controller.html">
+            
+                    
+                        <b>2.3.1.</b>
+                    
+                    控制器概述
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.3.2" data-path="../../core/controller-manager/custom-controller.html">
+            
+                <a href="../../core/controller-manager/custom-controller.html">
+            
+                    
+                        <b>2.3.2.</b>
+                    
+                    自定义控制器
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.4" data-path="../../core/apiserver/">
+            
+                <a href="../../core/apiserver/">
+            
+                    
+                        <b>2.4.</b>
+                    
+                    apiserver
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.5" data-path="../../core/kube-proxy/">
+            
+                <a href="../../core/kube-proxy/">
+            
+                    
+                        <b>2.5.</b>
+                    
+                    kube-proxy
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.5.1" data-path="../../core/kube-proxy/arch.html">
+            
+                <a href="../../core/kube-proxy/arch.html">
+            
+                    
+                        <b>2.5.1.</b>
+                    
+                    Proxy 服务框架
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.5.2" data-path="../../core/kube-proxy/iptables.html">
+            
+                <a href="../../core/kube-proxy/iptables.html">
+            
+                    
+                        <b>2.5.2.</b>
+                    
+                    IPtables-Mode Proxier
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.6" data-path="../../core/kubelet/">
+            
+                <a href="../../core/kubelet/">
+            
+                    
+                        <b>2.6.</b>
+                    
+                    kubelet
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part III - 周边项目</li>
+        
+        
+    
+        <li class="chapter " data-level="3.1" data-path="../">
+            
+                <a href="../">
+            
+                    
+                        <b>3.1.</b>
+                    
+                    概述
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="3.2" data-path="./">
+            
+                <a href="./">
+            
+                    
+                        <b>3.2.</b>
+                    
+                    client-go
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.2.1" data-path="informer.html">
+            
+                <a href="informer.html">
+            
+                    
+                        <b>3.2.1.</b>
+                    
+                    Informer (一)
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2.2" data-path="informer2.html">
+            
+                <a href="informer2.html">
+            
+                    
+                        <b>3.2.2.</b>
+                    
+                    Informer(二)
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="../.." >client-go</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="client-go">client-go</h1>
+<p>client-go &#x90E8;&#x5206;&#x6211;&#x6B65;&#x6253;&#x7B97;&#x4ECE;&#x5934;&#x5230;&#x5C3E;&#x4E00;&#x70B9;&#x70B9;&#x8BB2;&#x3002;&#x5728;&#x6838;&#x5FC3;&#x7EC4;&#x4EF6;&#x6E90;&#x7801;&#x7684;&#x5206;&#x6790;&#x8FC7;&#x7A0B;&#x4E2D;&#x6709;&#x7528;&#x5230;&#x4E00;&#x4E9B; client-go &#x4E2D;&#x7684;&#x5173;&#x952E;&#x7279;&#x6027;&#x65F6;&#x54B1;&#x4EE5;&#x4E13;&#x9898;&#x5F62;&#x5F0F;&#x9010;&#x6E10;&#x6DFB;&#x52A0;&#x8FDB;&#x6765;&#x3002;</p>
+<h2 id="&#x672C;&#x7AE0;&#x89C4;&#x5212;">1. &#x672C;&#x7AE0;&#x89C4;&#x5212;</h2>
+<ul>
+<li><a href="informer.html">Custom Controller &#x4E4B; Informer (&#x4E00;)</a></li>
+<li><a href="informer2.html">Custom Controller &#x4E4B; Informer (&#x4E8C;)</a></li>
+</ul>
+<footer class="page-footer"><span class="copyright">Copyright &#xA9; farmer.hutao@outlook.com 2019 all right reserved&#xFF0C;powered by Gitbook</span><span class="footer-modification">&#x8BE5;&#x6587;&#x4EF6;&#x4FEE;&#x8BA2;&#x65F6;&#x95F4;&#xFF1A;
+2019-05-08 18:21:20
+</span></footer><div id="anchors-navbar"><i class="fa fa-anchor"></i><ul><p><a href="#client-go">client-go</a></p><li><a href="#&#x672C;&#x7AE0;&#x89C4;&#x5212;">1. &#x672C;&#x7AE0;&#x89C4;&#x5212;</a></li></ul></div><a href="#&#x672C;&#x7AE0;&#x89C4;&#x5212;" id="goTop"><i class="fa fa-arrow-up"></i></a>
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="../" class="navigation navigation-prev " aria-label="Previous page: 概述">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="informer.html" class="navigation navigation-next " aria-label="Next page: Informer (一)">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"client-go","level":"3.2","depth":1,"next":{"title":"Informer (一)","level":"3.2.1","depth":2,"path":"around/client-go/informer.md","ref":"around/client-go/informer.md","articles":[]},"previous":{"title":"概述","level":"3.1","depth":1,"path":"around/README.md","ref":"around/README.md","articles":[]},"dir":"ltr"},"config":{"plugins":["theme-comscore","codeblock-filename","navigator","simple-page-toc","expandable-chapters-small","search-pro","splitter","multipart","tbfed-pagefooter","prism","-highlight","editlink","github","github-buttons@2.1.0","donate","copy-code-button"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"tbfed-pagefooter":{"copyright":"Copyright &copy farmer.hutao@outlook.com 2019","modify_label":"该文件修订时间：","modify_format":"YYYY-MM-DD HH:mm:ss"},"prism":{},"github":{"url":"https://github.com/farmer-hutao/k8s-source-code-analysis"},"editlink":{"label":"编辑本页","multilingual":false,"base":"https://github.com/farmer-hutao/k8s-source-code-analysis/edit/master"},"simple-page-toc":{"maxDepth":4,"skipFirstH1":true},"splitter":{},"search-pro":{"cutWordLib":"nodejieba","defineWord":["Gitbook Use"]},"search":{},"multipart":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"donate":{"alipay":"","alipayText":"支付宝打赏","button":"鼓励作者","title":"催作者快快更新","wechat":"./image/wx.jpg","wechatText":"微信小额捐赠，鼓励作者尽快更新～"},"fontsettings":{"theme":"white","family":"sans","size":2},"codeblock-filename":{},"theme-comscore":{},"navigator":{},"github-buttons":{"repo":"farmer-hutao/k8s-source-code-analysis","types":["star"],"size":"small"},"expandable-chapters-small":{},"copy-code-button":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":true}},"theme":"default","author":"Tao Hu <farmer.hutao@outlook.com>","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"《k8s-1.13版本源码分析》","gitbook":"*","description":"k8s source code analysis"},"file":{"path":"around/client-go/README.md","mtime":"2019-05-08T10:21:20.497Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-05-08T11:14:27.451Z"},"basePath":"../..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../../gitbook/gitbook.js"></script>
+    <script src="../../gitbook/theme.js"></script>
+    
+        
+        <script src="../../gitbook/gitbook-plugin-expandable-chapters-small/expandable-chapters-small.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-search-pro/jquery.mark.min.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-search-pro/search.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-splitter/splitter.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-editlink/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-github/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-github-buttons/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-donate/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-copy-code-button/toggle.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-theme-comscore/test.js"></script>
+        
+    
+
+    </body>
+</html>
+

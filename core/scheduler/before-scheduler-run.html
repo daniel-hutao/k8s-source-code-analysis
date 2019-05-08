@@ -1,0 +1,1029 @@
+
+<!DOCTYPE HTML>
+<html lang="" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>调度程序启动前逻辑 · 《k8s-1.13版本源码分析》</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        <meta name="author" content="Tao Hu <farmer.hutao@outlook.com>">
+        
+        
+    
+    <link rel="stylesheet" href="../../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-codeblock-filename/block.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-navigator/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-expandable-chapters-small/expandable-chapters-small.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-search-pro/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-splitter/splitter.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-multipart/multipart.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-tbfed-pagefooter/footer.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-prism/prism.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-donate/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-theme-comscore/test.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="scheduler-framework.html" />
+    
+    
+    <link rel="prev" href="design.html" />
+    
+
+    <style>
+    @media only screen and (max-width: 640px) {
+        .book-header .hidden-mobile {
+            display: none;
+        }
+    }
+    </style>
+    <script>
+        window["gitbook-plugin-github-buttons"] = {"repo":"farmer-hutao/k8s-source-code-analysis","types":["star"],"size":"small"};
+    </script>
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        <li class="header">Part I - 准备工作</li>
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../../">
+            
+                <a href="../../">
+            
+                    
+                        <b>1.1.</b>
+                    
+                    前言
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="../../prepare/">
+            
+                <a href="../../prepare/">
+            
+                    
+                        <b>1.2.</b>
+                    
+                    k8s源码分析准备工作
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.2.1" data-path="../../prepare/get-code.html">
+            
+                <a href="../../prepare/get-code.html">
+            
+                    
+                        <b>1.2.1.</b>
+                    
+                    源码准备
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.2" data-path="../../prepare/debug-environment.html">
+            
+                <a href="../../prepare/debug-environment.html">
+            
+                    
+                        <b>1.2.2.</b>
+                    
+                    测试环境搭建-单节点
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.3" data-path="../../prepare/debug-environment-3node.html">
+            
+                <a href="../../prepare/debug-environment-3node.html">
+            
+                    
+                        <b>1.2.3.</b>
+                    
+                    测试环境搭建-三节点
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.4" data-path="../../prepare/debug.html">
+            
+                <a href="../../prepare/debug.html">
+            
+                    
+                        <b>1.2.4.</b>
+                    
+                    源码调试
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part II - 核心组件</li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="../">
+            
+                <a href="../">
+            
+                    
+                        <b>2.1.</b>
+                    
+                    概述
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2" data-path="./">
+            
+                <a href="./">
+            
+                    
+                        <b>2.2.</b>
+                    
+                    scheduler
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.2.1" data-path="design.html">
+            
+                <a href="design.html">
+            
+                    
+                        <b>2.2.1.</b>
+                    
+                    调度器设计
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="2.2.2" data-path="before-scheduler-run.html">
+            
+                <a href="before-scheduler-run.html">
+            
+                    
+                        <b>2.2.2.</b>
+                    
+                    调度程序启动前逻辑
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.3" data-path="scheduler-framework.html">
+            
+                <a href="scheduler-framework.html">
+            
+                    
+                        <b>2.2.3.</b>
+                    
+                    调度器框架
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.4" data-path="generic-scheduler.html">
+            
+                <a href="generic-scheduler.html">
+            
+                    
+                        <b>2.2.4.</b>
+                    
+                    一般调度过程
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.5" data-path="predicate.html">
+            
+                <a href="predicate.html">
+            
+                    
+                        <b>2.2.5.</b>
+                    
+                    预选过程
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.6" data-path="priority.html">
+            
+                <a href="priority.html">
+            
+                    
+                        <b>2.2.6.</b>
+                    
+                    优选过程
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.7" data-path="preempt.html">
+            
+                <a href="preempt.html">
+            
+                    
+                        <b>2.2.7.</b>
+                    
+                    抢占调度
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.8" data-path="init.html">
+            
+                <a href="init.html">
+            
+                    
+                        <b>2.2.8.</b>
+                    
+                    调度器初始化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.9" data-path="affinity.html">
+            
+                <a href="affinity.html">
+            
+                    
+                        <b>2.2.9.</b>
+                    
+                    专题-亲和性调度
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.10" data-path="summarize.html">
+            
+                <a href="summarize.html">
+            
+                    
+                        <b>2.2.10.</b>
+                    
+                    scheduler 总结
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.3" data-path="../controller-manager/">
+            
+                <a href="../controller-manager/">
+            
+                    
+                        <b>2.3.</b>
+                    
+                    controller-manager
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.3.1" data-path="../controller-manager/controller.html">
+            
+                <a href="../controller-manager/controller.html">
+            
+                    
+                        <b>2.3.1.</b>
+                    
+                    控制器概述
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.3.2" data-path="../controller-manager/custom-controller.html">
+            
+                <a href="../controller-manager/custom-controller.html">
+            
+                    
+                        <b>2.3.2.</b>
+                    
+                    自定义控制器
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.4" data-path="../apiserver/">
+            
+                <a href="../apiserver/">
+            
+                    
+                        <b>2.4.</b>
+                    
+                    apiserver
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.5" data-path="../kube-proxy/">
+            
+                <a href="../kube-proxy/">
+            
+                    
+                        <b>2.5.</b>
+                    
+                    kube-proxy
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.5.1" data-path="../kube-proxy/arch.html">
+            
+                <a href="../kube-proxy/arch.html">
+            
+                    
+                        <b>2.5.1.</b>
+                    
+                    Proxy 服务框架
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.5.2" data-path="../kube-proxy/iptables.html">
+            
+                <a href="../kube-proxy/iptables.html">
+            
+                    
+                        <b>2.5.2.</b>
+                    
+                    IPtables-Mode Proxier
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.6" data-path="../kubelet/">
+            
+                <a href="../kubelet/">
+            
+                    
+                        <b>2.6.</b>
+                    
+                    kubelet
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part III - 周边项目</li>
+        
+        
+    
+        <li class="chapter " data-level="3.1" data-path="../../around/">
+            
+                <a href="../../around/">
+            
+                    
+                        <b>3.1.</b>
+                    
+                    概述
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2" data-path="../../around/client-go/">
+            
+                <a href="../../around/client-go/">
+            
+                    
+                        <b>3.2.</b>
+                    
+                    client-go
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.2.1" data-path="../../around/client-go/informer.html">
+            
+                <a href="../../around/client-go/informer.html">
+            
+                    
+                        <b>3.2.1.</b>
+                    
+                    Informer (一)
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2.2" data-path="../../around/client-go/informer2.html">
+            
+                <a href="../../around/client-go/informer2.html">
+            
+                    
+                        <b>3.2.2.</b>
+                    
+                    Informer(二)
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="../.." >调度程序启动前逻辑</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="&#x8C03;&#x5EA6;&#x7A0B;&#x5E8F;&#x542F;&#x52A8;&#x524D;&#x903B;&#x8F91;">&#x8C03;&#x5EA6;&#x7A0B;&#x5E8F;&#x542F;&#x52A8;&#x524D;&#x903B;&#x8F91;</h1>
+<!-- toc -->
+<ul>
+<li><a href="#%E6%A6%82%E8%BF%B0">&#x6982;&#x8FF0;</a></li>
+<li><a href="#cobra%E5%92%8Cmain">cobra&#x548C;main</a><ul>
+<li><a href="#cobra%E6%98%AF%E5%95%A5">cobra&#x662F;&#x5565;</a></li>
+<li><a href="#%E4%BD%BF%E7%94%A8cobra">&#x4F7F;&#x7528;cobra</a></li>
+</ul>
+</li>
+<li><a href="#scheduler%E7%9A%84main">Scheduler&#x7684;main</a></li>
+</ul>
+<!-- tocstop -->
+<h2 id="&#x6982;&#x8FF0;">1. &#x6982;&#x8FF0;</h2>
+<p>&#x524D;&#x9762;&#x63D0;&#x5230;&#x8FC7;scheduler&#x7A0B;&#x5E8F;&#x53EF;&#x4EE5;&#x5206;&#x4E3A;&#x4E09;&#x5C42;&#xFF0C;&#x7B2C;&#x4E00;&#x5C42;&#x662F;&#x8C03;&#x5EA6;&#x5668;&#x542F;&#x52A8;&#x524D;&#x7684;&#x903B;&#x8F91;&#xFF0C;&#x5305;&#x62EC;&#x547D;&#x4EE4;&#x884C;&#x53C2;&#x6570;&#x89E3;&#x6790;&#x3001;&#x53C2;&#x6570;&#x6821;&#x9A8C;&#x3001;&#x8C03;&#x5EA6;&#x5668;&#x521D;&#x59CB;&#x5316;&#x7B49;&#x4E00;&#x7CFB;&#x5217;&#x903B;&#x8F91;&#x3002;&#x8FD9;&#x4E2A;&#x90E8;&#x5206;&#x6211;&#x4E0D;&#x4F1A;&#x592A;&#x8BE6;&#x7EC6;&#x5730;&#x4ECB;&#x7ECD;&#xFF0C;&#x56E0;&#x4E3A;&#x8FD9;&#x4E9B;&#x4EE3;&#x7801;&#x4F4D;&#x4E8E;&#x8C03;&#x5EA6;&#x6846;&#x67B6;&#x4E4B;&#x524D;&#xFF0C;&#x76F8;&#x5BF9;&#x6BD4;&#x8F83;&#x67AF;&#x71E5;&#x65E0;&#x8DA3;&#xFF0C;&#x8BB2;&#x591A;&#x4E86;&#x78E8;&#x706D;&#x5927;&#x4F19;&#x5BF9;&#x6E90;&#x7801;&#x7684;&#x5174;&#x8DA3;&#xFF5E;</p>
+<h2 id="cobra&#x548C;main">2. cobra&#x548C;main</h2>
+<p>&#x5267;&#x900F;&#x4E00;&#x4E0B;&#x5148;&#xFF0C;&#x5982;&#x679C;&#x4F60;&#x4E4B;&#x524D;&#x6CA1;&#x6709;&#x7528;&#x8FC7;cobra&#xFF0C;&#x90A3;&#x4E48;&#x5728;&#x7B2C;&#x4E00;&#x6B21;&#x89C1;&#x5230;cobra&#x4E4B;&#x540E;&#xFF0C;&#x5F88;&#x53EF;&#x80FD;&#x4EE5;&#x540E;&#x4F60;&#x81EA;&#x5DF1;&#x5199;&#x7684;&#x7A0B;&#x5E8F;&#xFF0C;&#x5F00;&#x53D1;&#x7684;&#x5C0F;&#x5DE5;&#x5177;&#x4F1A;&#x5168;&#x90E8;&#x53D8;&#x6210;cobra&#x98CE;&#x683C;&#x3002;&#x6211;&#x6700;&#x8FD1;&#x534A;&#x5E74;&#x5199;&#x7684;&#x547D;&#x4EE4;&#x884C;&#x7A0B;&#x5E8F;&#x5C31;&#x5168;&#x90E8;&#x662F;&#x57FA;&#x4E8E;cobra+pflag&#x7684;&#x3002;cobra&#x6709;&#x591A;&#x4F18;&#x96C5;&#x5462;&#xFF0C;&#x4E14;&#x542C;&#x6211;&#x6162;&#x6162;&#x9053;&#x6765;&#xFF5E;</p>
+<h3 id="cobra&#x662F;&#x5565;">2.1. cobra&#x662F;&#x5565;</h3>
+<p><img src="image/before-scheduler-run/1550801313662.png" alt="1550801313662"></p>
+<p>&#x4ECE;github&#x4E0A;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x627E;&#x5230;&#x8FD9;&#x4E2A;&#x9879;&#x76EE;&#xFF0C;&#x622A;&#x81F3;&#x4ECA;&#x5929;&#x5DF2;&#x7ECF;&#x6709;&#x4E0A;&#x4E07;&#x4E2A;star&#xFF0C;&#x4E00;&#x767E;&#x591A;&#x4E2A;contributors&#xFF0C;&#x53EF;&#x89C1;&#x6765;&#x5934;&#x4E0D;&#x5C0F;&#xFF01;Cobra&#x5B98;&#x65B9;&#x63CF;&#x8FF0;&#x662F;&#xFF1A;</p>
+<blockquote>
+<p>Cobra is both a library for creating powerful modern CLI applications as well as a program to generate applications and command files.</p>
+</blockquote>
+<p>&#x4E5F;&#x5C31;&#x662F;&#x8FD9;&#x4E2A;&#x610F;&#x601D;&#xFF1A;Cobra&#x65E2;&#x662F;&#x4E00;&#x4E2A;&#x521B;&#x5EFA;&#x5F3A;&#x5927;&#x7684;&#x73B0;&#x4EE3;&#x5316;&#x547D;&#x4EE4;&#x884C;&#x7A0B;&#x5E8F;&#x7684;&#x5E93;&#xFF0C;&#x53C8;&#x662F;&#x4E00;&#x4E2A;&#x7528;&#x4E8E;&#x751F;&#x6210;&#x5E94;&#x7528;&#x548C;&#x547D;&#x4EE4;&#x884C;&#x6587;&#x4EF6;&#x7684;&#x7A0B;&#x5E8F;&#x3002;&#x6709;&#x5F88;&#x591A;&#x6D41;&#x884C;&#x7684;Go&#x9879;&#x76EE;&#x7528;&#x4E86;Cobra&#xFF0C;&#x5176;&#x4E2D;&#x5F53;&#x7136;&#x5305;&#x62EC;&#x6211;&#x4EEC;&#x6700;&#x6700;&#x719F;&#x77E5;&#x7684;k8s&#x548C;docker&#xFF0C;&#x5927;&#x81F4;&#x5217;&#x51FA;&#x6765;&#x6709;&#x8FD9;&#x4E9B;&#xFF1A;</p>
+<ul>
+<li>Kubernetes</li>
+<li>Hugo</li>
+<li>rkt</li>
+<li>etcd</li>
+<li>Moby (former Docker)</li>
+<li>Docker (distribution)</li>
+<li>OpenShift</li>
+<li>Delve</li>
+<li>GopherJS</li>
+<li>CockroachDB</li>
+<li>Bleve</li>
+<li>ProjectAtomic (enterprise)</li>
+<li>Giant Swarm&apos;s gsctl</li>
+<li>Nanobox/Nanopack</li>
+<li>rclone</li>
+<li>nehm</li>
+<li>Pouch</li>
+</ul>
+<p>&#x5982;&#x679C;&#x4F60;&#x662F;&#x4E91;&#x8BA1;&#x7B97;&#x65B9;&#x5411;&#x7684;&#x653B;&#x57CE;&#x72EE;&#xFF0C;&#x4E0A;&#x9762;&#x534A;&#x6570;&#x9879;&#x76EE;&#x5E94;&#x8BE5;&#x90FD;&#x8033;&#x719F;&#x80FD;&#x8BE6;&#xFF5E;</p>
+<h3 id="&#x4F7F;&#x7528;cobra">2.2. &#x4F7F;&#x7528;cobra</h3>
+<p>&#x4E0B;&#x9762;&#x6211;&#x4EEC;&#x5B9E;&#x8DF5;&#x4E00;&#x4E0B;cobra&#xFF0C;&#x5148;&#x4E0B;&#x8F7D;&#x8FD9;&#x4E2A;&#x9879;&#x76EE;&#x7F16;&#x8BD1;&#x4E00;&#x4E0B;&#xFF1A;</p>
+<pre class="language-"><code class="lang-shell"><span class="token comment"># &#x5982;&#x679C;&#x4F60;&#x7684;&#x7F51;&#x7EDC;&#x5F88;&#x7ED9;&#x529B;&#xFF0C;&#x90A3;&#x4E48;&#x4E0B;&#x9762;&#x8FD9;&#x4E2A;&#x547D;&#x4EE4;&#x5C31;&#x591F;&#x4E86;&#xFF1B;</span>
+go get -u github.com/spf13/cobra/cobra
+<span class="token comment"># &#x5982;&#x679C;&#x4F60;&#x7684;&#x7F51;&#x7EDC;&#x4E0D;&#x7ED9;&#x529B;&#xFF0C;&#x90A3;&#x5C31;&#x4E0B;&#x8F7D;cobra&#x7684;zip&#x5305;&#xFF0C;&#x4E22;&#x5230;GOPATH&#x4E0B;&#x5BF9;&#x5E94;&#x76EE;&#x5F55;&#xFF0C;&#x7136;&#x540E;&#x89E3;&#x51B3;&#x4F9D;&#x8D56;&#xFF0C;&#x518D;build</span>
+</code></pre>
+<p>&#x4E8E;&#x662F;&#x6211;&#x4EEC;&#x5F97;&#x5230;&#x4E86;&#x8FD9;&#x6837;&#x4E00;&#x4E2A;&#x53EF;&#x6267;&#x884C;&#x6587;&#x4EF6;&#x53CA;&#x9879;&#x76EE;&#x6E90;&#x7801;&#xFF1A;</p>
+<p><img src="image/before-scheduler-run/1550805176140.png" alt="1550805176140"></p>
+<p>&#x6211;&#x4EEC;&#x8BD5;&#x4E00;&#x4E0B;&#x8FD9;&#x4E2A;&#x547D;&#x4EE4;&#xFF1A;<code>cobra init ${project-name}</code></p>
+<pre class="language-"><code class="lang-shell"><span class="token punctuation">[</span>root@farmer-hutao src<span class="token punctuation">]</span><span class="token comment"># cobra init myapp</span>
+Your Cobra application is ready at
+/root/go/src/myapp
+
+Give it a try by going there and running <span class="token variable"><span class="token variable">`</span>go run main.go<span class="token variable">`</span></span><span class="token keyword">.</span>
+Add commands to it by running <span class="token variable"><span class="token variable">`</span>cobra add <span class="token punctuation">[</span>cmdname<span class="token punctuation">]</span><span class="token variable">`</span></span><span class="token keyword">.</span>
+
+<span class="token punctuation">[</span>root@farmer-hutao src<span class="token punctuation">]</span><span class="token comment"># ls myapp/</span>
+cmd  LICENSE  main.go
+<span class="token punctuation">[</span>root@farmer-hutao src<span class="token punctuation">]</span><span class="token comment"># pwd</span>
+/root/go/src
+</code></pre>
+<p>&#x5982;&#x4E0A;&#xFF0C;&#x672C;&#x5730;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x4E00;&#x4E2A;main.go&#x548C;&#x4E00;&#x4E2A;cmd&#x76EE;&#x5F55;&#xFF0C;&#x8FD9;&#x4E2A;cmd&#x548C;k8s&#x6E90;&#x7801;&#x91CC;&#x7684;cmd&#x662F;&#x4E0D;&#x662F;&#x5F88;&#x50CF;&#xFF5E;</p>
+<p>main.go&#x91CC;&#x9762;&#x7684;&#x4EE3;&#x7801;&#x5F88;&#x7CBE;&#x7B80;&#xFF0C;&#x5982;&#x4E0B;&#xFF1A;</p>
+<div><p class="code-filename">main.go</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">package</span> main
+
+<span class="token keyword">import</span> <span class="token string">&quot;myapp/cmd&quot;</span>
+
+<span class="token keyword">func</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        cmd<span class="token punctuation">.</span><span class="token function">Execute</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>&#x8FD9;&#x91CC;&#x6CE8;&#x610F;&#x5230;&#x8C03;&#x7528;&#x4E86;&#x4E00;&#x4E2A;cmd&#x7684;Execute()&#x65B9;&#x6CD5;&#xFF0C;&#x6211;&#x4EEC;&#x7EE7;&#x7EED;&#x770B;cmd&#x662F;&#x4EC0;&#x4E48;&#xFF1A;</p>
+<p><img src="image/before-scheduler-run/1550806123357.png" alt="1550806123357"></p>
+<p>&#x5982;&#x4E0A;&#x56FE;&#xFF0C;&#x5728;<code>main.go</code>&#x91CC;&#x9762;import&#x4E86;<code>myapp/cmd</code>&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x8FD9;&#x4E2A;<code>root.go</code>&#x6587;&#x4EF6;&#x3002;&#x6240;&#x4EE5;Execute()&#x51FD;&#x6570;&#x5C31;&#x5F88;&#x597D;&#x627E;&#x4E86;&#x3002;&#x5728;<code>Execute</code>&#x91CC;&#x9762;&#x8C03;&#x7528;&#x4E86;<code>rootCmd.Execute()</code>&#x65B9;&#x6CD5;&#xFF0C;&#x8FD9;&#x4E2A;<code>rootCmd</code>&#x662F;<code>*cobra.Command</code>&#x7C7B;&#x578B;&#x7684;&#x3002;&#x6211;&#x4EEC;&#x5173;&#x6CE8;&#x4E00;&#x4E0B;&#x8FD9;&#x4E2A;&#x7C7B;&#x578B;&#x3002;</p>
+<p>&#x4E0B;&#x9762;&#x6211;&#x4EEC;&#x7EE7;&#x7EED;&#x4F7F;&#x7528;cobra&#x547D;&#x4EE4;&#x7ED9;myapp&#x6DFB;&#x52A0;&#x4E00;&#x4E2A;&#x5B50;&#x547D;&#x4EE4;&#xFF1A;</p>
+<p><img src="image/before-scheduler-run/1550809296691.png" alt="1550809296691"></p>
+<p>&#x5982;&#x4E0A;&#xFF0C;&#x6211;&#x4EEC;&#x7684;&#x7A0B;&#x5E8F;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;version&#x5B50;&#x547D;&#x4EE4;&#x4E86;&#xFF01;&#x6211;&#x4EEC;&#x770B;&#x4E00;&#x4E0B;&#x6E90;&#x7801;&#x53D1;&#x751F;&#x4E86;&#x4EC0;&#x4E48;&#x53D8;&#x5316;&#xFF1A;</p>
+<p><img src="image/before-scheduler-run/1550809447903.png" alt="1550809447903"></p>
+<p>&#x591A;&#x4E86;&#x4E00;&#x4E2A;<code>version.go</code>&#xFF0C;&#x5728;&#x8FD9;&#x4E2A;&#x6E90;&#x6587;&#x4EF6;&#x7684;init()&#x51FD;&#x6570;&#x91CC;&#x9762;&#x8C03;&#x7528;&#x4E86;&#x4E00;&#x4E2A;<code>rootCmd.AddCommand(versionCmd)</code>&#xFF0C;&#x8FD9;&#x91CC;&#x53EF;&#x4EE5;&#x731C;&#x5230;&#x662F;&#x6839;&#x547D;&#x4EE4;&#x4E0B;&#x6DFB;&#x52A0;&#x4E00;&#x4E2A;&#x5B50;&#x547D;&#x4EE4;&#x7684;&#x610F;&#x601D;&#xFF0C;&#x6839;&#x547D;&#x4EE4;&#x8868;&#x793A;&#x7684;&#x5C31;&#x662F;&#x6211;&#x4EEC;&#x76F4;&#x63A5;&#x6267;&#x884C;&#x8FD9;&#x4E2A;&#x53EF;&#x6267;&#x884C;&#x6587;&#x4EF6;&#xFF0C;&#x5B50;&#x547D;&#x4EE4;&#x5C31;&#x662F;version&#xFF0C;&#x653E;&#x5728;&#x4E00;&#x8D77;&#x7684;&#x611F;&#x89C9;&#x5C31;&#x7C7B;&#x4F3C;&#x5927;&#x5BB6;&#x4F7F;&#x7528;<code>kubectl version</code>&#x7684;&#x611F;&#x89C9;&#x3002;</p>
+<p>&#x53E6;&#x5916;&#x6CE8;&#x610F;&#x5230;&#x8FD9;&#x91CC;&#x7684;Run&#x5C5E;&#x6027;&#x662F;&#x4E00;&#x4E2A;&#x533F;&#x540D;&#x51FD;&#x6570;&#xFF0C;&#x8FD9;&#x4E2A;&#x51FD;&#x6570;&#x4E2D;&#x8F93;&#x51FA;&#x4E86;&#x201C;version called&#x201D;&#x5B57;&#x6837;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x8BF4;&#x6211;&#x4EEC;&#x6267;&#x884C;version&#x5B50;&#x547D;&#x4EE4;&#x7684;&#x65F6;&#x5019;&#x5176;&#x5B9E;&#x662F;&#x8C03;&#x7528;&#x5230;&#x4E86;&#x8FD9;&#x91CC;&#x7684;Run.</p>
+<p>&#x6700;&#x540E;&#x6211;&#x4EEC;&#x5B9E;&#x8DF5;&#x4E00;&#x4E0B;&#x591A;&#x7EA7;&#x5B50;&#x547D;&#x4EE4;&#xFF1A;</p>
+<p><img src="image/before-scheduler-run/1550809980172.png" alt="1550809980172"></p>
+<p><img src="image/before-scheduler-run/1550810044678.png" alt="1550810044678"></p>
+<p>&#x5957;&#x8DEF;&#x4E5F;&#x5C31;&#x8FD9;&#x6837;&#xFF0C;&#x901A;&#x8FC7;<code>serverCmd.AddCommand(createCmd)</code>&#x8C03;&#x7528;&#x540E;&#x5C31;&#x80FD;&#x591F;&#x628A;<code>*cobra.Command</code>&#x7C7B;&#x578B;&#x7684;createCmd&#x53D8;&#x6210;serverCmd&#x7684;&#x5B50;&#x547D;&#x4EE4;&#x4E86;&#xFF0C;&#x8FD9;&#x4E2A;&#x65F6;&#x5019;&#x6211;&#x4EEC;&#x73A9;&#x8D77;&#x6765;&#x5C31;&#x50CF;<code>kubectl get pods</code>.</p>
+<p>&#x884C;&#xFF0C;&#x770B;&#x5230;&#x8FD9;&#x91CC;&#x6211;&#x4EEC;&#x56DE;&#x5934;&#x770B;&#x4E00;&#x4E0B;scheduler&#x7684;&#x6E90;&#x7801;&#x5C31;&#x80FD;&#x627E;&#x5230;main&#x7684;&#x903B;&#x8F91;&#x4E86;&#x3002;</p>
+<h2 id="Scheduler&#x7684;main">3. Scheduler&#x7684;main</h2>
+<p>&#x6211;&#x4EEC;&#x6253;&#x5F00;&#x6587;&#x4EF6;&#xFF1A;<code>cmd/kube-scheduler/scheduler.go</code>&#x53EF;&#x4EE5;&#x627E;&#x5230;scheduler&#x7684;main()&#x51FD;&#x6570;&#xFF0C;&#x5F88;&#x7B80;&#x77ED;&#xFF0C;&#x53BB;&#x6389;&#x679D;&#x5E72;&#x540E;&#x5982;&#x4E0B;&#xFF1A;</p>
+<div><p class="code-filename">cmd/kube-scheduler/scheduler.go:34</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    command <span class="token operator">:=</span> app<span class="token punctuation">.</span><span class="token function">NewSchedulerCommand</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token keyword">if</span> err <span class="token operator">:=</span> command<span class="token punctuation">.</span><span class="token function">Execute</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+        fmt<span class="token punctuation">.</span><span class="token function">Fprintf</span><span class="token punctuation">(</span>os<span class="token punctuation">.</span>Stderr<span class="token punctuation">,</span> <span class="token string">&quot;%v\n&quot;</span><span class="token punctuation">,</span> err<span class="token punctuation">)</span>
+        os<span class="token punctuation">.</span><span class="token function">Exit</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>&#x770B;&#x5230;&#x8FD9;&#x91CC;&#x731C;&#x90FD;&#x80FD;&#x731C;&#x5230;<code>kube-scheduler</code>&#x8FD9;&#x4E2A;&#x4E8C;&#x8FDB;&#x5236;&#x6587;&#x4EF6;&#x5728;&#x8FD0;&#x884C;&#x7684;&#x65F6;&#x5019;&#x662F;&#x8C03;&#x7528;&#x4E86;<code>command.Execute()</code>&#x51FD;&#x6570;&#x80CC;&#x540E;&#x7684;&#x90A3;&#x4E2A;Run&#xFF0C;&#x90A3;&#x4E2A;Run&#x8EB2;&#x5728;<code>command := app.NewSchedulerCommand()</code>&#x8FD9;&#x884C;&#x4EE3;&#x7801;&#x8C03;&#x7528;&#x7684;<code>NewSchedulerCommand()</code>&#x65B9;&#x6CD5;&#x91CC;&#xFF0C;&#x8FD9;&#x4E2A;&#x65B9;&#x6CD5;&#x4E00;&#x5B9A;&#x8FD4;&#x56DE;&#x4E86;&#x4E00;&#x4E2A;<code>*cobra.Command</code>&#x7C7B;&#x578B;&#x7684;&#x5BF9;&#x8C61;&#x3002;&#x6211;&#x4EEC;&#x8DDF;&#x8FDB;&#x53BB;&#x8FD9;&#x4E2A;&#x51FD;&#x6570;&#xFF0C;&#x770B;&#x4E00;&#x4E0B;&#x662F;&#x4E0D;&#x662F;&#x8FD9;&#x4E2A;&#x6837;&#x5B50;&#xFF1A;</p>
+<div><p class="code-filename">cmd/kube-scheduler/app/server.go:70</p></div>
+<pre class="language-"><code class="lang-go"><span class="token operator">/</span> NewSchedulerCommand creates a <span class="token operator">*</span>cobra<span class="token punctuation">.</span>Command object with <span class="token keyword">default</span> parameters
+<span class="token keyword">func</span> <span class="token function">NewSchedulerCommand</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">*</span>cobra<span class="token punctuation">.</span>Command <span class="token punctuation">{</span>
+    cmd <span class="token operator">:=</span> <span class="token operator">&amp;</span>cobra<span class="token punctuation">.</span>Command<span class="token punctuation">{</span>
+        Use<span class="token punctuation">:</span> <span class="token string">&quot;kube-scheduler&quot;</span><span class="token punctuation">,</span>
+        Long<span class="token punctuation">:</span> <span class="token string">`The Kubernetes scheduler is a policy-rich, topology-aware,
+workload-specific function that significantly impacts availability, performance,
+and capacity. The scheduler needs to take into account individual and collective
+resource requirements, quality of service requirements, hardware/software/policy
+constraints, affinity and anti-affinity specifications, data locality, inter-workload
+interference, deadlines, and so on. Workload-specific requirements will be exposed
+through the API as necessary.`</span><span class="token punctuation">,</span>
+        Run<span class="token punctuation">:</span> <span class="token keyword">func</span><span class="token punctuation">(</span>cmd <span class="token operator">*</span>cobra<span class="token punctuation">.</span>Command<span class="token punctuation">,</span> args <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">if</span> err <span class="token operator">:=</span> <span class="token function">runCommand</span><span class="token punctuation">(</span>cmd<span class="token punctuation">,</span> args<span class="token punctuation">,</span> opts<span class="token punctuation">)</span><span class="token punctuation">;</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+                fmt<span class="token punctuation">.</span><span class="token function">Fprintf</span><span class="token punctuation">(</span>os<span class="token punctuation">.</span>Stderr<span class="token punctuation">,</span> <span class="token string">&quot;%v\n&quot;</span><span class="token punctuation">,</span> err<span class="token punctuation">)</span>
+                os<span class="token punctuation">.</span><span class="token function">Exit</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> cmd
+<span class="token punctuation">}</span>
+</code></pre>
+<p>&#x5982;&#x4E0A;&#xFF0C;&#x540C;&#x6837;&#x6211;&#x5148;&#x5220;&#x6389;&#x4E86;&#x4E00;&#x4E9B;&#x679D;&#x5E72;&#x4EE3;&#x7801;&#xFF0C;&#x5269;&#x4E0B;&#x7684;&#x53EF;&#x4EE5;&#x5F88;&#x6E05;&#x695A;&#x5730;&#x770B;&#x5230;&#xFF0C;schduler&#x542F;&#x52A8;&#x65F6;&#x8C03;&#x7528;&#x4E86;<code>runCommand(cmd, args, opts)</code>&#xFF0C;&#x8FD9;&#x4E2A;&#x51FD;&#x6570;&#x5728;&#x54EA;&#x91CC;&#x5462;&#xFF0C;&#x7EE7;&#x7EED;&#x8DDF;&#x4E00;&#x4E0B;&#xFF1A;</p>
+<div><p class="code-filename">cmd/kube-scheduler/app/server.go:117</p></div>
+<pre class="language-"><code class="lang-go"><span class="token comment">// runCommand runs the scheduler.</span>
+<span class="token keyword">func</span> <span class="token function">runCommand</span><span class="token punctuation">(</span>cmd <span class="token operator">*</span>cobra<span class="token punctuation">.</span>Command<span class="token punctuation">,</span> args <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">string</span><span class="token punctuation">,</span> opts <span class="token operator">*</span>options<span class="token punctuation">.</span>Options<span class="token punctuation">)</span> <span class="token builtin">error</span> <span class="token punctuation">{</span>
+    c<span class="token punctuation">,</span> err <span class="token operator">:=</span> opts<span class="token punctuation">.</span><span class="token function">Config</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    stopCh <span class="token operator">:=</span> <span class="token function">make</span><span class="token punctuation">(</span><span class="token keyword">chan</span> <span class="token keyword">struct</span><span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">)</span>
+    <span class="token comment">// Get the completed config</span>
+    cc <span class="token operator">:=</span> c<span class="token punctuation">.</span><span class="token function">Complete</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token keyword">return</span> <span class="token function">Run</span><span class="token punctuation">(</span>cc<span class="token punctuation">,</span> stopCh<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>&#x5982;&#x4E0A;&#xFF0C;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x8FD9;&#x91CC;&#x662F;&#x5904;&#x7406;&#x914D;&#x7F6E;&#x95EE;&#x9898;&#x540E;&#x8C03;&#x7528;&#x4E86;&#x4E00;&#x4E2A;Run()&#x51FD;&#x6570;&#xFF0C;Run()&#x7684;&#x4F5C;&#x7528;&#x662F;&#x57FA;&#x4E8E;&#x7ED9;&#x5B9A;&#x7684;&#x914D;&#x7F6E;&#x542F;&#x52A8;scheduler&#xFF0C;&#x5B83;&#x53EA;&#x4F1A;&#x5728;&#x51FA;&#x9519;&#x65F6;&#x6216;&#x8005;channel stopCh&#x88AB;&#x5173;&#x95ED;&#x65F6;&#x624D;&#x9000;&#x51FA;&#xFF0C;&#x4EE3;&#x7801;&#x4E3B;&#x8981;&#x90E8;&#x5206;&#x5982;&#x4E0B;&#xFF1A;</p>
+<div><p class="code-filename">cmd/kube-scheduler/app/server.go:167</p></div>
+<pre class="language-"><code class="lang-go"><span class="token comment">// Run executes the scheduler based on the given configuration. It only return on error or when stopCh is closed.</span>
+<span class="token keyword">func</span> <span class="token function">Run</span><span class="token punctuation">(</span>cc schedulerserverconfig<span class="token punctuation">.</span>CompletedConfig<span class="token punctuation">,</span> stopCh <span class="token operator">&lt;-</span><span class="token keyword">chan</span> <span class="token keyword">struct</span><span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token builtin">error</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Create the scheduler.</span>
+    sched<span class="token punctuation">,</span> err <span class="token operator">:=</span> scheduler<span class="token punctuation">.</span><span class="token function">New</span><span class="token punctuation">(</span>cc<span class="token punctuation">.</span>Client<span class="token punctuation">,</span>
+        cc<span class="token punctuation">.</span>InformerFactory<span class="token punctuation">.</span><span class="token function">Core</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">V1</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">Nodes</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+        stopCh<span class="token punctuation">,</span>
+        scheduler<span class="token punctuation">.</span><span class="token function">WithName</span><span class="token punctuation">(</span>cc<span class="token punctuation">.</span>ComponentConfig<span class="token punctuation">.</span>SchedulerName<span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+    <span class="token comment">// Prepare a reusable runCommand function.</span>
+    run <span class="token operator">:=</span> <span class="token keyword">func</span><span class="token punctuation">(</span>ctx context<span class="token punctuation">.</span>Context<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        sched<span class="token punctuation">.</span><span class="token function">Run</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+        <span class="token operator">&lt;-</span>ctx<span class="token punctuation">.</span><span class="token function">Done</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+
+    ctx<span class="token punctuation">,</span> cancel <span class="token operator">:=</span> context<span class="token punctuation">.</span><span class="token function">WithCancel</span><span class="token punctuation">(</span>context<span class="token punctuation">.</span><span class="token function">TODO</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> 
+    <span class="token keyword">defer</span> <span class="token function">cancel</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+    <span class="token keyword">go</span> <span class="token keyword">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">select</span> <span class="token punctuation">{</span>
+        <span class="token keyword">case</span> <span class="token operator">&lt;-</span>stopCh<span class="token punctuation">:</span>
+            <span class="token function">cancel</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+        <span class="token keyword">case</span> <span class="token operator">&lt;-</span>ctx<span class="token punctuation">.</span><span class="token function">Done</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+    <span class="token comment">// Leader election is disabled, so runCommand inline until done.</span>
+    <span class="token function">run</span><span class="token punctuation">(</span>ctx<span class="token punctuation">)</span>
+    <span class="token keyword">return</span> fmt<span class="token punctuation">.</span><span class="token function">Errorf</span><span class="token punctuation">(</span><span class="token string">&quot;finished without leader elect&quot;</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x8FD9;&#x91CC;&#x6700;&#x7EC8;&#x662F;&#x8981;&#x8DD1;<code>sched.Run()</code>&#x8FD9;&#x4E2A;&#x65B9;&#x6CD5;&#x6765;&#x542F;&#x52A8;scheduler&#xFF0C;<code>sched.Run()</code>&#x65B9;&#x6CD5;&#x5DF2;&#x7ECF;&#x5728;pkg&#x4E0B;&#xFF0C;&#x5177;&#x4F53;&#x4F4D;&#x7F6E;&#x662F;<code>pkg/scheduler/scheduler.go:276</code>&#xFF0C;&#x4E5F;&#x5C31;&#x662F;scheduler&#x6846;&#x67B6;&#x771F;&#x6B63;&#x8FD0;&#x884C;&#x7684;&#x903B;&#x8F91;&#x4E86;&#x3002;&#x4E8E;&#x662F;&#x6211;&#x4EEC;&#x5DF2;&#x7ECF;&#x4ECE;main&#x51FA;&#x53D1;&#xFF0C;&#x627E;&#x5230;&#x4E86;scheduler&#x4E3B;&#x6846;&#x67B6;&#x7684;&#x5165;&#x53E3;&#xFF0C;&#x5177;&#x4F53;&#x7684;scheduler&#x903B;&#x8F91;&#x6211;&#x4EEC;&#x4E0B;&#x4E00;&#x8BB2;&#x518D;&#x6765;&#x4ED4;&#x7EC6;&#x5206;&#x6790;&#x3002;</p>
+<p>&#x6700;&#x540E;&#x6211;&#x4EEC;&#x6765;&#x770B;&#x4E00;&#x4E0B;sched&#x7684;&#x5B9A;&#x4E49;&#xFF0C;&#x5728;linux&#x91CC;&#x6211;&#x4EEC;&#x7ECF;&#x5E38;&#x4F1A;&#x770B;&#x5230;&#x4E00;&#x4E9B;&#x8F6F;&#x4EF6;&#x53EB;&#x505A;&#x4EC0;&#x4E48;&#x4EC0;&#x4E48;d&#xFF0C;d&#x4E5F;&#x5C31;&#x662F;daemon&#xFF0C;&#x5B88;&#x62A4;&#x8FDB;&#x7A0B;&#x7684;&#x610F;&#x601D;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x4E00;&#x76F4;&#x8DD1;&#x5728;&#x540E;&#x53F0;&#x7684;&#x4E00;&#x4E2A;&#x7A0B;&#x5E8F;&#x3002;&#x8FD9;&#x91CC;&#x7684;sched&#x4E5F;&#x5C31;&#x662F;&#x201C;scheduler daemon&#x201D;&#x7684;&#x610F;&#x601D;&#x3002;sched&#x7684;&#x5176;&#x5B9E;&#x662F;<code>*Scheduler</code>&#x7C7B;&#x578B;&#xFF0C;&#x5B9A;&#x4E49;&#x5728;&#xFF1A;</p>
+<div><p class="code-filename">pkg/scheduler/scheduler.go:58</p></div>
+<pre class="language-"><code class="lang-go"><span class="token comment">// Scheduler watches for new unscheduled pods. It attempts to find</span>
+<span class="token comment">// nodes that they fit on and writes bindings back to the api server.</span>
+<span class="token keyword">type</span> Scheduler <span class="token keyword">struct</span> <span class="token punctuation">{</span>
+    config <span class="token operator">*</span>factory<span class="token punctuation">.</span>Config
+<span class="token punctuation">}</span>
+</code></pre>
+<p>&#x5982;&#x4E0A;&#xFF0C;&#x6CE8;&#x91CA;&#x4E5F;&#x5F88;&#x6E05;&#x6670;&#xFF0C;&#x8BF4;Scheduler watch&#x65B0;&#x521B;&#x5EFA;&#x7684;&#x672A;&#x88AB;&#x8C03;&#x5EA6;&#x7684;pods&#xFF0C;&#x7136;&#x540E;&#x5C1D;&#x8BD5;&#x5BFB;&#x627E;&#x5408;&#x9002;&#x7684;node&#xFF0C;&#x56DE;&#x5199;&#x4E00;&#x4E2A;&#x7ED1;&#x5B9A;&#x5173;&#x7CFB;&#x5230;api server.&#x8FD9;&#x91CC;&#x4E5F;&#x53EF;&#x4EE5;&#x4F53;&#x4F1A;&#x5230;daemon&#x7684;&#x611F;&#x89C9;&#xFF0C;&#x6211;&#x4EEC;&#x5E73;&#x65F6;&#x642D;&#x5EFA;&#x7684;k8s&#x96C6;&#x7FA4;&#x4E2D;&#x8FD0;&#x884C;&#x7740;&#x4E00;&#x4E2A;daemon&#x8FDB;&#x7A0B;&#x53EB;&#x505A;kube-scheduler&#xFF0C;&#x8FD9;&#x4E2A;&#x4E00;&#x76F4;&#x8DD1;&#x7740;&#x7684;&#x8FDB;&#x7A0B;&#x505A;&#x7684;&#x5C31;&#x662F;&#x4E0A;&#x9762;&#x6CE8;&#x91CA;&#x91CC;&#x8BF4;&#x7684;&#x4E8B;&#x60C5;&#xFF0C;&#x5728;&#x7A0B;&#x5E8F;&#x91CC;&#x9762;&#x4E5F;&#x5C31;&#x5BF9;&#x5E94;&#x8FD9;&#x6837;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#xFF1A;Scheduler.</p>
+<p>Scheduler&#x7ED3;&#x6784;&#x4F53;&#x4E2D;&#x7684;Config&#x5BF9;&#x8C61;&#x6211;&#x4EEC;&#x518D;&#x7B80;&#x5355;&#x770B;&#x4E00;&#x4E0B;&#xFF1A;</p>
+<div><p class="code-filename">pkg/scheduler/factory/factory.go:96</p></div>
+<pre class="language-"><code class="lang-go"><span class="token comment">// Config is an implementation of the Scheduler&apos;s configured input data.</span>
+<span class="token keyword">type</span> Config <span class="token keyword">struct</span> <span class="token punctuation">{</span>
+    <span class="token comment">// It is expected that changes made via SchedulerCache will be observed</span>
+    <span class="token comment">// by NodeLister and Algorithm.</span>
+    SchedulerCache schedulerinternalcache<span class="token punctuation">.</span>Cache
+    <span class="token comment">// Ecache is used for optimistically invalid affected cache items after</span>
+    <span class="token comment">// successfully binding a pod</span>
+    Ecache     <span class="token operator">*</span>equivalence<span class="token punctuation">.</span>Cache
+    NodeLister algorithm<span class="token punctuation">.</span>NodeLister
+    Algorithm  algorithm<span class="token punctuation">.</span>ScheduleAlgorithm
+    GetBinder  <span class="token keyword">func</span><span class="token punctuation">(</span>pod <span class="token operator">*</span>v1<span class="token punctuation">.</span>Pod<span class="token punctuation">)</span> Binder
+    <span class="token comment">// PodConditionUpdater is used only in case of scheduling errors. If we succeed</span>
+    <span class="token comment">// with scheduling, PodScheduled condition will be updated in apiserver in /bind</span>
+    <span class="token comment">// handler so that binding and setting PodCondition it is atomic.</span>
+    PodConditionUpdater PodConditionUpdater
+    <span class="token comment">// PodPreemptor is used to evict pods and update pod annotations.</span>
+    PodPreemptor PodPreemptor
+
+    <span class="token comment">// NextPod should be a function that blocks until the next pod</span>
+    <span class="token comment">// is available. We don&apos;t use a channel for this, because scheduling</span>
+    <span class="token comment">// a pod may take some amount of time and we don&apos;t want pods to get</span>
+    <span class="token comment">// stale while they sit in a channel.</span>
+    NextPod <span class="token keyword">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">*</span>v1<span class="token punctuation">.</span>Pod
+
+    <span class="token comment">// SchedulingQueue holds pods to be scheduled</span>
+    SchedulingQueue internalqueue<span class="token punctuation">.</span>SchedulingQueue
+<span class="token punctuation">}</span>
+</code></pre>
+<p>&#x5982;&#x4E0A;&#xFF0C;&#x540C;&#x6837;&#x6211;&#x53EA;&#x4FDD;&#x7559;&#x4E86;&#x4E00;&#x4E9B;&#x597D;&#x7406;&#x89E3;&#x7684;&#x5B57;&#x6BB5;&#xFF0C;&#x6211;&#x4EEC;&#x968F;&#x4FBF;&#x626B;&#x4E00;&#x4E0B;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x8B6C;&#x5982;&#xFF1A;SchedulingQueue&#x3001;NextPod&#x3001;NodeLister&#x8FD9;&#x4E9B;&#x5F88;&#x5BB9;&#x6613;&#x4ECE;&#x5B57;&#x9762;&#x4E0A;&#x7406;&#x89E3;&#x7684;&#x5B57;&#x6BB5;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;Scheduler&#x5BF9;&#x8C61;&#x5728;&#x5DE5;&#x4F5C;&#xFF08;&#x5B8C;&#x6210;&#x8C03;&#x5EA6;&#x8FD9;&#x4EF6;&#x4E8B;&#xFF09;&#x4E2D;&#x9700;&#x8981;&#x7528;&#x5230;&#x7684;&#x4E00;&#x4E9B;&#x5BF9;&#x8C61;&#x3002;</p>
+<p>ok&#xFF0C;&#x4E0B;&#x4E00;&#x8BB2;&#x6211;&#x4EEC;&#x5F00;&#x59CB;&#x804A;Scheduler&#x7684;&#x5DE5;&#x4F5C;&#x8FC7;&#x7A0B;&#xFF01; </p>
+<footer class="page-footer"><span class="copyright">Copyright &#xA9; farmer.hutao@outlook.com 2019 all right reserved&#xFF0C;powered by Gitbook</span><span class="footer-modification">&#x8BE5;&#x6587;&#x4EF6;&#x4FEE;&#x8BA2;&#x65F6;&#x95F4;&#xFF1A;
+2019-03-01 11:13:36
+</span></footer><div id="anchors-navbar"><i class="fa fa-anchor"></i><ul><p><a href="#&#x8C03;&#x5EA6;&#x7A0B;&#x5E8F;&#x542F;&#x52A8;&#x524D;&#x903B;&#x8F91;">&#x8C03;&#x5EA6;&#x7A0B;&#x5E8F;&#x542F;&#x52A8;&#x524D;&#x903B;&#x8F91;</a></p><li><a href="#&#x6982;&#x8FF0;">1. &#x6982;&#x8FF0;</a></li><li><a href="#cobra&#x548C;main">2. cobra&#x548C;main</a></li><ul><li><a href="#cobra&#x662F;&#x5565;">2.1. cobra&#x662F;&#x5565;</a></li><li><a href="#&#x4F7F;&#x7528;cobra">2.2. &#x4F7F;&#x7528;cobra</a></li></ul><li><a href="#Scheduler&#x7684;main">3. Scheduler&#x7684;main</a></li></ul></div><a href="#&#x6982;&#x8FF0;" id="goTop"><i class="fa fa-arrow-up"></i></a>
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="design.html" class="navigation navigation-prev " aria-label="Previous page: 调度器设计">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="scheduler-framework.html" class="navigation navigation-next " aria-label="Next page: 调度器框架">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"调度程序启动前逻辑","level":"2.2.2","depth":2,"next":{"title":"调度器框架","level":"2.2.3","depth":2,"path":"core/scheduler/scheduler-framework.md","ref":"core/scheduler/scheduler-framework.md","articles":[]},"previous":{"title":"调度器设计","level":"2.2.1","depth":2,"path":"core/scheduler/design.md","ref":"core/scheduler/design.md","articles":[]},"dir":"ltr"},"config":{"plugins":["theme-comscore","codeblock-filename","navigator","simple-page-toc","expandable-chapters-small","search-pro","splitter","multipart","tbfed-pagefooter","prism","-highlight","editlink","github","github-buttons@2.1.0","donate","copy-code-button"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"tbfed-pagefooter":{"copyright":"Copyright &copy farmer.hutao@outlook.com 2019","modify_label":"该文件修订时间：","modify_format":"YYYY-MM-DD HH:mm:ss"},"prism":{},"github":{"url":"https://github.com/farmer-hutao/k8s-source-code-analysis"},"editlink":{"label":"编辑本页","multilingual":false,"base":"https://github.com/farmer-hutao/k8s-source-code-analysis/edit/master"},"simple-page-toc":{"maxDepth":4,"skipFirstH1":true},"splitter":{},"search-pro":{"cutWordLib":"nodejieba","defineWord":["Gitbook Use"]},"search":{},"multipart":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"donate":{"alipay":"","alipayText":"支付宝打赏","button":"鼓励作者","title":"催作者快快更新","wechat":"./image/wx.jpg","wechatText":"微信小额捐赠，鼓励作者尽快更新～"},"fontsettings":{"theme":"white","family":"sans","size":2},"codeblock-filename":{},"theme-comscore":{},"navigator":{},"github-buttons":{"repo":"farmer-hutao/k8s-source-code-analysis","types":["star"],"size":"small"},"expandable-chapters-small":{},"copy-code-button":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":true}},"theme":"default","author":"Tao Hu <farmer.hutao@outlook.com>","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"《k8s-1.13版本源码分析》","gitbook":"*","description":"k8s source code analysis"},"file":{"path":"core/scheduler/before-scheduler-run.md","mtime":"2019-03-01T03:13:36.096Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-05-08T11:14:27.451Z"},"basePath":"../..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../../gitbook/gitbook.js"></script>
+    <script src="../../gitbook/theme.js"></script>
+    
+        
+        <script src="../../gitbook/gitbook-plugin-expandable-chapters-small/expandable-chapters-small.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-search-pro/jquery.mark.min.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-search-pro/search.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-splitter/splitter.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-editlink/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-github/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-github-buttons/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-donate/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-copy-code-button/toggle.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-theme-comscore/test.js"></script>
+        
+    
+
+    </body>
+</html>
+
