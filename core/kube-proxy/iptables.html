@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <title>自定义控制器 · 《k8s-1.13版本源码分析》</title>
+        <title>IPtables-Mode Proxier · 《k8s-1.13版本源码分析》</title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="description" content="">
         <meta name="generator" content="GitBook 3.2.3">
@@ -94,10 +94,10 @@
     <link rel="shortcut icon" href="../../gitbook/images/favicon.ico" type="image/x-icon">
 
     
-    <link rel="next" href="../apiserver/" />
+    <link rel="next" href="../kubelet/" />
     
     
-    <link rel="prev" href="controller.html" />
+    <link rel="prev" href="arch.html" />
     
 
     <style>
@@ -428,9 +428,9 @@
             
         </li>
     
-        <li class="chapter " data-level="2.3" data-path="./">
+        <li class="chapter " data-level="2.3" data-path="../controller-manager/">
             
-                <a href="./">
+                <a href="../controller-manager/">
             
                     
                         <b>2.3.</b>
@@ -444,9 +444,9 @@
             <ul class="articles">
                 
     
-        <li class="chapter " data-level="2.3.1" data-path="controller.html">
+        <li class="chapter " data-level="2.3.1" data-path="../controller-manager/controller.html">
             
-                <a href="controller.html">
+                <a href="../controller-manager/controller.html">
             
                     
                         <b>2.3.1.</b>
@@ -459,9 +459,9 @@
             
         </li>
     
-        <li class="chapter active" data-level="2.3.2" data-path="custom-controller.html">
+        <li class="chapter " data-level="2.3.2" data-path="../controller-manager/custom-controller.html">
             
-                <a href="custom-controller.html">
+                <a href="../controller-manager/custom-controller.html">
             
                     
                         <b>2.3.2.</b>
@@ -494,9 +494,9 @@
             
         </li>
     
-        <li class="chapter " data-level="2.5" data-path="../kube-proxy/">
+        <li class="chapter " data-level="2.5" data-path="./">
             
-                <a href="../kube-proxy/">
+                <a href="./">
             
                     
                         <b>2.5.</b>
@@ -510,9 +510,9 @@
             <ul class="articles">
                 
     
-        <li class="chapter " data-level="2.5.1" data-path="../kube-proxy/arch.html">
+        <li class="chapter " data-level="2.5.1" data-path="arch.html">
             
-                <a href="../kube-proxy/arch.html">
+                <a href="arch.html">
             
                     
                         <b>2.5.1.</b>
@@ -525,9 +525,9 @@
             
         </li>
     
-        <li class="chapter " data-level="2.5.2" data-path="../kube-proxy/iptables.html">
+        <li class="chapter active" data-level="2.5.2" data-path="iptables.html">
             
-                <a href="../kube-proxy/iptables.html">
+                <a href="iptables.html">
             
                     
                         <b>2.5.2.</b>
@@ -663,7 +663,7 @@
     <!-- Title -->
     <h1>
         <i class="fa fa-circle-o-notch fa-spin"></i>
-        <a href="../.." >自定义控制器</a>
+        <a href="../.." >IPtables-Mode Proxier</a>
     </h1>
 </div>
 
@@ -681,19 +681,10 @@
     
                                 <section class="normal markdown-section">
                                 
-                                <h1 id="&#x81EA;&#x5B9A;&#x4E49;&#x63A7;&#x5236;&#x5668;">&#x81EA;&#x5B9A;&#x4E49;&#x63A7;&#x5236;&#x5668;</h1>
-<!-- toc -->
-<ul>
-<li><a href="#custom-controller-%E5%B7%A5%E4%BD%9C%E6%B5%81">Custom controller &#x5DE5;&#x4F5C;&#x6D41;</a></li>
-</ul>
-<!-- tocstop -->
-<h2 id="Custom_controller_&#x5DE5;&#x4F5C;&#x6D41;">1. Custom controller &#x5DE5;&#x4F5C;&#x6D41;</h2>
-<p><img src="image/custom-controller/1555996411720.png" alt=""></p>
-<p>&#x4E0A;&#x534A;&#x90E8;&#x5206; client-go &#x7684;&#x903B;&#x8F91;&#x6211;&#x4EEC;&#x5728;&#x653E;&#x5728; &#x201C;PART III - &#x5468;&#x8FB9;&#x9879;&#x76EE; / client-go / Informer&#x201D; &#x4E2D;&#x5206;&#x6790;&#x3002;</p>
-<p>&#x4ECA;&#x5929;&#x6765;&#x5173;&#x6CE8;&#x8FD9;&#x5E45;&#x56FE;&#x7684;&#x4E0B;&#x534A;&#x90E8;&#x5206;&#xFF0C;&#x4E5F;&#x5C31;&#x662F; Custom controller &#x4E2D;&#x9700;&#x8981;&#x6211;&#x4EEC;&#x81EA;&#x5DF1;&#x7F16;&#x7801;&#x7684;&#x90E8;&#x5206;&#xFF0C;&#x5BF9;&#x5E94;&#x56FE;&#x4E2D;&#x7684;&#x9EC4;&#x8272;&#x65B9;&#x5757;&#x7684;&#x5185;&#x5BB9;&#x3002;</p>
+                                <h1 id="IPtables-Mode_Proxier">IPtables-Mode Proxier</h1>
 <footer class="page-footer"><span class="copyright">Copyright &#xA9; farmer.hutao@outlook.com 2019 all right reserved&#xFF0C;powered by Gitbook</span><span class="footer-modification">&#x8BE5;&#x6587;&#x4EF6;&#x4FEE;&#x8BA2;&#x65F6;&#x95F4;&#xFF1A;
-2019-04-25 13:43:34
-</span></footer><div id="anchors-navbar"><i class="fa fa-anchor"></i><ul><p><a href="#&#x81EA;&#x5B9A;&#x4E49;&#x63A7;&#x5236;&#x5668;">&#x81EA;&#x5B9A;&#x4E49;&#x63A7;&#x5236;&#x5668;</a></p><li><a href="#Custom_controller_&#x5DE5;&#x4F5C;&#x6D41;">1. Custom controller &#x5DE5;&#x4F5C;&#x6D41;</a></li></ul></div><a href="#Custom_controller_&#x5DE5;&#x4F5C;&#x6D41;" id="goTop"><i class="fa fa-arrow-up"></i></a>
+2019-05-08 18:28:29
+</span></footer>
                                 
                                 </section>
                             
@@ -736,12 +727,12 @@
 
             
                 
-                <a href="controller.html" class="navigation navigation-prev " aria-label="Previous page: 控制器概述">
+                <a href="arch.html" class="navigation navigation-prev " aria-label="Previous page: Proxy 服务框架">
                     <i class="fa fa-angle-left"></i>
                 </a>
                 
                 
-                <a href="../apiserver/" class="navigation navigation-next " aria-label="Next page: apiserver">
+                <a href="../kubelet/" class="navigation navigation-next " aria-label="Next page: kubelet">
                     <i class="fa fa-angle-right"></i>
                 </a>
                 
@@ -752,7 +743,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"自定义控制器","level":"2.3.2","depth":2,"next":{"title":"apiserver","level":"2.4","depth":1,"path":"core/apiserver/README.md","ref":"core/apiserver/README.md","articles":[]},"previous":{"title":"控制器概述","level":"2.3.1","depth":2,"path":"core/controller-manager/controller.md","ref":"core/controller-manager/controller.md","articles":[]},"dir":"ltr"},"config":{"plugins":["theme-comscore","codeblock-filename","navigator","simple-page-toc","expandable-chapters-small","search-pro","splitter","multipart","tbfed-pagefooter","prism","-highlight","editlink","github","github-buttons@2.1.0","donate","copy-code-button"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"tbfed-pagefooter":{"copyright":"Copyright &copy farmer.hutao@outlook.com 2019","modify_label":"该文件修订时间：","modify_format":"YYYY-MM-DD HH:mm:ss"},"prism":{},"github":{"url":"https://github.com/farmer-hutao/k8s-source-code-analysis"},"editlink":{"label":"编辑本页","multilingual":false,"base":"https://github.com/farmer-hutao/k8s-source-code-analysis/edit/master"},"simple-page-toc":{"maxDepth":4,"skipFirstH1":true},"splitter":{},"search-pro":{"cutWordLib":"nodejieba","defineWord":["Gitbook Use"]},"search":{},"multipart":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"donate":{"alipay":"","alipayText":"支付宝打赏","button":"鼓励作者","title":"催作者快快更新","wechat":"./image/wx.jpg","wechatText":"微信小额捐赠，鼓励作者尽快更新～"},"fontsettings":{"theme":"white","family":"sans","size":2},"codeblock-filename":{},"theme-comscore":{},"navigator":{},"github-buttons":{"repo":"farmer-hutao/k8s-source-code-analysis","types":["star"],"size":"small"},"expandable-chapters-small":{},"copy-code-button":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":true}},"theme":"default","author":"Tao Hu <farmer.hutao@outlook.com>","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"《k8s-1.13版本源码分析》","gitbook":"*","description":"k8s source code analysis"},"file":{"path":"core/controller-manager/custom-controller.md","mtime":"2019-04-25T05:43:34.564Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-05-08T10:35:48.049Z"},"basePath":"../..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"IPtables-Mode Proxier","level":"2.5.2","depth":2,"next":{"title":"kubelet","level":"2.6","depth":1,"path":"core/kubelet/README.md","ref":"core/kubelet/README.md","articles":[]},"previous":{"title":"Proxy 服务框架","level":"2.5.1","depth":2,"path":"core/kube-proxy/arch.md","ref":"core/kube-proxy/arch.md","articles":[]},"dir":"ltr"},"config":{"plugins":["theme-comscore","codeblock-filename","navigator","simple-page-toc","expandable-chapters-small","search-pro","splitter","multipart","tbfed-pagefooter","prism","-highlight","editlink","github","github-buttons@2.1.0","donate","copy-code-button"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"tbfed-pagefooter":{"copyright":"Copyright &copy farmer.hutao@outlook.com 2019","modify_label":"该文件修订时间：","modify_format":"YYYY-MM-DD HH:mm:ss"},"prism":{},"github":{"url":"https://github.com/farmer-hutao/k8s-source-code-analysis"},"editlink":{"label":"编辑本页","multilingual":false,"base":"https://github.com/farmer-hutao/k8s-source-code-analysis/edit/master"},"simple-page-toc":{"maxDepth":4,"skipFirstH1":true},"splitter":{},"search-pro":{"cutWordLib":"nodejieba","defineWord":["Gitbook Use"]},"search":{},"multipart":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"donate":{"alipay":"","alipayText":"支付宝打赏","button":"鼓励作者","title":"催作者快快更新","wechat":"./image/wx.jpg","wechatText":"微信小额捐赠，鼓励作者尽快更新～"},"fontsettings":{"theme":"white","family":"sans","size":2},"codeblock-filename":{},"theme-comscore":{},"navigator":{},"github-buttons":{"repo":"farmer-hutao/k8s-source-code-analysis","types":["star"],"size":"small"},"expandable-chapters-small":{},"copy-code-button":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":true}},"theme":"default","author":"Tao Hu <farmer.hutao@outlook.com>","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"《k8s-1.13版本源码分析》","gitbook":"*","description":"k8s source code analysis"},"file":{"path":"core/kube-proxy/iptables.md","mtime":"2019-05-08T10:28:29.662Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-05-08T10:35:48.049Z"},"basePath":"../..","book":{"language":""}});
         });
     </script>
 </div>
