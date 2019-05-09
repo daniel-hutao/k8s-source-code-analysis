@@ -4,5 +4,6 @@ client-go 部分我步打算从头到尾一点点讲。在核心组件源码的�
 
 ## 本章规划
 
-- [Informer](./informer.md)
+- [Custom Controller 之 Informer (一)](./informer.md)
+- [Custom Controller 之 Informer (二)](./informer2.md)
 

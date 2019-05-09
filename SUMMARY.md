@@ -27,10 +27,12 @@
 * [apiserver](core/apiserver/README.md)
 * [kube-proxy](core/kube-proxy/README.md)
     * [Proxy 服务框架](core/kube-proxy/arch.md)
+    * [IPtables-Mode Proxier](core/kube-proxy/iptables.md)
 * [kubelet](core/kubelet/README.md)
 
 ## Part III - 周边项目
 * [概述](around/README.md)
 * [client-go](around/client-go/README.md)
-    * [Informer](around/client-go/informer.md)
+    * [Informer (一)](around/client-go/informer.md)
+    * [Informer(二)](around/client-go/informer2.md)
 
