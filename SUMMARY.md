@@ -28,6 +28,7 @@
 * [kube-proxy](core/kube-proxy/README.md)
     * [Proxy 服务框架](core/kube-proxy/arch.md)
     * [IPtables-Mode Proxier](core/kube-proxy/iptables.md)
+    * [Ipvs-Mode Proxier](core/kube-proxy/ipvs.md)
 * [kubelet](core/kubelet/README.md)
 
 ## Part III - 周边项目

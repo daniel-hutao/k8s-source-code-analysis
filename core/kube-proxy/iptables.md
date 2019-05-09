@@ -1,5 +1,9 @@
 # IPtables-Mode Proxier
 
+<!-- toc -->
+
+## 概述
+
 kube-Proxy提供三种模式(userspace/iptables/ipvs)的proxier实现,userspace是早期的proxy模式，ipvs模式处于实验性阶段proxy模式，本文先从默认的内核级iptables proxier代码实现与逻辑分析开始，其它模式将用专文解析源码。
 
 Iptables-mode Proxier的service配置和代码内都包含一些基础概念如clusterIP、nodeport、loadbalancer、Ingress、ClusterCIDR、onlyLocal、ExternalIP等，请在了解源码之前先熟悉其概念用途场景与类型区别，再看源码将对你理解proxy事半功倍。当然也需要对netfilter、iptables、connTrack等proxy基础依赖的工具熟悉。基础概念部分在本文将不深入介绍，有需求可自行查阅相关资料。
@@ -12,11 +16,9 @@ Iptables-mode proxier的负载均衡机制是通过底层netfliter/iptables规�
 
 下面proxier源码分析,我们先从proxier的接口、实现类、实现类方法列表一窥究竟，从结构上看整体Proxier的框架。然后我们再详细分析proxier对象的产生时所定义的属性值、值类型和用途。有了前面的两项的了解后我们再来分析proxier类方法的实现，也就是proxier代理逻辑部分(关键逻辑部分在**syncProxyRules()**方法分析部分)。最后我们分析proxier底层内核iptables的runner实现，也就是proxy上层逻辑层最终会调用iptables命令去执行规则的操作部分。
 
+## Proxier 数据结构与类定义
 
-
-## Proxier数据结构与类定义
-
-**ProxyProvider**代理提供者接口定义，需要实现两个proxy的关键方法Sync()和SyncLoop()
+**ProxyProvider** 代理提供者接口定义，需要实现两个proxy的关键方法Sync()和SyncLoop()
 
 !FILENAME  pkg/proxy/types.go:27
 
@@ -30,7 +32,7 @@ type ProxyProvider interface {
 }
 ```
 
-**Iptables-mode Proxier**为ProxyProvider接口实现类，proxier类属性项比较多，我们先看一下注释用途与结构定义，在实例化proxier对象时我们再详看。
+**Iptables-mode Proxier** 为 ProxyProvider 接口实现类，proxier 类属性项比较多，我们先看一下注释用途与结构定义，在实例化proxier对象时我们再详看。
 
 !FILENAME pkg/proxy/iptables/proxier.go:205
 
@@ -213,8 +215,6 @@ func (proxier *Proxier) deleteEndpointConnections(connectionMap []proxy.ServiceE
 func (proxier *Proxier) appendServiceCommentLocked(args []string, svcName string){/*...*/}
 func (proxier *Proxier) syncProxyRules(){/*...*/}
 ```
-
-
 
 ## Proxier对象生成与运行
 
@@ -417,9 +417,7 @@ func (bfr *BoundedFrequencyRunner) tryRun() {
 }
 ```
 
-
-
-## Proxier服务与端点更新Tracker
+## Proxier 服务与端点更新 Tracker
 
 kube-proxy需要及时同步services和endpoints的变化信息,前面我们看到proxier类对象有两个属性：**serviceChanges**和**endpointsChanges**是就是用来跟踪Service和Endpoint的更新信息，我们先来分析与之相关这两个类ServiceChangeTracker和EndpointChangeTracker。
 
@@ -663,7 +661,7 @@ func (proxier *Proxier) OnEndpointsDelete(endpoints *v1.Endpoints) {
 ```
 
 
-## syncProxyRule同步配置与规则
+## syncProxyRule 同步配置与规则
 
 **proxier.syncProxyRules()**  实现监听svc或ep更新配置到iptables规则的一致性同步机制功能，这也是iptables proxer最核心的逻辑代码。作者实现是利用了iptables-save/iptables-restore机制将现存的iptables配置和服务与端点同步的信息来生成相对应的iptables链与规则数据，每次同步执行写入可restore标准格式的规则数据后通过iptables-restore命令进行重设iptables规则。
 
@@ -775,7 +773,7 @@ func (proxier *Proxier) syncProxyRules() {
 
 下面将分解详述每块代码逻辑:
 
-### 更新service和endpoints,返回更新结果 
+### 更新 service 和 endpoints ;返回更新结果 
 
 !FILENAME pkg/proxy/iptables/proxier.go:652
 
@@ -794,7 +792,7 @@ func (proxier *Proxier) syncProxyRules() {
 	}
 ```
 
-#### UpdateServiceMap() SVC服务的更新实现
+#### UpdateServiceMap() SVC 服务的更新实现
 
 !FILENAME pkg/proxy/service.go:212
 
@@ -814,7 +812,7 @@ func UpdateServiceMap(serviceMap ServiceMap, changes *ServiceChangeTracker) (res
 }
 ```
 
-**serviceMap.apply()**应用更新变化事件的服务项(merge->filter->unmerge)
+**serviceMap.apply() **应用更新变化事件的服务项(merge->filter->unmerge)
 
 !FILENAME pkg/proxy/service.go:268
 
@@ -905,7 +903,7 @@ func UpdateEndpointsMap(endpointsMap EndpointsMap, changes *EndpointChangeTracke
 }
 ```
 
-**EndpointsMap.apply()**应用更新变化事件的端点项(merge->unmerge)
+**EndpointsMap.apply()** 应用更新变化事件的端点项(merge->unmerge)
 
 !FILENAME pkg/proxy/endpoints.go:242
 
@@ -981,7 +979,7 @@ func detectStaleConnections(oldEndpointsMap, newEndpointsMap EndpointsMap, stale
 }
 ```
 
-### 创建与联接kube链
+### 创建与联接 kube 链
 
 - filter表中INPUT链头部插入自定义链调转到KUBE-EXTERNAL-SERVICES链
   *iptables  -I "INPUT" -t "filter" -m "conntrack" --ctstate  "NEW"  -m comment --comment  "kubernetes externally-visible service portals" -j "KUBE-EXTERNAL-SERVICES"*  
@@ -1023,7 +1021,7 @@ for _, chain := range iptablesJumpChains {
 	}
 ```
 
-### 创建Iptables基础数据
+### 创建 Iptables 基础数据
 
 - 获取现存在的Filter/Nat表链数据
 - 创建iptables-save/restore格式数据（表头、链）
@@ -1111,7 +1109,7 @@ for _, chain := range iptablesJumpChains {
 	}...)
 ```
 
-### 为每个service创建rules
+### 为每个 service 创建 rules
 
 先了解serviceInfo的完整定义说明
 
@@ -1787,7 +1785,7 @@ if len(proxier.clusterCIDR) != 0 {
 	writeLine(proxier.natRules, "COMMIT")
 ```
 
-### 汇集与加载iptables配置规则数据
+### 汇集与加载 iptables 配置规则数据
 
 !FILENAME pkg/proxy/iptables/proxier.go:1326
 
@@ -1813,11 +1811,11 @@ if len(proxier.clusterCIDR) != 0 {
 
 
 
-## IPtables底层的runner实现
+## IPtables 底层的 runner 实现
 
 前面基本已看完整个proxy的执行流程，最后iptables proxier是如何使用系统层iptables命令进行底层的iptables规则CRUD操作（通俗的理解：iptables proxier实现都是在操作iptables命令生成相应的规则），下面我来看一下kuber-proxy组件底层iptables操作器的封装。
 
-### iptables执行器
+### iptables 执行器
 
 Interface**接口为运行iptables命令定义
 
@@ -1923,7 +1921,7 @@ func New(exec utilexec.Interface, dbus utildbus.Interface, protocol Protocol) In
 }
 ```
 
-### iptables执行器方法
+### iptables 执行器方法
 
 **runner.run()**  这个是方法是runner最基础和公共调用的内部方法，也就是iptables命令执行os exec调用代码。run()有两个传参：1. 指定iptables操作command，2.参数列表。通过传参将组成一个完整的iptables命令进行exec调用执行。runContext()此方法内含有带context上下文和不带context两种执行方式。
 
