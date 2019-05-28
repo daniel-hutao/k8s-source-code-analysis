@@ -2,7 +2,7 @@
 
 ## 概述
 
-关于ipvs-mode proxier基础知识可参看官司方文档([英文版](https://github.com/kubernetes/kubernetes/tree/master/pkg/proxy/ipvs)、[中文版](https://www.codercto.com/a/22682.html))，其官方文档主要介绍以下几方面内容： 
+关于ipvs-mode proxier基础知识可参看官方文档([英文版](https://github.com/kubernetes/kubernetes/tree/master/pkg/proxy/ipvs)、[中文版](https://www.codercto.com/a/22682.html))，其官方文档主要介绍以下几方面内容： 
 
 1. ipvs技术简介和对比iptables-mode所带来的好处；
 2. ipvs-mode proxier按用户配置不同所生成的用户层iptables规则示例(**masquerade-all/cluster-cidr/Load Balancer/NodePort/externalIPs**)； 
