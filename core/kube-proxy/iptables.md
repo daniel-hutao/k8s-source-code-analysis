@@ -1,4 +1,4 @@
-# IPtables-Mode Proxier
+# Iptables-mode Proxier
 
 <!-- toc -->
 

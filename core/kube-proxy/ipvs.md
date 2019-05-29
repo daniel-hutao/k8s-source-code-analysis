@@ -1,5 +1,7 @@
 # Ipvs-mode proxier
 
+<!-- toc -->
+
 ## 概述
 
 关于ipvs-mode proxier基础知识可参看官方文档([英文版](https://github.com/kubernetes/kubernetes/tree/master/pkg/proxy/ipvs)、[中文版](https://www.codercto.com/a/22682.html))，其官方文档主要介绍以下几方面内容： 
@@ -174,7 +176,7 @@ ipvs模式和iptables模式的service和endpoints更新变化信息同步机制�
 
 在构建ipvs-mode proxier对象时指定同步运行器async.NewBoundedFrequencyRunner，同步proxy的规则处理则是syncProxyRules()。同样ipvs-proxier类对象有两个属性对象：**serviceChanges**(ServiceChangeTracker)和**endpointsChanges**(EndpointChangeTracker)是就是用来跟踪并记录service和endpoints的变化信息更新至相应的两个属性Items map(serviceChange和endpointsChange)。
 
-!FILENAME:pkg/proxy/ipvs/proxier.go:429
+!FILENAME pkg/proxy/ipvs/proxier.go:429
 
 ```go
 proxier.syncRunner = async.NewBoundedFrequencyRunner("sync-runner", proxier.syncProxyRules, minSyncPeriod, syncPeriod, burstSyncs)
@@ -182,7 +184,7 @@ proxier.syncRunner = async.NewBoundedFrequencyRunner("sync-runner", proxier.sync
 
 在框架层第二层proxy server的运行时最后的调用就是"s.Proxier.SyncLoop()"
 
-!FILENAME:pkg/proxy/ipvs/proxier.go:631
+!FILENAME pkg/proxy/ipvs/proxier.go:631
 
 ```go
 func (proxier *Proxier) SyncLoop() {
@@ -192,7 +194,7 @@ func (proxier *Proxier) SyncLoop() {
 }
 ```
 
-!FILENAME:pkg/util/async/bounded_frequency_runner.go:169
+!FILENAME pkg/util/async/bounded_frequency_runner.go:169
 
 ```go
 func (bfr *BoundedFrequencyRunner) Loop(stop <-chan struct{}) {
@@ -213,7 +215,7 @@ func (bfr *BoundedFrequencyRunner) Loop(stop <-chan struct{}) {
 
 BoundedFrequencyRunner.*tryRun()* 按指定频率执行回调函数func  "bfr.fn()"
 
-!FILENAME:pkg/util/async/bounded_frequency_runner.go:211
+!FILENAME pkg/util/async/bounded_frequency_runner.go:211
 
 ```go
 func (bfr *BoundedFrequencyRunner) tryRun() {
@@ -1136,7 +1138,7 @@ if !proxier.ipsetList[kubeClusterIPSet].isEmpty() {
 
 acceptIPVSTraffic 在NAT表的KUBE-SERVICE链最后添加对所有目地址为ipvs虚拟服务的流量ACCEPT规则（此规则应放置于KUBE-SERVICE的最底部）。默认服务类型clusterip则生成规则*-A KUBE-SERVICE -m set --match-set KUBE-CLUSTER-IP dst,dst -j ACCEPT*，如果有服务类型为LoadBalancer则生成规则*-A KUBE-SERVICE -m set --match-set KUBE-LOAD-BALANCER dst,dst -j ACCEPT*。
 
-!FILENAME:pkg/proxy/ipvs/proxier.go:1397
+!FILENAME pkg/proxy/ipvs/proxier.go:1397
 
 ```go
 proxier.acceptIPVSTraffic()
@@ -1228,8 +1230,6 @@ clusterCIDR被指定时生成两条filter表KUBE-FORWARD链规则数据，接受
 		return
 	}
 ```
-
-
 
 >  ipvs-mode Proxier整个逻辑实现已分析完，其关键逻辑即syncProxyRules(){…}内代码，其中还有一些细节技术未展开叙述,如几个关键的依赖底层技术ipset的实现runner、ipvs路由(VS/RS)操作基于netlink机制通迅机制的实现等，因篇幅过长，后续再看具体情况补充。
 

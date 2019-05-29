@@ -20,6 +20,7 @@ kube-proxy源码分析以下几部分内容进行展开：
 ## 本章规划
 
 1. [Proxy 服务框架](./arch.md)
-2. [IPtables-Mode Proxier](./iptables.md)
-3. [Ipvs-Mode Proxier](./ipvs.md)
+2. [Iptables-mode Proxier](./iptables.md)
+3. [Ipvs-mode Proxier](./ipvs.md)
+4. [Userspace-mode Proxier](./userspace.md)
 
