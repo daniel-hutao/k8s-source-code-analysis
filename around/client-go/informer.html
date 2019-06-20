@@ -715,20 +715,25 @@
 <!-- toc -->
 <ul>
 <li><a href="#%E6%A6%82%E8%BF%B0">&#x6982;&#x8FF0;</a></li>
-<li><a href="#%E6%9E%B6%E6%9E%84%E6%A6%82%E8%A7%88">&#x67B6;&#x6784;&#x6982;&#x89C8;</a></li>
-<li><a href="#reflector---list--watch-api-server">reflector - List &amp; Watch API Server</a><ul>
-<li><a href="#reflector-%E5%AF%B9%E8%B1%A1">Reflector &#x5BF9;&#x8C61;</a></li>
+<li><a href="#%E6%9E%B6%E6%9E%84%E6%A6%82%E8%A7%88">&#x67B6;&#x6784;&#x6982;&#x89C8;</a><ul>
+<li><a href="#client-go-%E7%9B%B8%E5%85%B3%E6%A8%A1%E5%9D%97">client-go &#x76F8;&#x5173;&#x6A21;&#x5757;</a></li>
+<li><a href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E6%8E%A7%E5%88%B6%E5%99%A8%E7%9B%B8%E5%85%B3%E6%A8%A1%E5%9D%97">&#x81EA;&#x5B9A;&#x4E49;&#x63A7;&#x5236;&#x5668;&#x76F8;&#x5173;&#x6A21;&#x5757;</a></li>
+</ul>
+</li>
+<li><a href="#%E7%AC%AC%E4%B8%80%E6%AD%A5reflector---list--watch-api-server">&#x7B2C;&#x4E00;&#x6B65;&#xFF1A;reflector - List &amp; Watch API Server</a><ul>
+<li><a href="#reflector-%E5%AF%B9%E8%B1%A1%E5%AE%9A%E4%B9%89">Reflector &#x5BF9;&#x8C61;&#x5B9A;&#x4E49;</a></li>
 <li><a href="#listandwatch">ListAndWatch</a></li>
 </ul>
 </li>
-<li><a href="#watchhandler---add-obj-to-delta-fifo">watchHandler - add obj to delta fifo</a></li>
-<li><a href="#informer-controller---pop-obj-from-delta-fifo">Informer (controller) - pop obj from delta fifo</a><ul>
+<li><a href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5watchhandler---add-obj-to-delta-fifo">&#x7B2C;&#x4E8C;&#x6B65;&#xFF1A;watchHandler - add obj to delta fifo</a></li>
+<li><a href="#%E7%AC%AC%E4%B8%89%E5%9B%9B%E4%BA%94%E6%AD%A5informer---pop-obj-from-delta-fifoadd-obj-to-store">&#x7B2C;&#x4E09;&#x3001;&#x56DB;&#x3001;&#x4E94;&#x6B65;&#xFF1A;Informer - pop obj from delta fifo&#x3001;Add obj to store</a><ul>
 <li><a href="#controller">Controller</a></li>
 <li><a href="#processloop">processLoop</a></li>
+<li><a href="#clientstate">clientState</a></li>
 </ul>
 </li>
-<li><a href="#add-obj-to-indexer-thread-safe-store">Add obj to Indexer (Thread safe store)</a></li>
-<li><a href="#sharedindexinformer">sharedIndexInformer</a><ul>
+<li><a href="#%E7%AC%AC%E5%85%AD%E6%AD%A5dispatch-event-handler-functions">&#x7B2C;&#x516D;&#x6B65;&#xFF1A;Dispatch Event Handler functions</a><ul>
+<li><a href="#sharedindexinformer">sharedIndexInformer</a></li>
 <li><a href="#sharedprocessor">sharedProcessor</a><ul>
 <li><a href="#processorlistener">processorListener</a></li>
 <li><a href="#processorlistenerrun">processorListener.run()</a></li>
@@ -751,14 +756,32 @@
 <p>Informer &#x5728;&#x5F88;&#x591A;&#x7EC4;&#x4EF6;&#x7684;&#x6E90;&#x7801;&#x4E2D;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#xFF0C;&#x5C24;&#x5176;&#x662F; kube-controller-manager (&#x5199;&#x8FD9;&#x7BC7;&#x6587;&#x7AE0;&#x65F6;&#x6211;&#x5DF2;&#x7ECF;&#x57FA;&#x672C;&#x5199;&#x5B8C; kube-scheduler &#x7684;&#x6E90;&#x7801;&#x5206;&#x6790;&#xFF0C;&#x7740;&#x624B;&#x5199; kube-controller-manager &#x4E86;&#xFF0C;&#x9274;&#x4E8E; controlelr &#x548C; client-go &#x5173;&#x8054;&#x6BD4;&#x8F83;&#x5927;&#xFF0C;&#x8DF3;&#x8FC7;&#x6765;&#x5148;&#x8BB2;&#x8BB2;&#x5178;&#x578B;&#x7684;&#x63A7;&#x5236;&#x5668;&#x5DE5;&#x4F5C;&#x6D41;&#x7A0B;&#x4E2D;&#x6D89;&#x53CA;&#x5230;&#x7684; client-go &#x90E8;&#x5206;).</p>
 <p>Informer &#x662F; client-go &#x4E2D;&#x4E00;&#x4E2A;&#x6BD4;&#x8F83;&#x6838;&#x5FC3;&#x7684;&#x5DE5;&#x5177;&#xFF0C;&#x901A;&#x8FC7; Informer(&#x5B9E;&#x9645;&#x6211;&#x4EEC;&#x7528;&#x5230;&#x7684;&#x90FD;&#x4E0D;&#x662F;&#x5355;&#x7EAF;&#x7684; informer&#xFF0C;&#x800C;&#x662F;&#x7EC4;&#x5408;&#x4E86;&#x5404;&#x79CD;&#x5DE5;&#x5177;&#x7684; sharedInformerFactory) &#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x8F7B;&#x677E; List/Get &#x67D0;&#x4E2A;&#x8D44;&#x6E90;&#x5BF9;&#x8C61;&#xFF0C;&#x53EF;&#x4EE5;&#x76D1;&#x542C;&#x8D44;&#x6E90;&#x5BF9;&#x8C61;&#x7684;&#x5404;&#x79CD;&#x4E8B;&#x4EF6;(&#x6BD4;&#x5982;&#x521B;&#x5EFA;&#x548C;&#x5220;&#x9664;)&#x7136;&#x540E;&#x89E6;&#x53D1;&#x56DE;&#x8C03;&#x51FD;&#x6570;&#xFF0C;&#x8BA9;&#x6211;&#x4EEC;&#x80FD;&#x591F;&#x5728;&#x5404;&#x79CD;&#x4E8B;&#x4EF6;&#x53D1;&#x751F;&#x7684;&#x65F6;&#x5019;&#x80FD;&#x591F;&#x4F5C;&#x51FA;&#x76F8;&#x5E94;&#x7684;&#x903B;&#x8F91;&#x5904;&#x7406;&#x3002;&#x4E3E;&#x4E2A;&#x4F8B;&#x5B57;&#xFF0C;&#x5F53; pod &#x6570;&#x91CF;&#x53D8;&#x5316;&#x7684;&#x65F6;&#x5019; deployment &#x662F;&#x4E0D;&#x662F;&#x9700;&#x8981;&#x5224;&#x65AD;&#x81EA;&#x5DF1;&#x540D;&#x4E0B;&#x7684; pod &#x6570;&#x91CF;&#x662F;&#x5426;&#x8FD8;&#x548C;&#x9884;&#x671F;&#x7684;&#x4E00;&#x6837;&#xFF1F;&#x5982;&#x679C;&#x5C11;&#x4E86;&#x662F;&#x4E0D;&#x662F;&#x8981;&#x8003;&#x8651;&#x521B;&#x5EFA;&#xFF1F;</p>
 <h2 id="&#x67B6;&#x6784;&#x6982;&#x89C8;">2. &#x67B6;&#x6784;&#x6982;&#x89C8;</h2>
-<p>&#x81EA;&#x5B9A;&#x4E49;&#x63A7;&#x5236;&#x5668;&#x7684;&#x5DE5;&#x4F5C;&#x6D41;&#x7A0B;&#x57FA;&#x672C;&#x5982;&#x4E0B;&#x56FE;&#x6240;&#x793A;&#xFF0C;&#x6211;&#x4EEC;&#x4ECA;&#x5929;&#x8981;&#x5206;&#x6790;&#x56FE;&#x4E2D;&#x4E0A;&#x534A;&#x90E8;&#x5206;&#x7684;&#x903B;&#x8F91;&#x3002;</p>
+<p>&#x81EA;&#x5B9A;&#x4E49;&#x63A7;&#x5236;&#x5668;&#x7684;&#x5DE5;&#x4F5C;&#x6D41;&#x7A0B;&#x57FA;&#x672C;&#x5982;&#x4E0B;&#x56FE;&#x6240;&#x793A;&#xFF0C;&#x6211;&#x4EEC;&#x4ECA;&#x5929;&#x8981;&#x5206;&#x6790;&#x56FE;&#x4E2D;&#x4E0A;&#x534A;&#x90E8;&#x5206;&#x7684;&#x903B;&#x8F91;&#x3002;(&#x56FE;&#x7247;&#x6765;&#x81EA;<a href="https://github.com/kubernetes/sample-controller/blob/master/docs/controller-client-go.md" target="_blank">https://github.com/kubernetes/sample-controller/blob/master/docs/controller-client-go.md</a>)</p>
 <p><img src="image/informer/1555996411720.png" alt="1555996411720"></p>
 <p>&#x6211;&#x4EEC;&#x5F00;&#x53D1;&#x81EA;&#x5B9A;&#x4E49;&#x63A7;&#x5236;&#x5668;&#x7684;&#x65F6;&#x5019;&#x7528;&#x5230;&#x7684;&#x201C;&#x673A;&#x5236;&#x201D;&#x4E3B;&#x8981;&#x5B9A;&#x4E49;&#x5728; client-go &#x7684; tool/cache&#x4E0B;&#xFF1A;</p>
 <p><img src="image/informer/1556075198766.png" alt="1556075198766"></p>
-<p>&#x6211;&#x4EEC;&#x6839;&#x636E;&#x56FE;&#x4E2D;&#x7684;9&#x4E2A;&#x6B65;&#x9AA4;&#x6765;&#x8DDF;&#x6E90;&#x7801;</p>
-<h2 id="reflector_-_List___Watch_API_Server">3. reflector - List &amp; Watch API Server</h2>
+<p>&#x5148;&#x5173;&#x6CE8;&#x4E00;&#x4E0B;&#x7B2C;&#x4E00;&#x5E45;&#x56FE;&#x4E2D;&#x6D89;&#x53CA;&#x5230;&#x7684;&#x4E00;&#x4E9B; components&#xFF1A;</p>
+<h3 id="client-go_&#x76F8;&#x5173;&#x6A21;&#x5757;">2.1. client-go &#x76F8;&#x5173;&#x6A21;&#x5757;</h3>
+<ul>
+<li><strong>Reflector</strong>: Reflector &#x7C7B;&#x578B;&#x5B9A;&#x4E49;&#x5728; cache &#x5305;&#x4E2D;(<em>tools/cache/reflector.go:47</em>)&#xFF0C;&#x5B83;&#x7684;&#x4F5C;&#x7528;&#x662F;&#x5411; apiserver watch &#x7279;&#x5B9A;&#x7684;&#x8D44;&#x6E90;&#x7C7B;&#x578B;&#x3002;&#x8FD9;&#x4E2A;&#x529F;&#x80FD;&#x901A;&#x8FC7;&#x5176;&#x7ED1;&#x5B9A;&#x7684; ListAndWatch &#x65B9;&#x6CD5;&#x5B9E;&#x73B0;&#x3002;Watch &#x7684;&#x8D44;&#x6E90;&#x53EF;&#x4EE5;&#x662F; in-build &#x7684;&#x8D44;&#x6E90;&#x4E5F;&#x53EF;&#x4EE5;&#x662F; custom &#x7684;&#x8D44;&#x6E90;&#x3002;&#x5F53; Reflector &#x901A;&#x8FC7; watch API &#x63A5;&#x6536;&#x5230;&#x5B58;&#x5728;&#x65B0;&#x7684;&#x8D44;&#x6E90;&#x5BF9;&#x8C61;&#x5B9E;&#x4F8B;&#x7684;&#x901A;&#x77E5;&#x540E;&#xFF0C;&#x5B83;&#x4F7F;&#x7528;&#x76F8;&#x5E94;&#x7684; list API &#x83B7;&#x53D6;&#x65B0;&#x521B;&#x5EFA;&#x7684;&#x8D44;&#x6E90;&#x5BF9;&#x8C61;&#xFF0C;&#x7136;&#x540E; put &#x8FDB; Delta Fifo &#x961F;&#x5217;&#x3002;&#x8FD9;&#x4E2A;&#x6B65;&#x9AA4;&#x5728; watchHandler &#x51FD;&#x6570;(<em>tools/cache/reflector.go:268</em>)&#x4E2D;&#x5B8C;&#x6210;&#x3002;</li>
+<li><strong>Informer</strong>: &#x4E00;&#x4E2A;&#x5B9A;&#x4E49;&#x5728; cache &#x5305;&#x4E2D;&#x7684;&#x57FA;&#x7840; controller(<em>tools/cache/controller.go:75</em>) (&#x4E00;&#x4E2A; informer) &#x4ECE; Delta Fifo &#x961F;&#x5217;&#x4E2D; pop &#x51FA;&#x6765;&#x8D44;&#x6E90;&#x5BF9;&#x8C61;&#x5B9E;&#x4F8B;(&#x8FD9;&#x4E2A;&#x529F;&#x80FD;&#x5728; processLoop &#x4E2D;&#x5B9E;&#x73B0;(<em>tools/cache/controller.go:148</em>))&#x3002;&#x8FD9;&#x4E2A; base controller &#x505A;&#x7684;&#x5DE5;&#x4F5C;&#x662F;&#x4FDD;&#x5B58;&#x8FD9;&#x4E2A;&#x5BF9;&#x8C61;&#x7528;&#x4E8E;&#x540E;&#x7EED;&#x68C0;&#x7D22;&#x5904;&#x7406;&#x7528;&#x7684;&#xFF0C;&#x7136;&#x540E;&#x89E6;&#x53D1;&#x6211;&#x4EEC;&#x81EA;&#x5DF1;&#x7684;&#x63A7;&#x5236;&#x5668;&#x6765;&#x5904;&#x7406;&#x8FD9;&#x4E2A;&#x5BF9;&#x8C61;&#x3002;</li>
+<li><strong>Indexer</strong>: Indexer &#x63D0;&#x4F9B;&#x7684;&#x662F; objects &#x4E4B;&#x4E0A;&#x7684;&#x68C0;&#x7D22;&#x80FD;&#x529B;&#x3002;Indexer &#x4E5F;&#x5B9A;&#x4E49;&#x5728; cache &#x5305;&#x4E2D;(<em>tools/cache/index.go:27</em>). &#x4E00;&#x4E2A;&#x5178;&#x578B;&#x7684;&#x68C0;&#x7D22;&#x4F7F;&#x7528;&#x65B9;&#x5F0F;&#x662F;&#x57FA;&#x4E8E;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#x7684; labels &#x521B;&#x5EFA;&#x7D22;&#x5F15;&#x3002;Indexer &#x53EF;&#x4EE5;&#x57FA;&#x4E8E;&#x5404;&#x79CD;&#x7D22;&#x5F15;&#x51FD;&#x6570;&#x7EF4;&#x62A4;&#x7D22;&#x5F15;&#x3002;Indexer &#x4F7F;&#x7528;&#x4E00;&#x4E2A;&#x7EBF;&#x7A0B;&#x5B89;&#x5168;&#x7684; store &#x6765;&#x5B58;&#x50A8;&#x5BF9;&#x8C61;&#x548C;&#x5176;&#x5BF9;&#x5E94;&#x7684; key. &#x8FD8;&#x6709;&#x4E00;&#x4E2A;&#x9ED8;&#x8BA4;&#x51FD;&#x6570; MetaNamespaceKeyFunc(<em>tools/cache/store.go:76</em>)  &#x53EF;&#x4EE5;&#x751F;&#x6210;&#x5BF9;&#x8C61;&#x7684; key&#xFF0C;&#x7C7B;&#x4F3C; &lt;namespace&gt;/&lt;name&gt; &#x683C;&#x5F0F;&#x6765;&#x5173;&#x8054;&#x5BF9;&#x5E94;&#x7684;&#x5BF9;&#x8C61;&#x3002;</li>
+</ul>
+<h3 id="&#x81EA;&#x5B9A;&#x4E49;&#x63A7;&#x5236;&#x5668;&#x76F8;&#x5173;&#x6A21;&#x5757;">2.2. &#x81EA;&#x5B9A;&#x4E49;&#x63A7;&#x5236;&#x5668;&#x76F8;&#x5173;&#x6A21;&#x5757;</h3>
+<ul>
+<li><strong>Informer reference</strong>: &#x8FD9;&#x662F;&#x4E00;&#x4E2A;&#x77E5;&#x9053;&#x5982;&#x4F55;&#x5904;&#x7406;&#x81EA;&#x5B9A;&#x4E49;&#x8D44;&#x6E90;&#x5BF9;&#x8C61;&#x7684; Informer &#x5B9E;&#x4F8B;&#x7684;&#x5F15;&#x7528;&#x3002;&#x81EA;&#x5B9A;&#x4E49;&#x63A7;&#x5236;&#x5668;&#x9700;&#x8981;&#x521B;&#x5EFA;&#x5408;&#x9002;&#x7684; Informer.</li>
+<li><strong>Indexer reference</strong>: &#x8FD9;&#x662F;&#x4E00;&#x4E2A;&#x77E5;&#x9053;&#x5982;&#x4F55;&#x5904;&#x7406;&#x81EA;&#x5B9A;&#x4E49;&#x8D44;&#x6E90;&#x5BF9;&#x8C61;&#x7684; Indexer &#x5B9E;&#x4F8B;&#x7684;&#x5F15;&#x7528;. &#x81EA;&#x5B9A;&#x4E49;&#x63A7;&#x5236;&#x5668;&#x4EE3;&#x7801;&#x9700;&#x8981;&#x521B;&#x5EFA;&#x8FD9;&#x4E2A;&#x5F15;&#x7528;&#x5BF9;&#x8C61;&#xFF0C;&#x7136;&#x540E;&#x7528;&#x4E8E;&#x68C0;&#x7D22;&#x8D44;&#x6E90;&#x5BF9;&#x8C61;&#x7528;&#x4E8E;&#x540E;&#x7EED;&#x7684;&#x5904;&#x7406;&#x3002;</li>
+</ul>
+<p>Base controller &#x63D0;&#x4F9B;&#x4E86; NewIndexerInformer(<em>tools/cache/controller.go:345</em>) &#x51FD;&#x6570;&#x6765;&#x521B;&#x5EFA; Informer &#x548C; Indexer. &#x5728;&#x4EE3;&#x7801;&#x91CC;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x76F4;&#x63A5;&#x8C03;&#x7528;&#x8FD9;&#x4E2A;&#x51FD;&#x6570;&#x6216;&#x8005;&#x4F7F;&#x7528;&#x5DE5;&#x5382;&#x65B9;&#x6CD5;&#x6765;&#x521B;&#x5EFA; informer.</p>
+<ul>
+<li><strong>Resource Event Handlers</strong>: &#x8FD9;&#x662F;&#x4E00;&#x4E2A;&#x56DE;&#x8C03;&#x51FD;&#x6570;&#xFF0C;&#x5728; Informer &#x60F3;&#x8981;&#x5206;&#x53D1;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#x7ED9;&#x63A7;&#x5236;&#x5668;&#x7684;&#x65F6;&#x5019;&#x4F1A;&#x8C03;&#x7528;&#x8FD9;&#x4E2A;&#x51FD;&#x6570;&#x3002;&#x5178;&#x578B;&#x7684;&#x7528;&#x6CD5;&#x662F;&#x5199;&#x4E00;&#x4E2A;&#x51FD;&#x6570;&#x6765;&#x83B7;&#x53D6;&#x5206;&#x53D1;&#x8FC7;&#x6765;&#x7684;&#x5BF9;&#x8C61;&#x7684; key&#xFF0C;&#x5C06; key &#x653E;&#x5165;&#x961F;&#x5217;&#x4E2D;&#x7B49;&#x5F85;&#x8FDB;&#x4E00;&#x6B65;&#x7684;&#x5904;&#x7406;&#x3002;</li>
+<li><strong>Work queue</strong>: &#x8FD9;&#x4E2A;&#x961F;&#x5217;&#x662F;&#x5728;&#x81EA;&#x5DF1;&#x7684;&#x63A7;&#x5236;&#x5668;&#x4EE3;&#x7801;&#x4E2D;&#x521B;&#x5EFA;&#x7684;&#xFF0C;&#x7528;&#x6765;&#x89E3;&#x8026;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#x7684;&#x5206;&#x53D1;&#x548C;&#x5904;&#x7406;&#x8FC7;&#x7A0B;&#x3002;Resource event handler &#x51FD;&#x6570;&#x4F1A;&#x88AB;&#x5199;&#x6210;&#x63D0;&#x53D6;&#x5206;&#x53D1;&#x6765;&#x7684;&#x5BF9;&#x8C61;&#x7684; key&#xFF0C;&#x7136;&#x540E;&#x5C06;&#x8FD9;&#x4E2A; key &#x6DFB;&#x52A0;&#x5230; work queue &#x91CC;&#x9762;&#x3002;</li>
+<li><strong>Process Item</strong> &#x8FD9;&#x662F;&#x6211;&#x4EEC;&#x5728;&#x81EA;&#x5DF1;&#x4EE3;&#x7801;&#x4E2D;&#x5B9E;&#x73B0;&#x7684;&#x7528;&#x6765;&#x5904;&#x7406; work queue &#x4E2D;&#x62FF;&#x5230;&#x7684; items &#x7684;&#x51FD;&#x6570;&#x3002;&#x8FD9;&#x91CC;&#x53EF;&#x4EE5;&#x6709;&#x4E00;&#x4E2A;&#x6216;&#x591A;&#x4E2A;&#x51FD;&#x6570;&#x6765;&#x5904;&#x7406;&#x5177;&#x4F53;&#x7684;&#x8FC7;&#x7A0B;&#xFF0C;&#x8FD9;&#x4E2A;&#x51FD;&#x6570;&#x7684;&#x5178;&#x578B;&#x7528;&#x6CD5;&#x662F;&#x4F7F;&#x7528; Indexer &#x7D22;&#x5F15;&#x6216;&#x8005;&#x4E00;&#x4E2A; Listing wrapper &#x6765;&#x6839;&#x636E;&#x76F8;&#x5E94;&#x7684; key &#x68C0;&#x7D22;&#x5BF9;&#x8C61;&#x3002;</li>
+</ul>
+<p>&#x4E0B;&#x9762;&#x6211;&#x4EEC;&#x6839;&#x636E;&#x56FE;&#x4E2D;&#x8FD9;&#x51E0;&#x4E2A;&#x6B65;&#x9AA4;&#x6765;&#x8DDF;&#x6E90;&#x7801;&#x3002;</p>
+<h2 id="&#x7B2C;&#x4E00;&#x6B65;&#xFF1A;reflector_-_List___Watch_API_Server">3. &#x7B2C;&#x4E00;&#x6B65;&#xFF1A;reflector - List &amp; Watch API Server</h2>
 <p>Reflector &#x4F1A;&#x76D1;&#x89C6;&#x7279;&#x5B9A;&#x7684;&#x8D44;&#x6E90;&#xFF0C;&#x5C06;&#x53D8;&#x5316;&#x5199;&#x5165;&#x7ED9;&#x5B9A;&#x7684;&#x5B58;&#x50A8;&#x4E2D;&#xFF0C;&#x4E5F;&#x5C31;&#x662F; Delta FIFO queue.</p>
-<h3 id="Reflector_&#x5BF9;&#x8C61;">3.1. Reflector &#x5BF9;&#x8C61;</h3>
+<h3 id="Reflector_&#x5BF9;&#x8C61;&#x5B9A;&#x4E49;">3.1. Reflector &#x5BF9;&#x8C61;&#x5B9A;&#x4E49;</h3>
 <p>Reflector &#x7684;&#x4E2D;&#x6587;&#x542B;&#x4E49;&#x662F;&#x53CD;&#x5C04;&#x5668;&#xFF0C;&#x6211;&#x4EEC;&#x5148;&#x770B;&#x4E00;&#x4E0B;&#x7C7B;&#x578B;&#x5B9A;&#x4E49;&#xFF1A;</p>
 <div><p class="code-filename">tools/cache/reflector.go:47</p></div>
 <pre class="language-"><code class="lang-go"><span class="token keyword">type</span> Reflector <span class="token keyword">struct</span> <span class="token punctuation">{</span>
@@ -812,7 +835,7 @@
        <span class="token comment">// &#x5F00;&#x59CB; watch</span>
       w<span class="token punctuation">,</span> err <span class="token operator">:=</span> r<span class="token punctuation">.</span>listerWatcher<span class="token punctuation">.</span><span class="token function">Watch</span><span class="token punctuation">(</span>options<span class="token punctuation">)</span>
        <span class="token comment">// &#x2026;&#x2026;</span>
-       <span class="token comment">// w &#x4EA4;&#x7ED9; watchHandler &#x5904;&#x7406;</span>
+       <span class="token comment">// w &#x4EA4;&#x7ED9; watchHandler &#x5904;&#x7406;&#xFF0C;&#x8FD9;&#x91CC;&#x7684;&#x903B;&#x8F91;&#x540E;&#x9762;&#x5206;&#x6790;</span>
       <span class="token keyword">if</span> err <span class="token operator">:=</span> r<span class="token punctuation">.</span><span class="token function">watchHandler</span><span class="token punctuation">(</span>w<span class="token punctuation">,</span> <span class="token operator">&amp;</span>resourceVersion<span class="token punctuation">,</span> resyncerrc<span class="token punctuation">,</span> stopCh<span class="token punctuation">)</span><span class="token punctuation">;</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
          <span class="token keyword">if</span> err <span class="token operator">!=</span> errorStopRequested <span class="token punctuation">{</span>
             klog<span class="token punctuation">.</span><span class="token function">Warningf</span><span class="token punctuation">(</span><span class="token string">&quot;%s: watch of %v ended with: %v&quot;</span><span class="token punctuation">,</span> r<span class="token punctuation">.</span>name<span class="token punctuation">,</span> r<span class="token punctuation">.</span>expectedType<span class="token punctuation">,</span> err<span class="token punctuation">)</span>
@@ -822,8 +845,8 @@
    <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<h2 id="watchHandler_-_add_obj_to_delta_fifo">4. watchHandler - add obj to delta fifo</h2>
-<p>&#x524D;&#x9762;&#x8BB2;&#x5230; ListAndWatch &#x51FD;&#x6570;&#x7684;&#x6700;&#x540E;&#x4E00;&#x6B65;&#x903B;&#x8F91;&#x662F; watchHandler&#xFF0C;&#x5728; ListAndWatch &#x4E2D;&#x5148;&#x662F;&#x66F4;&#x65B0;&#x4E86; Delta FIFO &#x4E2D;&#x7684; item&#xFF0C;&#x7136;&#x540E; watch &#x8D44;&#x6E90;&#x5BF9;&#x8C61;&#xFF0C;&#x6700;&#x540E;&#x4EA4;&#x7ED9; watchHandler &#x5904;&#x7406;&#xFF0C;&#x6240;&#x4EE5; watchHandler &#x57FA;&#x672C;&#x53EF;&#x4EE5;&#x731C;&#x5230;&#x662F;&#x5C06;&#x6709;&#x53D8;&#x5316;&#x7684;&#x8D44;&#x6E90;&#x6DFB;&#x52A0;&#x5230; Delta FIFO &#x4E2D;&#x4E86;&#x3002;</p>
+<h2 id="&#x7B2C;&#x4E8C;&#x6B65;&#xFF1A;watchHandler_-_add_obj_to_delta_fifo">4. &#x7B2C;&#x4E8C;&#x6B65;&#xFF1A;watchHandler - add obj to delta fifo</h2>
+<p>&#x524D;&#x9762;&#x8BB2;&#x5230; <strong>ListAndWatch</strong> &#x51FD;&#x6570;&#x7684;&#x6700;&#x540E;&#x4E00;&#x6B65;&#x903B;&#x8F91;&#x662F; <strong>watchHandler</strong>&#xFF0C;&#x5728; ListAndWatch &#x4E2D;&#x5148;&#x662F;&#x66F4;&#x65B0;&#x4E86; Delta FIFO &#x4E2D;&#x7684; item&#xFF0C;&#x7136;&#x540E; watch &#x8D44;&#x6E90;&#x5BF9;&#x8C61;&#xFF0C;&#x6700;&#x540E;&#x4EA4;&#x7ED9; watchHandler &#x5904;&#x7406;&#xFF0C;&#x6240;&#x4EE5; watchHandler &#x57FA;&#x672C;&#x53EF;&#x4EE5;&#x731C;&#x5230;&#x662F;&#x5C06;&#x6709;&#x53D8;&#x5316;&#x7684;&#x8D44;&#x6E90;&#x6DFB;&#x52A0;&#x5230; Delta FIFO &#x4E2D;&#xFF0C;&#x6211;&#x4EEC;&#x5177;&#x4F53;&#x6765;&#x770B;&#x3002;</p>
 <div><p class="code-filename">tools/cache/reflector.go:287</p></div>
 <pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>r <span class="token operator">*</span>Reflector<span class="token punctuation">)</span> <span class="token function">watchHandler</span><span class="token punctuation">(</span>w watch<span class="token punctuation">.</span>Interface<span class="token punctuation">,</span> resourceVersion <span class="token operator">*</span><span class="token builtin">string</span><span class="token punctuation">,</span> errc <span class="token keyword">chan</span> <span class="token builtin">error</span><span class="token punctuation">,</span> stopCh <span class="token operator">&lt;-</span><span class="token keyword">chan</span> <span class="token keyword">struct</span><span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token builtin">error</span> <span class="token punctuation">{</span>
    <span class="token comment">// &#x2026;&#x2026;</span>
@@ -865,9 +888,10 @@ loop<span class="token punctuation">:</span>
    <span class="token keyword">return</span> <span class="token boolean">nil</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<h2 id="Informer_(controller)_-_pop_obj_from_delta_fifo">5. Informer (controller) - pop obj from delta fifo</h2>
+<h2 id="&#x7B2C;&#x4E09;&#x3001;&#x56DB;&#x3001;&#x4E94;&#x6B65;&#xFF1A;Informer_-_pop_obj_from_delta_fifo&#x3001;Add_obj_to_store">5. &#x7B2C;&#x4E09;&#x3001;&#x56DB;&#x3001;&#x4E94;&#x6B65;&#xFF1A;Informer - pop obj from delta fifo&#x3001;Add obj to store</h2>
+<p>&#x5148;&#x770B; Controller &#x662F;&#x4EC0;&#x4E48;</p>
 <h3 id="Controller">5.1. Controller</h3>
-<p>&#x4E00;&#x4E2A; Informer &#x9700;&#x8981;&#x5B9E;&#x73B0; Controller &#x63A5;&#x53E3;&#xFF1A;</p>
+<p>Informer &#x4F1A;&#x5B9E;&#x73B0; Controller &#x63A5;&#x53E3;&#xFF0C;&#x8FD9;&#x4E2A;&#x63A5;&#x53E3;&#x957F;&#x8FD9;&#x6837;&#xFF1A;</p>
 <div><p class="code-filename">tools/cache/controller.go:82</p></div>
 <pre class="language-"><code class="lang-go"><span class="token keyword">type</span> Controller <span class="token keyword">interface</span> <span class="token punctuation">{</span>
    <span class="token function">Run</span><span class="token punctuation">(</span>stopCh <span class="token operator">&lt;-</span><span class="token keyword">chan</span> <span class="token keyword">struct</span><span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">)</span>
@@ -875,7 +899,7 @@ loop<span class="token punctuation">:</span>
    <span class="token function">LastSyncResourceVersion</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token builtin">string</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>&#x4E00;&#x4E2A;&#x57FA;&#x7840;&#x7684; Controller &#x5B9E;&#x73B0;&#x5982;&#x4E0B;&#xFF1A;</p>
+<p>&#x548C;&#x8FD9;&#x4E2A; Controller &#x5BF9;&#x5E94;&#x7684;&#x6709;&#x4E00;&#x4E2A;&#x57FA;&#x7840; controller &#x5B9E;&#x73B0;&#xFF1A;</p>
 <div><p class="code-filename">tools/cache/controller.go:75</p></div>
 <pre class="language-"><code class="lang-go"><span class="token keyword">type</span> controller <span class="token keyword">struct</span> <span class="token punctuation">{</span>
    config         Config
@@ -886,7 +910,7 @@ loop<span class="token punctuation">:</span>
 </code></pre>
 <p>controller &#x7C7B;&#x578B;&#x7ED3;&#x6784;&#x5982;&#x4E0B;&#xFF1A;</p>
 <p><img src="image/informer/1556088003902.png" alt="1556088003902"></p>
-<p>&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x4E3B;&#x8981;&#x5BF9;&#x5916;&#x66B4;&#x9732;&#x7684;&#x903B;&#x8F91;&#x662F; Run() &#x65B9;&#x6CD5;&#xFF0C;&#x6211;&#x4EEC;&#x770B;&#x4E00;&#x4E0B; Run() &#x4E2D;&#x7684;&#x903B;&#x8F91;&#xFF1A;</p>
+<p>&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x4E3B;&#x8981;&#x5BF9;&#x5916;&#x66B4;&#x9732;&#x7684;&#x903B;&#x8F91;&#x662F; Run() &#x65B9;&#x6CD5;&#xFF0C;&#x8FD8;&#x6709;&#x4E00;&#x4E2A;&#x91CD;&#x70B9; processLoop() &#x5176;&#x5B9E;&#x4E5F;&#x5728; Run() &#x91CC;&#x9762;&#x88AB;&#x8C03;&#x7528;&#xFF0C;&#x6211;&#x4EEC;&#x770B;&#x4E00;&#x4E0B; Run() &#x4E2D;&#x7684;&#x903B;&#x8F91;&#xFF1A;</p>
 <div><p class="code-filename">tools/cache/controller.go:100</p></div>
 <pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>c <span class="token operator">*</span>controller<span class="token punctuation">)</span> <span class="token function">Run</span><span class="token punctuation">(</span>stopCh <span class="token operator">&lt;-</span><span class="token keyword">chan</span> <span class="token keyword">struct</span><span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
    <span class="token keyword">defer</span> utilruntime<span class="token punctuation">.</span><span class="token function">HandleCrash</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
@@ -927,7 +951,7 @@ loop<span class="token punctuation">:</span>
 <span class="token punctuation">}</span>
 </code></pre>
 <p>&#x8FD9;&#x91CC;&#x7684; Queue &#x5C31;&#x662F; Delta FIFO&#xFF0C;Pop &#x662F;&#x4E2A;&#x963B;&#x585E;&#x65B9;&#x6CD5;&#xFF0C;&#x5185;&#x90E8;&#x5B9E;&#x73B0;&#x65F6;&#x4F1A;&#x9010;&#x4E2A; pop &#x961F;&#x5217;&#x4E2D;&#x7684;&#x6570;&#x636E;&#xFF0C;&#x4EA4;&#x7ED9; PopProcessFunc &#x5904;&#x7406;&#x3002;&#x6211;&#x4EEC;&#x5148;&#x4E0D;&#x770B; Pop &#x7684;&#x5B9E;&#x73B0;&#xFF0C;&#x5173;&#x6CE8;&#x4E00;&#x4E0B; PopProcessFunc &#x662F;&#x5982;&#x4F55;&#x5904;&#x7406; Pop &#x4E2D;&#x4ECE;&#x961F;&#x5217;&#x62FF;&#x51FA;&#x6765;&#x7684; item &#x7684;&#x3002;</p>
-<p>PopProcessFunc &#x662F;&#x4E00;&#x4E2A;&#x7C7B;&#x578B;&#xFF1A;</p>
+<p>PopProcessFunc &#x662F;&#x4E00;&#x4E2A;&#x7C7B;&#x578B;&#xFF0C;&#x5982;&#x4E0B;&#xFF1A;</p>
 <p><code>type PopProcessFunc func(interface{}) error</code></p>
 <p>&#x6240;&#x4EE5;&#x8FD9;&#x91CC;&#x53EA;&#x662F;&#x4E00;&#x4E2A;&#x7C7B;&#x578B;&#x8F6C;&#x6362;&#xFF0C;&#x6211;&#x4EEC;&#x5173;&#x6CE8;<code>c.config.Process</code>&#x5C31;&#x884C;&#xFF1A;</p>
 <div><p class="code-filename">tools/cache/controller.go:367</p></div>
@@ -962,8 +986,8 @@ loop<span class="token punctuation">:</span>
 <li>clientState</li>
 <li>ResourceEventHandler (h)</li>
 </ul>
-<p>&#x6211;&#x4EEC;&#x4E00;&#x4E00;&#x6765;&#x770B;</p>
-<h2 id="Add_obj_to_Indexer_(Thread_safe_store)">6. Add obj to Indexer (Thread safe store)</h2>
+<p>&#x6211;&#x4EEC;&#x540E;&#x9762;&#x4F1A;&#x4E00;&#x4E00;&#x5206;&#x6790;&#x5230;&#x3002;</p>
+<h3 id="clientState">5.3. clientState</h3>
 <p>&#x524D;&#x9762;&#x8BF4;&#x5230; clientState&#xFF0C;&#x8FD9;&#x4E2A;&#x53D8;&#x91CF;&#x7684;&#x521D;&#x59CB;&#x5316;&#x662F;<code>clientState := NewIndexer(DeletionHandlingMetaNamespaceKeyFunc, indexers)</code></p>
 <p>NewIndexer &#x4EE3;&#x7801;&#x5982;&#x4E0B;&#xFF1A;</p>
 <div><p class="code-filename">tools/cache/store.go:239</p></div>
@@ -985,7 +1009,7 @@ loop<span class="token punctuation">:</span>
    <span class="token function">AddIndexers</span><span class="token punctuation">(</span>newIndexers Indexers<span class="token punctuation">)</span> <span class="token builtin">error</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>&#x987A;&#x5E26;&#x770B;&#x4E00;&#x4E0B; NewThreadSafeStore()</p>
+<p>&#x987A;&#x5E26;&#x770B;&#x4E00;&#x4E0B; <strong>NewThreadSafeStore()</strong></p>
 <div><p class="code-filename">tools/cache/thread_safe_store.go:298</p></div>
 <pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token function">NewThreadSafeStore</span><span class="token punctuation">(</span>indexers Indexers<span class="token punctuation">,</span> indices Indices<span class="token punctuation">)</span> ThreadSafeStore <span class="token punctuation">{</span>
    <span class="token keyword">return</span> <span class="token operator">&amp;</span>threadSafeMap<span class="token punctuation">{</span>
@@ -1021,10 +1045,10 @@ loop<span class="token punctuation">:</span>
    c<span class="token punctuation">.</span><span class="token function">updateIndices</span><span class="token punctuation">(</span>oldObject<span class="token punctuation">,</span> obj<span class="token punctuation">,</span> key<span class="token punctuation">)</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>&#x7B2C;&#x56DB;&#x6B65;&#x548C;&#x7B2C;&#x4E94;&#x6B65;&#x7684;&#x5185;&#x5BB9;&#x5148;&#x5206;&#x6790;&#x5230;&#x8FD9;&#x91CC;&#xFF0C;&#x540E;&#x9762;&#x5173;&#x6CE8; threadSafeMap &#x5B9E;&#x73B0;&#x7684;&#x65F6;&#x5019;&#x518D;&#x7EE7;&#x7EED;&#x6DF1;&#x5165;&#x3002;</p>
-<h2 id="sharedIndexInformer">7. sharedIndexInformer</h2>
-<p>&#x7B2C;&#x516D;&#x6B65;&#x662F; Dispatch Event Handler functions(Send Object to Custom Controller)</p>
-<p>&#x6211;&#x4EEC;&#x5148;&#x770B;&#x4E00;&#x4E2A;&#x63A5;&#x53E3; SharedInformer&#xFF1A;</p>
+<p>&#x8FD9;&#x5757;&#x903B;&#x8F91;&#x5148;&#x5206;&#x6790;&#x5230;&#x8FD9;&#x91CC;&#xFF0C;&#x540E;&#x9762;&#x5173;&#x6CE8; threadSafeMap &#x5B9E;&#x73B0;&#x7684;&#x65F6;&#x5019;&#x518D;&#x7EE7;&#x7EED;&#x6DF1;&#x5165;&#x3002;</p>
+<h2 id="&#x7B2C;&#x516D;&#x6B65;&#xFF1A;Dispatch_Event_Handler_functions">6. &#x7B2C;&#x516D;&#x6B65;&#xFF1A;Dispatch Event Handler functions</h2>
+<p>&#x6211;&#x4EEC;&#x5148;&#x770B;&#x4E00;&#x4E2A;&#x63A5;&#x53E3; SharedInformer</p>
+<h3 id="sharedIndexInformer">6.1. sharedIndexInformer</h3>
 <div><p class="code-filename">tools/cache/shared_informer.go:43</p></div>
 <pre class="language-"><code class="lang-go"><span class="token keyword">type</span> SharedInformer <span class="token keyword">interface</span> <span class="token punctuation">{</span>
    <span class="token function">AddEventHandler</span><span class="token punctuation">(</span>handler ResourceEventHandler<span class="token punctuation">)</span>
@@ -1065,7 +1089,7 @@ loop<span class="token punctuation">:</span>
 <span class="token punctuation">}</span>
 </code></pre>
 <p>&#x8FD9;&#x4E2A;&#x7C7B;&#x578B;&#x5185;&#x5305;&#x4E86;&#x5F88;&#x591A;&#x6211;&#x4EEC;&#x524D;&#x9762;&#x770B;&#x5230;&#x8FC7;&#x7684;&#x5BF9;&#x8C61;&#xFF0C;indexer&#x3001;controller&#x3001;listeratcher &#x90FD;&#x4E0D;&#x964C;&#x751F;&#xFF0C;&#x6211;&#x4EEC;&#x770B;&#x8FD9;&#x91CC;&#x7684; processor &#x662F;&#x505A;&#x4EC0;&#x4E48;&#x7684;&#xFF1A;</p>
-<h3 id="sharedProcessor">7.1. sharedProcessor</h3>
+<h3 id="sharedProcessor">6.2. sharedProcessor</h3>
 <p>&#x7C7B;&#x578B;&#x5B9A;&#x4E49;&#x5982;&#x4E0B;&#xFF1A;</p>
 <div><p class="code-filename">tools/cache/shared_informer.go:375</p></div>
 <pre class="language-"><code class="lang-go"><span class="token keyword">type</span> sharedProcessor <span class="token keyword">struct</span> <span class="token punctuation">{</span>
@@ -1078,7 +1102,7 @@ loop<span class="token punctuation">:</span>
 <span class="token punctuation">}</span>
 </code></pre>
 <p>&#x8FD9;&#x91CC;&#x7684;&#x91CD;&#x70B9;&#x660E;&#x663E;&#x662F; listeners &#x5C5E;&#x6027;&#x4E86;&#xFF0C;&#x6211;&#x4EEC;&#x7EE7;&#x7EED;&#x770B; listeners &#x7684;&#x7C7B;&#x578B;&#x4E2D;&#x7684; processorListener&#xFF1A;</p>
-<h4 id="processorListener">7.1.1. processorListener</h4>
+<h4 id="processorListener">6.2.1. processorListener</h4>
 <div><p class="code-filename">tools/cache/shared_informer.go:466</p></div>
 <pre class="language-"><code class="lang-go"><span class="token keyword">type</span> processorListener <span class="token keyword">struct</span> <span class="token punctuation">{</span>
    nextCh <span class="token keyword">chan</span> <span class="token keyword">interface</span><span class="token punctuation">{</span><span class="token punctuation">}</span>
@@ -1095,7 +1119,7 @@ loop<span class="token punctuation">:</span>
 <li>run()</li>
 <li>pop()</li>
 </ul>
-<h4 id="processorListener_run()">7.1.2. processorListener.run()</h4>
+<h4 id="processorListener_run()">6.2.2. processorListener.run()</h4>
 <p>&#x5148;&#x770B;&#x4E00;&#x4E0B;&#x8FD9;&#x4E2A; run &#x505A;&#x4E86;&#x4EC0;&#x4E48;&#xFF1A;</p>
 <div><p class="code-filename">tools/cache/shared_informer.go:540</p></div>
 <pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>p <span class="token operator">*</span>processorListener<span class="token punctuation">)</span> <span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -1145,7 +1169,7 @@ loop<span class="token punctuation">:</span>
 <span class="token punctuation">}</span>
 </code></pre>
 <p>&#x53E6;&#x5916;&#x6CE8;&#x610F;&#x5230;<code>for next := range p.nextCh</code>&#x662F;&#x4E0B;&#x9762;&#x7684; case &#x6267;&#x884C;&#x7684;&#x524D;&#x63D0;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x8BF4;&#x89E6;&#x53D1;&#x70B9;&#x662F; p.nextCh&#xFF0C;&#x6211;&#x4EEC;&#x63A5;&#x7740;&#x770B; pop &#x8FC7;&#x7A0B;(&#x8FD9;&#x91CC;&#x7684;&#x903B;&#x8F91;&#x4E0D;&#x7B80;&#x5355;&#xFF0C;&#x53EF;&#x80FD;&#x5F97;&#x591A;&#x82B1;&#x70B9;&#x7CBE;&#x529B;)</p>
-<h4 id="processorListener_pop()">7.1.3. processorListener.pop()</h4>
+<h4 id="processorListener_pop()">6.2.3. processorListener.pop()</h4>
 <div><p class="code-filename">tools/cache/shared_informer.go:510</p></div>
 <pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>p <span class="token operator">*</span>processorListener<span class="token punctuation">)</span> <span class="token function">pop</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
    <span class="token keyword">defer</span> utilruntime<span class="token punctuation">.</span><span class="token function">HandleCrash</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
@@ -1186,14 +1210,14 @@ loop<span class="token punctuation">:</span>
 <span class="token punctuation">}</span>
 </code></pre>
 <p>&#x8FD9;&#x91CC;&#x7684; pop &#x903B;&#x8F91;&#x7684;&#x5165;&#x53E3;&#x662F;<code>&lt;-p.addCh</code>&#xFF0C;&#x6211;&#x4EEC;&#x7EE7;&#x7EED;&#x5411;&#x4E0A;&#x627E;&#x4E00;&#x4E0B;&#x8FD9;&#x4E2A; addCh &#x7684;&#x6765;&#x6E90;&#xFF1A;</p>
-<h4 id="processorListener_add()">7.1.4. processorListener.add()</h4>
+<h4 id="processorListener_add()">6.2.4. processorListener.add()</h4>
 <div><p class="code-filename">tools/cache/shared_informer.go:506</p></div>
 <pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>p <span class="token operator">*</span>processorListener<span class="token punctuation">)</span> <span class="token function">add</span><span class="token punctuation">(</span>notification <span class="token keyword">interface</span><span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
    p<span class="token punctuation">.</span>addCh <span class="token operator">&lt;-</span> notification
 <span class="token punctuation">}</span>
 </code></pre>
 <p>&#x8FD9;&#x4E2A; add() &#x65B9;&#x6CD5;&#x53C8;&#x5728;&#x54EA;&#x91CC;&#x88AB;&#x8C03;&#x7528;&#x5462;&#xFF1F;</p>
-<h4 id="sharedProcessor_distribute()">7.1.5. sharedProcessor.distribute()</h4>
+<h4 id="sharedProcessor_distribute()">6.2.5. sharedProcessor.distribute()</h4>
 <div><p class="code-filename">tools/cache/shared_informer.go:400</p></div>
 <pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>p <span class="token operator">*</span>sharedProcessor<span class="token punctuation">)</span> <span class="token function">distribute</span><span class="token punctuation">(</span>obj <span class="token keyword">interface</span><span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span> sync <span class="token builtin">bool</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
    p<span class="token punctuation">.</span>listenersLock<span class="token punctuation">.</span><span class="token function">RLock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
@@ -1211,7 +1235,7 @@ loop<span class="token punctuation">:</span>
 <span class="token punctuation">}</span>
 </code></pre>
 <p>&#x8FD9;&#x4E2A;&#x65B9;&#x6CD5;&#x903B;&#x8F91;&#x6BD4;&#x8F83;&#x7B80;&#x6D01;&#xFF0C;&#x5206;&#x53D1;&#x5BF9;&#x8C61;&#x3002;&#x6211;&#x4EEC;&#x7EE7;&#x7EED;&#x770B;&#x54EA;&#x91CC;&#x8FDB;&#x5165;&#x7684; distribute&#xFF1A;</p>
-<h3 id="sharedIndexInformer_HandleDeltas()">7.2. sharedIndexInformer.HandleDeltas()</h3>
+<h3 id="sharedIndexInformer_HandleDeltas()">6.3. sharedIndexInformer.HandleDeltas()</h3>
 <div><p class="code-filename">tools/cache/shared_informer.go:344</p></div>
 <pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>s <span class="token operator">*</span>sharedIndexInformer<span class="token punctuation">)</span> <span class="token function">HandleDeltas</span><span class="token punctuation">(</span>obj <span class="token keyword">interface</span><span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token builtin">error</span> <span class="token punctuation">{</span>
    s<span class="token punctuation">.</span>blockDeltas<span class="token punctuation">.</span><span class="token function">Lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
@@ -1249,7 +1273,7 @@ loop<span class="token punctuation">:</span>
 <span class="token punctuation">}</span>
 </code></pre>
 <p>&#x7EE7;&#x7EED;&#x5F80;&#x524D;&#x770B;&#x4EE3;&#x7801;&#x903B;&#x8F91;&#x3002;</p>
-<h3 id="sharedIndexInformer_Run()">7.3. sharedIndexInformer.Run()</h3>
+<h3 id="sharedIndexInformer_Run()">6.4. sharedIndexInformer.Run()</h3>
 <div><p class="code-filename">tools/cache/shared_informer.go:189</p></div>
 <pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>s <span class="token operator">*</span>sharedIndexInformer<span class="token punctuation">)</span> <span class="token function">Run</span><span class="token punctuation">(</span>stopCh <span class="token operator">&lt;-</span><span class="token keyword">chan</span> <span class="token keyword">struct</span><span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
    <span class="token keyword">defer</span> utilruntime<span class="token punctuation">.</span><span class="token function">HandleCrash</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
@@ -1296,7 +1320,7 @@ loop<span class="token punctuation">:</span>
 </code></pre>
 <p>&#x770B;&#x5230;&#x8FD9;&#x91CC;&#x5DF2;&#x7ECF;&#x633A;&#x548C;&#x8C10;&#x4E86;&#xFF0C;&#x5728; sharedIndexInformer &#x7684; Run() &#x65B9;&#x6CD5;&#x4E2D;&#x5148;&#x662F;&#x521B;&#x5EFA;&#x4E00;&#x4E2A; DeltaFIFO&#xFF0C;&#x7136;&#x540E;&#x548C; lw &#x4E00;&#x8D77;&#x521D;&#x59CB;&#x5316; cfg&#xFF0C;&#x5229;&#x7528; cfg &#x521B;&#x5EFA; controller&#xFF0C;&#x6700;&#x540E; Run &#x8FD9;&#x4E2A; controller&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x6700;&#x57FA;&#x7840;&#x7684; informer.</p>
 <p>&#x5728;&#x8FD9;&#x6BB5;&#x4EE3;&#x7801;&#x91CC;&#x6211;&#x4EEC;&#x8FD8;&#x6CE8;&#x610F;&#x5230;&#x6709;&#x4E00;&#x6B65;&#x662F;<code>s.processor.run</code>&#xFF0C;&#x6211;&#x4EEC;&#x770B;&#x4E00;&#x4E0B;&#x8FD9;&#x4E2A; run &#x7684;&#x903B;&#x8F91;&#x3002;</p>
-<h4 id="sharedProcessor_run()">7.3.1. sharedProcessor.run()</h4>
+<h4 id="sharedProcessor_run()">6.4.1. sharedProcessor.run()</h4>
 <div><p class="code-filename">tools/cache/shared_informer.go:415</p></div>
 <pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>p <span class="token operator">*</span>sharedProcessor<span class="token punctuation">)</span> <span class="token function">run</span><span class="token punctuation">(</span>stopCh <span class="token operator">&lt;-</span><span class="token keyword">chan</span> <span class="token keyword">struct</span><span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
    <span class="token keyword">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -1318,8 +1342,8 @@ loop<span class="token punctuation">:</span>
 <p>&#x5230;&#x8FD9;&#x91CC;&#xFF0C;&#x6211;&#x4EEC;&#x57FA;&#x672C;&#x8BB2;&#x5B8C;&#x4E86;&#x81EA;&#x5B9A;&#x4E49; controller &#x7684;&#x65F6;&#x5019; client-go &#x91CC;&#x76F8;&#x5173;&#x7684;&#x903B;&#x8F91;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x56FE;&#x4E2D;&#x7684;&#x4E0A;&#x534A;&#x90E8;&#x5206;&#xFF1A;</p>
 <p><img src="image/informer/1556161315850.png" alt="1556161315850"></p>
 <footer class="page-footer"><span class="copyright">Copyright &#xA9; farmer.hutao@outlook.com 2019 all right reserved&#xFF0C;powered by Gitbook</span><span class="footer-modification">&#x8BE5;&#x6587;&#x4EF6;&#x4FEE;&#x8BA2;&#x65F6;&#x95F4;&#xFF1A;
-2019-05-09 09:57:41
-</span></footer><div id="anchors-navbar"><i class="fa fa-anchor"></i><ul><p><a href="#Custom_Controller_&#x4E4B;_Informer_(&#x4E00;)">Custom Controller &#x4E4B; Informer (&#x4E00;)</a></p><li><a href="#&#x6982;&#x8FF0;">1. &#x6982;&#x8FF0;</a></li><li><a href="#&#x67B6;&#x6784;&#x6982;&#x89C8;">2. &#x67B6;&#x6784;&#x6982;&#x89C8;</a></li><li><a href="#reflector_-_List___Watch_API_Server">3. reflector - List &amp; Watch API Server</a></li><ul><li><a href="#Reflector_&#x5BF9;&#x8C61;">3.1. Reflector &#x5BF9;&#x8C61;</a></li><li><a href="#ListAndWatch">3.2. ListAndWatch</a></li></ul><li><a href="#watchHandler_-_add_obj_to_delta_fifo">4. watchHandler - add obj to delta fifo</a></li><li><a href="#Informer_(controller)_-_pop_obj_from_delta_fifo">5. Informer (controller) - pop obj from delta fifo</a></li><ul><li><a href="#Controller">5.1. Controller</a></li><li><a href="#processLoop">5.2. processLoop</a></li></ul><li><a href="#Add_obj_to_Indexer_(Thread_safe_store)">6. Add obj to Indexer (Thread safe store)</a></li><li><a href="#sharedIndexInformer">7. sharedIndexInformer</a></li><ul><li><a href="#sharedProcessor">7.1. sharedProcessor</a></li><ul><li><a href="#processorListener">7.1.1. processorListener</a></li><li><a href="#processorListener_run()">7.1.2. processorListener.run()</a></li><li><a href="#processorListener_pop()">7.1.3. processorListener.pop()</a></li><li><a href="#processorListener_add()">7.1.4. processorListener.add()</a></li><li><a href="#sharedProcessor_distribute()">7.1.5. sharedProcessor.distribute()</a></li></ul><li><a href="#sharedIndexInformer_HandleDeltas()">7.2. sharedIndexInformer.HandleDeltas()</a></li><li><a href="#sharedIndexInformer_Run()">7.3. sharedIndexInformer.Run()</a></li><ul><li><a href="#sharedProcessor_run()">7.3.1. sharedProcessor.run()</a></li></ul></ul></ul></div><a href="#&#x6982;&#x8FF0;" id="goTop"><i class="fa fa-arrow-up"></i></a>
+2019-06-20 14:58:28
+</span></footer><div id="anchors-navbar"><i class="fa fa-anchor"></i><ul><p><a href="#Custom_Controller_&#x4E4B;_Informer_(&#x4E00;)">Custom Controller &#x4E4B; Informer (&#x4E00;)</a></p><li><a href="#&#x6982;&#x8FF0;">1. &#x6982;&#x8FF0;</a></li><li><a href="#&#x67B6;&#x6784;&#x6982;&#x89C8;">2. &#x67B6;&#x6784;&#x6982;&#x89C8;</a></li><ul><li><a href="#client-go_&#x76F8;&#x5173;&#x6A21;&#x5757;">2.1. client-go &#x76F8;&#x5173;&#x6A21;&#x5757;</a></li><li><a href="#&#x81EA;&#x5B9A;&#x4E49;&#x63A7;&#x5236;&#x5668;&#x76F8;&#x5173;&#x6A21;&#x5757;">2.2. &#x81EA;&#x5B9A;&#x4E49;&#x63A7;&#x5236;&#x5668;&#x76F8;&#x5173;&#x6A21;&#x5757;</a></li></ul><li><a href="#&#x7B2C;&#x4E00;&#x6B65;&#xFF1A;reflector_-_List___Watch_API_Server">3. &#x7B2C;&#x4E00;&#x6B65;&#xFF1A;reflector - List &amp; Watch API Server</a></li><ul><li><a href="#Reflector_&#x5BF9;&#x8C61;&#x5B9A;&#x4E49;">3.1. Reflector &#x5BF9;&#x8C61;&#x5B9A;&#x4E49;</a></li><li><a href="#ListAndWatch">3.2. ListAndWatch</a></li></ul><li><a href="#&#x7B2C;&#x4E8C;&#x6B65;&#xFF1A;watchHandler_-_add_obj_to_delta_fifo">4. &#x7B2C;&#x4E8C;&#x6B65;&#xFF1A;watchHandler - add obj to delta fifo</a></li><li><a href="#&#x7B2C;&#x4E09;&#x3001;&#x56DB;&#x3001;&#x4E94;&#x6B65;&#xFF1A;Informer_-_pop_obj_from_delta_fifo&#x3001;Add_obj_to_store">5. &#x7B2C;&#x4E09;&#x3001;&#x56DB;&#x3001;&#x4E94;&#x6B65;&#xFF1A;Informer - pop obj from delta fifo&#x3001;Add obj to store</a></li><ul><li><a href="#Controller">5.1. Controller</a></li><li><a href="#processLoop">5.2. processLoop</a></li><li><a href="#clientState">5.3. clientState</a></li></ul><li><a href="#&#x7B2C;&#x516D;&#x6B65;&#xFF1A;Dispatch_Event_Handler_functions">6. &#x7B2C;&#x516D;&#x6B65;&#xFF1A;Dispatch Event Handler functions</a></li><ul><li><a href="#sharedIndexInformer">6.1. sharedIndexInformer</a></li><li><a href="#sharedProcessor">6.2. sharedProcessor</a></li><ul><li><a href="#processorListener">6.2.1. processorListener</a></li><li><a href="#processorListener_run()">6.2.2. processorListener.run()</a></li><li><a href="#processorListener_pop()">6.2.3. processorListener.pop()</a></li><li><a href="#processorListener_add()">6.2.4. processorListener.add()</a></li><li><a href="#sharedProcessor_distribute()">6.2.5. sharedProcessor.distribute()</a></li></ul><li><a href="#sharedIndexInformer_HandleDeltas()">6.3. sharedIndexInformer.HandleDeltas()</a></li><li><a href="#sharedIndexInformer_Run()">6.4. sharedIndexInformer.Run()</a></li><ul><li><a href="#sharedProcessor_run()">6.4.1. sharedProcessor.run()</a></li></ul></ul></ul></div><a href="#&#x6982;&#x8FF0;" id="goTop"><i class="fa fa-arrow-up"></i></a>
                                 
                                 </section>
                             
@@ -1378,7 +1402,7 @@ loop<span class="token punctuation">:</span>
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Informer (一)","level":"3.2.1","depth":2,"next":{"title":"Informer(二)","level":"3.2.2","depth":2,"path":"around/client-go/informer2.md","ref":"around/client-go/informer2.md","articles":[]},"previous":{"title":"client-go","level":"3.2","depth":1,"path":"around/client-go/README.md","ref":"around/client-go/README.md","articles":[{"title":"Informer (一)","level":"3.2.1","depth":2,"path":"around/client-go/informer.md","ref":"around/client-go/informer.md","articles":[]},{"title":"Informer(二)","level":"3.2.2","depth":2,"path":"around/client-go/informer2.md","ref":"around/client-go/informer2.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["theme-comscore","codeblock-filename","navigator","simple-page-toc","expandable-chapters-small","search-pro","splitter","multipart","tbfed-pagefooter","prism","-highlight","editlink","github","github-buttons@2.1.0","donate","copy-code-button"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"tbfed-pagefooter":{"copyright":"Copyright &copy farmer.hutao@outlook.com 2019","modify_label":"该文件修订时间：","modify_format":"YYYY-MM-DD HH:mm:ss"},"prism":{},"github":{"url":"https://github.com/farmer-hutao/k8s-source-code-analysis"},"editlink":{"label":"编辑本页","multilingual":false,"base":"https://github.com/farmer-hutao/k8s-source-code-analysis/edit/master"},"simple-page-toc":{"maxDepth":4,"skipFirstH1":true},"splitter":{},"search-pro":{"cutWordLib":"nodejieba","defineWord":["Gitbook Use"]},"search":{},"multipart":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"donate":{"alipay":"","alipayText":"支付宝打赏","button":"鼓励作者","title":"催作者快快更新","wechat":"./image/wx.jpg","wechatText":"微信小额捐赠，鼓励作者尽快更新～"},"fontsettings":{"theme":"white","family":"sans","size":2},"codeblock-filename":{},"theme-comscore":{},"navigator":{},"github-buttons":{"repo":"farmer-hutao/k8s-source-code-analysis","types":["star"],"size":"small"},"expandable-chapters-small":{},"copy-code-button":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":true}},"theme":"default","author":"Tao Hu <farmer.hutao@outlook.com>","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"《k8s-1.13版本源码分析》","gitbook":"*","description":"k8s source code analysis"},"file":{"path":"around/client-go/informer.md","mtime":"2019-05-09T01:57:41.737Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-05-29T03:18:27.613Z"},"basePath":"../..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Informer (一)","level":"3.2.1","depth":2,"next":{"title":"Informer(二)","level":"3.2.2","depth":2,"path":"around/client-go/informer2.md","ref":"around/client-go/informer2.md","articles":[]},"previous":{"title":"client-go","level":"3.2","depth":1,"path":"around/client-go/README.md","ref":"around/client-go/README.md","articles":[{"title":"Informer (一)","level":"3.2.1","depth":2,"path":"around/client-go/informer.md","ref":"around/client-go/informer.md","articles":[]},{"title":"Informer(二)","level":"3.2.2","depth":2,"path":"around/client-go/informer2.md","ref":"around/client-go/informer2.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["theme-comscore","codeblock-filename","navigator","simple-page-toc","expandable-chapters-small","search-pro","splitter","multipart","tbfed-pagefooter","prism","-highlight","editlink","github","github-buttons@2.1.0","donate","copy-code-button"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"tbfed-pagefooter":{"copyright":"Copyright &copy farmer.hutao@outlook.com 2019","modify_label":"该文件修订时间：","modify_format":"YYYY-MM-DD HH:mm:ss"},"prism":{},"github":{"url":"https://github.com/farmer-hutao/k8s-source-code-analysis"},"editlink":{"label":"编辑本页","multilingual":false,"base":"https://github.com/farmer-hutao/k8s-source-code-analysis/edit/master"},"simple-page-toc":{"maxDepth":4,"skipFirstH1":true},"splitter":{},"search-pro":{"cutWordLib":"nodejieba","defineWord":["Gitbook Use"]},"search":{},"multipart":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"donate":{"alipay":"","alipayText":"支付宝打赏","button":"鼓励作者","title":"催作者快快更新","wechat":"./image/wx.jpg","wechatText":"微信小额捐赠，鼓励作者尽快更新～"},"fontsettings":{"theme":"white","family":"sans","size":2},"codeblock-filename":{},"theme-comscore":{},"navigator":{},"github-buttons":{"repo":"farmer-hutao/k8s-source-code-analysis","types":["star"],"size":"small"},"expandable-chapters-small":{},"copy-code-button":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":true}},"theme":"default","author":"Tao Hu <farmer.hutao@outlook.com>","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"《k8s-1.13版本源码分析》","gitbook":"*","description":"k8s source code analysis"},"file":{"path":"around/client-go/informer.md","mtime":"2019-06-20T06:58:28.297Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-06-20T07:00:23.544Z"},"basePath":"../..","book":{"language":""}});
         });
     </script>
 </div>
