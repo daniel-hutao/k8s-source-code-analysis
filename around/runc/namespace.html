@@ -1,0 +1,1662 @@
+
+<!DOCTYPE HTML>
+<html lang="" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>RunC 源码通读之 NameSpace · 《k8s-1.13版本源码分析》</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        <meta name="author" content="Tao Hu <farmer.hutao@outlook.com>">
+        
+        
+    
+    <link rel="stylesheet" href="../../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-codeblock-filename/block.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-navigator/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-expandable-chapters-small/expandable-chapters-small.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-search-pro/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-splitter/splitter.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-multipart/multipart.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-tbfed-pagefooter/footer.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-prism/prism.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-donate/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-theme-comscore/test.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="cgroup.html" />
+    
+    
+    <link rel="prev" href="./" />
+    
+
+    <style>
+    @media only screen and (max-width: 640px) {
+        .book-header .hidden-mobile {
+            display: none;
+        }
+    }
+    </style>
+    <script>
+        window["gitbook-plugin-github-buttons"] = {"repo":"farmer-hutao/k8s-source-code-analysis","types":["star"],"size":"small"};
+    </script>
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        <li class="header">Part I - 准备工作</li>
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../../">
+            
+                <a href="../../">
+            
+                    
+                        <b>1.1.</b>
+                    
+                    前言
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="../../prepare/">
+            
+                <a href="../../prepare/">
+            
+                    
+                        <b>1.2.</b>
+                    
+                    k8s源码分析准备工作
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.2.1" data-path="../../prepare/get-code.html">
+            
+                <a href="../../prepare/get-code.html">
+            
+                    
+                        <b>1.2.1.</b>
+                    
+                    源码准备
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.2" data-path="../../prepare/debug-environment.html">
+            
+                <a href="../../prepare/debug-environment.html">
+            
+                    
+                        <b>1.2.2.</b>
+                    
+                    测试环境搭建-单节点
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.3" data-path="../../prepare/debug-environment-3node.html">
+            
+                <a href="../../prepare/debug-environment-3node.html">
+            
+                    
+                        <b>1.2.3.</b>
+                    
+                    测试环境搭建-三节点
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.4" data-path="../../prepare/debug.html">
+            
+                <a href="../../prepare/debug.html">
+            
+                    
+                        <b>1.2.4.</b>
+                    
+                    源码调试
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part II - 核心组件</li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="../../core/">
+            
+                <a href="../../core/">
+            
+                    
+                        <b>2.1.</b>
+                    
+                    概述
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2" data-path="../../core/scheduler/">
+            
+                <a href="../../core/scheduler/">
+            
+                    
+                        <b>2.2.</b>
+                    
+                    scheduler
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.2.1" data-path="../../core/scheduler/design.html">
+            
+                <a href="../../core/scheduler/design.html">
+            
+                    
+                        <b>2.2.1.</b>
+                    
+                    调度器设计
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.2" data-path="../../core/scheduler/before-scheduler-run.html">
+            
+                <a href="../../core/scheduler/before-scheduler-run.html">
+            
+                    
+                        <b>2.2.2.</b>
+                    
+                    调度程序启动前逻辑
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.3" data-path="../../core/scheduler/scheduler-framework.html">
+            
+                <a href="../../core/scheduler/scheduler-framework.html">
+            
+                    
+                        <b>2.2.3.</b>
+                    
+                    调度器框架
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.4" data-path="../../core/scheduler/generic-scheduler.html">
+            
+                <a href="../../core/scheduler/generic-scheduler.html">
+            
+                    
+                        <b>2.2.4.</b>
+                    
+                    一般调度过程
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.5" data-path="../../core/scheduler/predicate.html">
+            
+                <a href="../../core/scheduler/predicate.html">
+            
+                    
+                        <b>2.2.5.</b>
+                    
+                    预选过程
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.6" data-path="../../core/scheduler/priority.html">
+            
+                <a href="../../core/scheduler/priority.html">
+            
+                    
+                        <b>2.2.6.</b>
+                    
+                    优选过程
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.7" data-path="../../core/scheduler/preempt.html">
+            
+                <a href="../../core/scheduler/preempt.html">
+            
+                    
+                        <b>2.2.7.</b>
+                    
+                    抢占调度
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.8" data-path="../../core/scheduler/init.html">
+            
+                <a href="../../core/scheduler/init.html">
+            
+                    
+                        <b>2.2.8.</b>
+                    
+                    调度器初始化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.9" data-path="../../core/scheduler/affinity.html">
+            
+                <a href="../../core/scheduler/affinity.html">
+            
+                    
+                        <b>2.2.9.</b>
+                    
+                    专题-亲和性调度
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.10" data-path="../../core/scheduler/summarize.html">
+            
+                <a href="../../core/scheduler/summarize.html">
+            
+                    
+                        <b>2.2.10.</b>
+                    
+                    scheduler 总结
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.3" data-path="../../core/controller-manager/">
+            
+                <a href="../../core/controller-manager/">
+            
+                    
+                        <b>2.3.</b>
+                    
+                    controller-manager
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.3.1" data-path="../../core/controller-manager/controller.html">
+            
+                <a href="../../core/controller-manager/controller.html">
+            
+                    
+                        <b>2.3.1.</b>
+                    
+                    控制器概述
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.3.2" data-path="../../core/controller-manager/custom-controller.html">
+            
+                <a href="../../core/controller-manager/custom-controller.html">
+            
+                    
+                        <b>2.3.2.</b>
+                    
+                    自定义控制器
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.4" data-path="../../core/apiserver/">
+            
+                <a href="../../core/apiserver/">
+            
+                    
+                        <b>2.4.</b>
+                    
+                    apiserver
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.5" data-path="../../core/kube-proxy/">
+            
+                <a href="../../core/kube-proxy/">
+            
+                    
+                        <b>2.5.</b>
+                    
+                    kube-proxy
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.5.1" data-path="../../core/kube-proxy/arch.html">
+            
+                <a href="../../core/kube-proxy/arch.html">
+            
+                    
+                        <b>2.5.1.</b>
+                    
+                    Proxy 服务框架
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.5.2" data-path="../../core/kube-proxy/iptables.html">
+            
+                <a href="../../core/kube-proxy/iptables.html">
+            
+                    
+                        <b>2.5.2.</b>
+                    
+                    Iptables-mode Proxier
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.5.3" data-path="../../core/kube-proxy/ipvs.html">
+            
+                <a href="../../core/kube-proxy/ipvs.html">
+            
+                    
+                        <b>2.5.3.</b>
+                    
+                    Ipvs-Mode Proxier
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.5.4" data-path="../../core/kube-proxy/userspace.html">
+            
+                <a href="../../core/kube-proxy/userspace.html">
+            
+                    
+                        <b>2.5.4.</b>
+                    
+                    Userspace-mode Proxier
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.6" data-path="../../core/kubelet/">
+            
+                <a href="../../core/kubelet/">
+            
+                    
+                        <b>2.6.</b>
+                    
+                    kubelet
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part III - 周边项目</li>
+        
+        
+    
+        <li class="chapter " data-level="3.1" data-path="../">
+            
+                <a href="../">
+            
+                    
+                        <b>3.1.</b>
+                    
+                    概述
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2" data-path="../client-go/">
+            
+                <a href="../client-go/">
+            
+                    
+                        <b>3.2.</b>
+                    
+                    client-go
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.2.1" data-path="../client-go/informer.html">
+            
+                <a href="../client-go/informer.html">
+            
+                    
+                        <b>3.2.1.</b>
+                    
+                    Informer (一)
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2.2" data-path="../client-go/informer2.html">
+            
+                <a href="../client-go/informer2.html">
+            
+                    
+                        <b>3.2.2.</b>
+                    
+                    Informer(二)
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.3" data-path="./">
+            
+                <a href="./">
+            
+                    
+                        <b>3.3.</b>
+                    
+                    RunC
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter active" data-level="3.3.1" data-path="namespace.html">
+            
+                <a href="namespace.html">
+            
+                    
+                        <b>3.3.1.</b>
+                    
+                    RunC 源码通读之 NameSpace
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.3.2" data-path="cgroup.html">
+            
+                <a href="cgroup.html">
+            
+                    
+                        <b>3.3.2.</b>
+                    
+                    RunC 源码通读之 Cgroup
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="../.." >RunC 源码通读之 NameSpace</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="RunC_&#x6E90;&#x7801;&#x901A;&#x8BFB;&#x6307;&#x5357;&#x4E4B;_NameSpace">RunC &#x6E90;&#x7801;&#x901A;&#x8BFB;&#x6307;&#x5357;&#x4E4B; NameSpace</h1>
+<!--toc-->
+<h2 id="&#x6982;&#x8FF0;">1. &#x6982;&#x8FF0;</h2>
+<p>&#x968F;&#x7740; docker &#x7684;&#x8BDE;&#x751F;&#x548C;&#x5BB9;&#x5668;&#x6280;&#x672F;&#x5E94;&#x7528;&#x4E0E;&#x9AD8;&#x901F;&#x53D1;&#x5C55;&#xFF0C;&#x957F;&#x671F;&#x4E00;&#x76F4;&#x5728;&#x540E;&#x53F0;&#x9ED8;&#x9ED8;&#x5949;&#x732E;&#x4E00;&#x4E9B; linux &#x7279;&#x6027;&#x5982; namespace&#x3001;cgroup &#x7B49;&#x6280;&#x672F;&#x8D70;&#x5411;&#x524D;&#x53F0;&#x3002;Namespace &#x662F; linux &#x5185;&#x6838;&#x6240;&#x63D0;&#x4F9B;&#x7684;&#x7279;&#x6027;&#xFF0C;&#x7528;&#x4E8E;&#x9694;&#x79BB;&#x5185;&#x6838;&#x8D44;&#x6E90;&#x7684;&#x65B9;&#x5F0F;&#xFF0C;&#x53EF;&#x4EE5;&#x8BF4;&#x6CA1;&#x6709;&#x9694;&#x79BB;&#x5C31;&#x4E0D;&#x4F1A;&#x5B58;&#x5728;&#x5BB9;&#x5668;&#x3002;</p>
+<p>Linux &#x5B98;&#x65B9;&#x63CF;&#x8FF0;&quot; namespace &#x662F;&#x5BF9;&#x5168;&#x5C40;&#x7CFB;&#x7EDF;&#x8D44;&#x6E90;&#x7684;&#x4E00;&#x79CD;&#x5C01;&#x88C5;&#x9694;&#x79BB;&#xFF0C;&#x4F7F;&#x5F97;&#x5904;&#x4E8E;&#x4E0D;&#x540C; namespace &#x7684;&#x8FDB;&#x7A0B;&#x62E5;&#x6709;&#x72EC;&#x7ACB;&#x7684;&#x5168;&#x5C40;&#x7CFB;&#x7EDF;&#x8D44;&#x6E90;&#xFF0C;&#x6539;&#x53D8;&#x4E00;&#x4E2A; namespace &#x4E2D;&#x7684;&#x7CFB;&#x7EDF;&#x8D44;&#x6E90;&#x53EA;&#x4F1A;&#x5F71;&#x54CD;&#x5F53;&#x524D; namespace &#x91CC;&#x7684;&#x8FDB;&#x7A0B;&#xFF0C;&#x5BF9;&#x5176;&#x4ED6; namespace &#x4E2D;&#x7684;&#x8FDB;&#x7A0B;&#x6CA1;&#x6709;&#x5F71;&#x54CD;&#x3002;&quot;&#x8BE6;&#x7EC6;&#x4ECB;&#x7ECD;<a href="http://man7.org/linux/man-pages/man7/namespaces.7.html" target="_blank">namespace&#x8BF4;&#x660E;&#x53C2;&#x8003;</a> &#x3002; Linux &#x5185;&#x6838;&#x91CC;&#x9762;&#x5B9E;&#x73B0;&#x4E86;7&#x79CD;&#x4E0D;&#x540C;&#x7C7B;&#x578B;&#x7684; namespace:</p>
+<pre class="language-"><code class="lang-shell">&#x540D;&#x79F0;        &#x5B8F;&#x5B9A;&#x4E49;             &#x9694;&#x79BB;&#x5185;&#x5BB9;
+Cgroup    CLONE_NEWCGROUP   Cgroup root directory 
+IPC       CLONE_NEWIPC      System V IPC, POSIX message queues 
+Network   CLONE_NEWNET      Network devices, stacks, ports, etc. 
+Mount     CLONE_NEWNS       Mount points
+PID       CLONE_NEWPID      Process IDs 
+User      CLONE_NEWUSER     User and group IDs 
+UTS       CLONE_NEWUTS      Hostname and NIS domain name
+</code></pre>
+<p>&#x672C;&#x6587;&#x5C06;&#x805A;&#x7126;&#x5728; runC &#x6E90;&#x7801;&#x5173;&#x4E8E;&#x5BB9;&#x5668;&#x521D;&#x59CB;&#x5316;&#x8FC7;&#x7A0B;&#x4E2D; namespace &#x5982;&#x4F55;&#x5E94;&#x7528;&#x4E0E;&#x5B9E;&#x73B0;&#x8D44;&#x6E90;&#x9694;&#x79BB;&#x3002;</p>
+<p>&#x4ECE;&#x5BB9;&#x5668;&#x7684; run &#x6267;&#x884C;&#x6D41;&#x7A0B;&#x6765;&#x770B;&#xFF1A; <strong>&#x5BB9;&#x5668;&#x5BF9;&#x8C61;&#x521B;&#x5EFA;&#x9636;&#x6BB5;</strong> startContainer() =&gt; createContainer() =&gt; loadFactory()  =&gt;  libcontainer.New() &#x5B8C;&#x6210; container &#x5BF9;&#x8C61;&#x7684;&#x521B;&#x5EFA;&#x540E;, startContainer() &#x4E2D;&#x5DF2;&#x521B;&#x5EFA;&#x7684; runner &#x5BF9;&#x8C61; run() &#x65B9;&#x6CD5;&#x6267;&#x884C;&#xFF0C;&#x8FDB;&#x5165;<strong>&#x5BB9;&#x5668;&#x5BF9;&#x8C61;&#x8FD0;&#x884C;&#x9636;&#x6BB5;</strong>:  startContainer() =&gt; runner.run() =&gt; newProcess() =&gt; runner.container.Run(process) =&gt; linuxContainer.strat() =&gt; linuxContainer.newParentProcess(process) =&gt; =&gt;linuxContainer.commandTemplate() =&gt; linuxContaine.newInitProcess() =&gt;parent.start() =&gt; initProcess.start() &#x3002;</p>
+<p>Parent.start() &#x6267;&#x884C;&#x5176;&#x5B9E;&#x5219;&#x662F; runC init &#x547D;&#x4EE4;&#x7684;&#x6267;&#x884C;:</p>
+<ol>
+<li>ParentProcces &#x521B;&#x5EFA;runC init&#x5B50;&#x8FDB;&#x7A0B;&#xFF0C;&#x4E2D;&#x95F4;&#x4F1A;&#x88AB; /runc/libcontainer/nsenter &#x52AB;&#x6301;( c &#x4EE3;&#x7801;&#x90E8;&#x5206; preamble )&#xFF0C;&#x4F7F; runc init &#x5B50;&#x8FDB;&#x7A0B;&#x4F4D;&#x4E8E;&#x5BB9;&#x5668;&#x914D;&#x7F6E;&#x6307;&#x5B9A;&#x7684;&#x5404;&#x4E2A; <strong>namespace</strong> &#x5185;&#xFF08;&#x5B9E;&#x73B0; namespace&#x914D;&#x7F6E; &#xFF09;</li>
+<li>ParentProcess &#x7528;init&#x7BA1;&#x9053;&#x5C06;&#x5BB9;&#x5668;&#x914D;&#x7F6E;&#x4FE1;&#x606F;&#x4F20;&#x8F93;&#x7ED9;runC init&#x8FDB;&#x7A0B;&#xFF0C;runC init&#x518D;&#x636E;&#x6B64;&#x914D;&#x7F6E;&#x4FE1;&#x606F;&#x8FDB;&#x884C;&#x5BB9;&#x5668;&#x7684;&#x521D;&#x59CB;&#x5316;&#x64CD;&#x4F5C;&#x3002;&#x521D;&#x59CB;&#x5316;&#x5B8C;&#x6210;&#x4E4B;&#x540E;&#xFF0C;&#x518D;&#x5411;&#x53E6;&#x4E00;&#x4E2A;&#x7BA1;&#x9053;exec.fifo&#x8FDB;&#x884C;&#x5199;&#x64CD;&#x4F5C;&#xFF0C;&#x8FDB;&#x5165;&#x963B;&#x585E;&#x72B6;&#x6001;&#x7B49;&#x5F85;runC start</li>
+</ol>
+<p>&#x56E0;&#x6B64;&#x672C;&#x6587;&#x6211;&#x4EEC;&#x5C06;&#x4ECE;&#x4E24;&#x4E2A;&#x65B9;&#x9762;&#x5C55;&#x5F00;&#x5206;&#x6790;&#xFF0C;&#x7B2C;&#x4E00;&#x5219;&#x662F; runC init &#x6D41;&#x7A0B;&#x6267;&#x884C;&#x5173;&#x4E8E; namespace &#x8BBE;&#x7F6E;&#x7684;&#x65F6;&#x673A;&#xFF0C;&#x7B2C;&#x4E8C;&#x5219;&#x662F; c &#x4EE3;&#x7801;&#x90E8;&#x5206; nsenter &#x7684;&#x5B9E;&#x73B0;&#xFF08; namespace &#x5173;&#x952E;&#x5E94;&#x7528;&#x4EE3;&#x7801;&#xFF09;&#x3002;</p>
+<h2 id="RunC_init_&#x6267;&#x884C;&#x6D41;&#x7A0B;&#x4E0E;_namespace">2. RunC init &#x6267;&#x884C;&#x6D41;&#x7A0B;&#x4E0E; namespace</h2>
+<p>&#x521B;&#x5EFA;&#x5BB9;&#x5668;&#x7684; init &#x8FDB;&#x7A0B;&#x65F6;&#x76F8;&#x5173; namespace &#x914D;&#x7F6E;&#x9879;</p>
+<div><p class="code-filename">libcontainer/container_linux.go:512</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>c <span class="token operator">*</span>linuxContainer<span class="token punctuation">)</span> <span class="token function">newInitProcess</span><span class="token punctuation">(</span>p <span class="token operator">*</span>Process<span class="token punctuation">,</span> cmd <span class="token operator">*</span>exec<span class="token punctuation">.</span>Cmd<span class="token punctuation">,</span> messageSockPair<span class="token punctuation">,</span> logFilePair filePair<span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token operator">*</span>initProcess<span class="token punctuation">,</span> <span class="token builtin">error</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    cmd<span class="token punctuation">.</span>Env <span class="token operator">=</span> <span class="token function">append</span><span class="token punctuation">(</span>cmd<span class="token punctuation">.</span>Env<span class="token punctuation">,</span> <span class="token string">&quot;_LIBCONTAINER_INITTYPE=&quot;</span><span class="token operator">+</span><span class="token function">string</span><span class="token punctuation">(</span>initStandard<span class="token punctuation">)</span><span class="token punctuation">)</span>
+    nsMaps <span class="token operator">:=</span> <span class="token function">make</span><span class="token punctuation">(</span><span class="token keyword">map</span><span class="token punctuation">[</span>configs<span class="token punctuation">.</span>NamespaceType<span class="token punctuation">]</span><span class="token builtin">string</span><span class="token punctuation">)</span>  
+    <span class="token keyword">for</span> <span class="token boolean">_</span><span class="token punctuation">,</span> ns <span class="token operator">:=</span> <span class="token keyword">range</span> c<span class="token punctuation">.</span>config<span class="token punctuation">.</span>Namespaces <span class="token punctuation">{</span>    <span class="token comment">// &#x5BB9;&#x5668; namesapces &#x914D;&#x7F6E;</span>
+        <span class="token keyword">if</span> ns<span class="token punctuation">.</span>Path <span class="token operator">!=</span> <span class="token string">&quot;&quot;</span> <span class="token punctuation">{</span>
+            nsMaps<span class="token punctuation">[</span>ns<span class="token punctuation">.</span>Type<span class="token punctuation">]</span> <span class="token operator">=</span> ns<span class="token punctuation">.</span>Path
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+    <span class="token boolean">_</span><span class="token punctuation">,</span> sharePidns <span class="token operator">:=</span> nsMaps<span class="token punctuation">[</span>configs<span class="token punctuation">.</span>NEWPID<span class="token punctuation">]</span>
+  <span class="token comment">// &#x521B;&#x5EFA; init &#x8FDB;&#x7A0B;&#x540C;&#x6B65;namespace&#x914D;&#x7F6E;&#x9879;&#x6570;&#x636E;&#xFF08;&#x540E;&#x9762;&#x6709;&#x8BE6;&#x8FF0;bootstrapData&#xFF09;</span>
+    data<span class="token punctuation">,</span> err <span class="token operator">:=</span> c<span class="token punctuation">.</span><span class="token function">bootstrapData</span><span class="token punctuation">(</span>c<span class="token punctuation">.</span>config<span class="token punctuation">.</span>Namespaces<span class="token punctuation">.</span><span class="token function">CloneFlags</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> nsMaps<span class="token punctuation">)</span>
+    <span class="token keyword">if</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token boolean">nil</span><span class="token punctuation">,</span> err
+    <span class="token punctuation">}</span>
+    init <span class="token operator">:=</span> <span class="token operator">&amp;</span>initProcess<span class="token punctuation">{</span>
+        cmd<span class="token punctuation">:</span>             cmd<span class="token punctuation">,</span>
+        messageSockPair<span class="token punctuation">:</span> messageSockPair<span class="token punctuation">,</span>
+        logFilePair<span class="token punctuation">:</span>     logFilePair<span class="token punctuation">,</span>
+        manager<span class="token punctuation">:</span>         c<span class="token punctuation">.</span>cgroupManager<span class="token punctuation">,</span>
+        intelRdtManager<span class="token punctuation">:</span> c<span class="token punctuation">.</span>intelRdtManager<span class="token punctuation">,</span>
+        config<span class="token punctuation">:</span>          c<span class="token punctuation">.</span><span class="token function">newInitConfig</span><span class="token punctuation">(</span>p<span class="token punctuation">)</span><span class="token punctuation">,</span>
+        container<span class="token punctuation">:</span>       c<span class="token punctuation">,</span>
+        process<span class="token punctuation">:</span>         p<span class="token punctuation">,</span>
+        bootstrapData<span class="token punctuation">:</span>   data<span class="token punctuation">,</span>              <span class="token comment">// &#x6307;&#x5B9A; init process bootstrapData&#x503C;</span>
+        sharePidns<span class="token punctuation">:</span>      sharePidns<span class="token punctuation">,</span>
+    <span class="token punctuation">}</span>
+    c<span class="token punctuation">.</span>initProcess <span class="token operator">=</span> init
+    <span class="token keyword">return</span> init<span class="token punctuation">,</span> <span class="token boolean">nil</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>InitProcess.start() &#x5BB9;&#x5668;&#x7684;&#x521D;&#x59CB;&#x5316;&#x914D;&#x7F6E;&#xFF0C;&#x6B64;&#x5904; cmd.start() &#x8C03;&#x7528;&#x5B9E;&#x5219;&#x662F; runC init&#x547D;&#x4EE4;&#x6267;&#x884C;:</p>
+<ul>
+<li><strong>&#x5148;&#x6267;&#x884C; nsenter C&#x4EE3;&#x7801;&#x90E8;&#x5206;</strong>&#xFF0C;&#x5B9E;&#x73B0;&#x5BF9;container&#x7684;process&#x8FDB;&#x884C;Namespace&#x76F8;&#x5173;&#x8BBE;&#x7F6E;&#x5982;uid/gid&#x3001;pid&#x3001;uts&#x3001;ns&#x3001;cgroup&#x7B49;&#x3002;</li>
+<li><strong>&#x8FD4;&#x6267;&#x884C; init &#x547D;&#x4EE4; Go &#x4EE3;&#x7801;&#x90E8;&#x5206;</strong>&#xFF0C;LinuxFactory.StartInitialization()&#x5BF9;&#x7F51;&#x7EDC;/&#x8DEF;&#x7531;&#x3001;rootfs&#x3001;selinux&#x3001;console&#x3001;&#x4E3B;&#x673A;&#x540D;&#x3001;apparmor&#x3001;Sysctl&#x3001;seccomp&#x3001;capability&#x7B49;&#x5BB9;&#x5668;&#x914D;&#x7F6E;</li>
+</ul>
+<div><p class="code-filename">libcontainer/process_linux.go:282</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>p <span class="token operator">*</span>initProcess<span class="token punctuation">)</span> <span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token builtin">error</span> <span class="token punctuation">{</span>
+  <span class="token comment">//  &#x5F53;&#x524D;&#x6267;&#x884C;&#x7A7A;&#x95F4;&#x8FDB;&#x7A0B;&#x79F0;&#x4E3A;bootstrap&#x8FDB;&#x7A0B;</span>
+  <span class="token comment">//  &#x542F;&#x52A8;&#x4E86; cmd&#xFF0C;&#x5373;&#x542F;&#x52A8;&#x4E86; runc init &#x547D;&#x4EE4;,&#x521B;&#x5EFA; runc init &#x5B50;&#x8FDB;&#x7A0B; </span>
+  <span class="token comment">//  &#x540C;&#x65F6;&#x4E5F;&#x6FC0;&#x6D3B;&#x4E86;C&#x4EE3;&#x7801;nsenter&#x6A21;&#x5757;&#x7684;&#x6267;&#x884C;&#xFF08;&#x4E3A;&#x4E86; namespace &#x7684;&#x8BBE;&#x7F6E; clone &#x4E86;&#x4E09;&#x4E2A;&#x8FDB;&#x7A0B;parent&#x3001;child&#x3001;init&#xFF09;</span>
+  <span class="token comment">//  C &#x4EE3;&#x7801;&#x6267;&#x884C;&#x540E;&#x8FD4;&#x56DE; go &#x4EE3;&#x7801;&#x90E8;&#x5206;,&#x6700;&#x540E;&#x7684; init &#x5B50;&#x8FDB;&#x7A0B;&#x4E3A;&#x4E86;&#x597D;&#x533A;&#x5206;&#x6B64;&#x5904;&#x547D;&#x540D;&#x4E3A;&quot; nsInit &quot;&#xFF08;&#x5373;&#x914D;&#x7F6E;&#x4E86;Namespace&#x7684;init&#xFF09;</span>
+  <span class="token comment">//  runc init go&#x4EE3;&#x7801;&#x4E3A;&#x5BB9;&#x5668;&#x521D;&#x59CB;&#x5316;&#x5176;&#x5B83;&#x90E8;&#x5206;(&#x7F51;&#x7EDC;&#x3001;rootfs&#x3001;&#x8DEF;&#x7531;&#x3001;&#x4E3B;&#x673A;&#x540D;&#x3001;console&#x3001;&#x5B89;&#x5168;&#x7B49;)</span>
+
+    err <span class="token operator">:=</span> p<span class="token punctuation">.</span>cmd<span class="token punctuation">.</span><span class="token function">Start</span><span class="token punctuation">(</span><span class="token punctuation">)</span>   <span class="token comment">// +runc init &#x547D;&#x4EE4;&#x6267;&#x884C;&#xFF0C;Namespace&#x5E94;&#x7528;&#x4EE3;&#x7801;&#x6267;&#x884C;&#x7A7A;&#x95F4;&#x65F6;&#x673A;</span>
+  <span class="token comment">//...</span>
+      <span class="token keyword">if</span> p<span class="token punctuation">.</span>bootstrapData <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+     <span class="token comment">// &#x5C06; bootstrapData &#x5199;&#x5165;&#x5230; parent pipe &#x4E2D;&#xFF0C;&#x6B64;&#x65F6; runc init &#x53EF;&#x4EE5;&#x4ECE; child pipe &#x91CC;&#x8BFB;&#x53D6;&#x5230;&#x8FD9;&#x4E2A;&#x6570;&#x636E;</span>
+        <span class="token keyword">if</span> <span class="token boolean">_</span><span class="token punctuation">,</span> err <span class="token operator">:=</span> io<span class="token punctuation">.</span><span class="token function">Copy</span><span class="token punctuation">(</span>p<span class="token punctuation">.</span>messageSockPair<span class="token punctuation">.</span>parent<span class="token punctuation">,</span> p<span class="token punctuation">.</span>bootstrapData<span class="token punctuation">)</span><span class="token punctuation">;</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> <span class="token function">newSystemErrorWithCause</span><span class="token punctuation">(</span>err<span class="token punctuation">,</span> <span class="token string">&quot;copying bootstrap data to pipe&quot;</span><span class="token punctuation">)</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+  <span class="token comment">//...</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>&#x6B64;&#x65F6;&#x6765;&#x5230; runC init &#x547D;&#x4EE4;&#x6267;&#x884C;&#x4EE3;&#x7801;&#x90E8;&#x5206;&#xFF0C;&#x524D;&#x9762;&#x6709;&#x8BF4;&#x5230;<strong>&#x5148;&#x6267;&#x884C; nsenter C &#x4EE3;&#x7801;&#x903B;&#x8F91;</strong>&#xFF08;&#x540E;&#x9762;&#x8BE6;&#x8FF0;&#xFF09;&#xFF0C;&#x518D;&#x8FD4;&#x56DE;&#x5230; Go init &#x4EE3;&#x7801;&#x90E8;&#x5206;&#xFF0C;&#x800C;Go init &#x4EE3;&#x7801;&#x90E8;&#x5206;&#x4E0D;&#x662F;&#x672C;&#x6587; namespace &#x4ECB;&#x7ECD;&#x7684;&#x91CD;&#x70B9;&#xFF0C;&#x8003;&#x8651;&#x5230;&#x6267;&#x884C;&#x6D41;&#x7A0B;&#x7406;&#x89E3;&#x7684;&#x8FDE;&#x7EED;&#x6027;&#xFF0C;&#x6211;&#x5148;&#x7B80;&#x8FF0;&#x4E00;&#x4E0B;&#x6B64;&#x5757;&#xFF0C;&#x6709;&#x52A9;&#x4E8E;&#x5C06;&#x6574;&#x4E2A;&#x8FC7;&#x7A0B;&#x4E32;&#x8054;&#x8D77;&#x6765;&#x7406;&#x89E3;&#x3002;</p>
+<p>RunC init &#x547D;&#x4EE4;&#x6267;&#x884C; Go &#x8C03;&#x7528; C &#x4EE3;&#x7801;&#x79F0;&#x4E4B; preamble ,&#x5373;&#x5728; import nsenter &#x6A21;&#x5757;&#x65F6;&#x673A;&#x5C06;&#x4F1A;&#x5728; Go &#x7684; runtime &#x542F;&#x52A8;&#x4E4B;&#x524D;&#xFF0C;&#x5148;&#x6267;&#x884C;&#x6B64;&#x5148;&#x5BFC;&#x4EE3;&#x7801;&#x5757;&#xFF0C;nsenter &#x7684;&#x521D;&#x59CB;&#x5316; init(void) &#x65B9;&#x6CD5;&#x5185;&#x5BF9; nsexec() &#x8C03;&#x7528; &#x3002;</p>
+<div><p class="code-filename">init.go:10</p></div>
+<pre class="language-"><code class="lang-go">    <span class="token boolean">_</span> <span class="token string">&quot;github.com/opencontainers/runc/libcontainer/nsenter&quot;</span>
+</code></pre>
+<div><p class="code-filename">libcontainer/nsenter/nsenter.go:3</p></div>
+<pre class="language-"><code class="lang-C">package nsenter
+/*
+#cgo CFLAGS: -Wall
+extern void nsexec();
+void __attribute__((constructor)) init(void) {
+    nsexec();
+}
+*/
+import &quot;C&quot;
+</code></pre>
+<p><em>&#x6CE8;&#xFF1A;&#x6B64;&#x5904; C &#x4EE3;&#x7801; nsexec() &#x5206;&#x6790;&#x90E8;&#x5206;&#x5C06;&#x540E;&#x9762;&#x5C06;&#x8BE6;&#x7EC6;&#x89E3;&#x6790;</em></p>
+<p><strong>&#x518D;&#x6267;&#x884C; go &#x4EE3;&#x7801; init &#x547D;&#x4EE4;&#x6267;&#x884C;&#x903B;&#x8F91;&#x90E8;&#x5206;</strong>,&#x521B;&#x5EFA; factory &#x5BF9;&#x8C61;&#xFF0C;&#x6267;&#x884C; factory.StartInitialization() =&gt; linuxStandardInit.Init() &#x5B8C;&#x6210;&#x5BB9;&#x5668;&#x7684;&#x76F8;&#x5173;&#x521D;&#x59CB;&#x5316;&#x914D;&#x7F6E;(&#x7F51;&#x7EDC;/&#x8DEF;&#x7531;&#x3001;rootfs&#x3001;selinux&#x3001;console&#x3001;&#x4E3B;&#x673A;&#x540D;&#x3001;apparmor&#x3001;Sysctl&#x3001;seccomp&#x3001;capability &#x7B49;)</p>
+<div><p class="code-filename">init.go:15</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token function">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+ <span class="token comment">//...</span>
+<span class="token keyword">var</span> initCommand <span class="token operator">=</span> cli<span class="token punctuation">.</span>Command<span class="token punctuation">{</span>
+    Name<span class="token punctuation">:</span>  <span class="token string">&quot;init&quot;</span><span class="token punctuation">,</span>
+    Usage<span class="token punctuation">:</span> <span class="token string">`initialize the namespaces and launch the process (do not call it outside of runc)`</span><span class="token punctuation">,</span>
+    Action<span class="token punctuation">:</span> <span class="token keyword">func</span><span class="token punctuation">(</span>context <span class="token operator">*</span>cli<span class="token punctuation">.</span>Context<span class="token punctuation">)</span> <span class="token builtin">error</span> <span class="token punctuation">{</span>
+        factory<span class="token punctuation">,</span> <span class="token boolean">_</span> <span class="token operator">:=</span> libcontainer<span class="token punctuation">.</span><span class="token function">New</span><span class="token punctuation">(</span><span class="token string">&quot;&quot;</span><span class="token punctuation">)</span>                          <span class="token comment">// +&#x521B;&#x5EFA; factory &#x5BF9;&#x8C61;</span>
+        <span class="token keyword">if</span> err <span class="token operator">:=</span> factory<span class="token punctuation">.</span><span class="token function">StartInitialization</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>       <span class="token comment">// +&#x6267;&#x884C; init &#x521D;&#x59CB;&#x5316;</span>
+            os<span class="token punctuation">.</span><span class="token function">Exit</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span>
+        <span class="token punctuation">}</span>
+        <span class="token function">panic</span><span class="token punctuation">(</span><span class="token string">&quot;libcontainer: container init failed to exec&quot;</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>libcontainer.New() &#x521B;&#x5EFA; factory &#x5BF9;&#x8C61;&#x8FD4;&#x56DE;</p>
+<div><p class="code-filename">libcontainer/factory_linux.go:131</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token function">New</span><span class="token punctuation">(</span>root <span class="token builtin">string</span><span class="token punctuation">,</span> options <span class="token operator">...</span><span class="token keyword">func</span><span class="token punctuation">(</span><span class="token operator">*</span>LinuxFactory<span class="token punctuation">)</span> <span class="token builtin">error</span><span class="token punctuation">)</span> <span class="token punctuation">(</span>Factory<span class="token punctuation">,</span> <span class="token builtin">error</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token comment">//...</span>
+    l <span class="token operator">:=</span> <span class="token operator">&amp;</span>LinuxFactory<span class="token punctuation">{</span>
+  <span class="token comment">//...</span>
+    <span class="token punctuation">}</span>
+  <span class="token comment">//... </span>
+    <span class="token keyword">return</span> l<span class="token punctuation">,</span> <span class="token boolean">nil</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>&#x521B;&#x5EFA; container &#x5BB9;&#x5668;&#x5BF9;&#x8C61;</p>
+<div><p class="code-filename">libcontainer/factory_linux.go:188</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>l <span class="token operator">*</span>LinuxFactory<span class="token punctuation">)</span> <span class="token function">Create</span><span class="token punctuation">(</span>id <span class="token builtin">string</span><span class="token punctuation">,</span> config <span class="token operator">*</span>configs<span class="token punctuation">.</span>Config<span class="token punctuation">)</span> <span class="token punctuation">(</span>Container<span class="token punctuation">,</span> <span class="token builtin">error</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token comment">// &#x521B;&#x5EFA; linux &#x5BB9;&#x5668;&#x7ED3;&#x6784;</span>
+    c <span class="token operator">:=</span> <span class="token operator">&amp;</span>linuxContainer<span class="token punctuation">{</span> 
+  <span class="token comment">//...</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> c<span class="token punctuation">,</span> <span class="token boolean">nil</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Linux &#x7248;&#x672C;&#x7684; factory &#x5B9E;&#x73B0;&#xFF0C;&#x67E5;&#x770B; StartInitialization() &#x5B9E;&#x73B0;&#x4EE3;&#x7801;</p>
+<div><p class="code-filename">libcontainer/factory_linux.go:282</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>l <span class="token operator">*</span>LinuxFactory<span class="token punctuation">)</span> <span class="token function">StartInitialization</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">(</span>err <span class="token builtin">error</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token comment">//...</span>
+    i<span class="token punctuation">,</span> err <span class="token operator">:=</span> <span class="token function">newContainerInit</span><span class="token punctuation">(</span>it<span class="token punctuation">,</span> pipe<span class="token punctuation">,</span> consoleSocket<span class="token punctuation">,</span> fifofd<span class="token punctuation">)</span> 
+  <span class="token comment">//...</span>
+  <span class="token comment">// newContainerInit()&#x8FD4;&#x56DE;&#x7684;initer&#x5B9E;&#x73B0;&#x5BF9;&#x8C61;&#x7684;Init()&#x65B9;&#x6CD5;&#x8C03;&#x7528; &quot;linuxStandardInit.Init()&quot;</span>
+  <span class="token keyword">return</span> i<span class="token punctuation">.</span><span class="token function">Init</span><span class="token punctuation">(</span><span class="token punctuation">)</span>                    
+<span class="token punctuation">}</span>
+</code></pre>
+<p>&#x7F51;&#x7EDC;/&#x8DEF;&#x7531;&#x3001;rootfs&#x3001;selinux&#x3001;console&#x3001;&#x4E3B;&#x673A;&#x540D;&#x3001;apparmor&#x3001;sysctl&#x3001;seccomp&#x3001;capability &#x7B49;&#x5BB9;&#x5668;&#x7684;&#x76F8;&#x5173;&#x521D;&#x59CB;&#x5316;&#x914D;&#x7F6E;&#x3002;&#x7BA1;&#x9053; exec.fifo &#x8FDB;&#x884C;&#x5199;&#x64CD;&#x4F5C;&#xFF0C;&#x8FDB;&#x5165;&#x963B;&#x585E;&#x72B6;&#x6001;&#x7B49;&#x5F85; runC start</p>
+<div><p class="code-filename">libcontainer/standard_init_linux.go:46</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>l <span class="token operator">*</span>linuxStandardInit<span class="token punctuation">)</span> <span class="token function">Init</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token builtin">error</span> <span class="token punctuation">{</span>
+  <span class="token comment">//...</span>
+  <span class="token comment">// &#x7559;&#x610F;&#x6B64;&#x4E24;&#x4E2A;&#x5173;&#x4E8E;&#x7F51;&#x7EDC;nework/route&#x914D;&#x7F6E;&#xFF0C;&#x5C06;&#x4E13;&#x6587;&#x8BE6;&#x7EC6;&#x4ECB;&#x7ECD;network</span>
+  <span class="token comment">// &#x914D;&#x7F6E;network,</span>
+  <span class="token comment">//  &#x914D;&#x7F6E;&#x8DEF;&#x7531;</span>
+  <span class="token comment">// selinux&#x914D;&#x7F6E;</span>
+  <span class="token comment">// + &#x51C6;&#x5907;rootfs</span>
+  <span class="token comment">// &#x914D;&#x7F6E;console</span>
+  <span class="token comment">// &#x5B8C;&#x6210;rootfs&#x8BBE;&#x7F6E;</span>
+  <span class="token comment">// &#x4E3B;&#x673A;&#x540D;&#x8BBE;&#x7F6E;</span>
+  <span class="token comment">// &#x5E94;&#x7528;apparmor&#x914D;&#x7F6E;</span>
+  <span class="token comment">// Sysctl&#x7CFB;&#x7EDF;&#x53C2;&#x6570;&#x8C03;&#x8282;</span>
+  <span class="token comment">// path&#x53EA;&#x8BFB;&#x5C5E;&#x6027;&#x914D;&#x7F6E;</span>
+  <span class="token comment">// &#x544A;&#x8BC9;runC&#x8FDB;&#x7A0B;&#xFF0C;&#x6211;&#x4EEC;&#x5DF2;&#x7ECF;&#x5B8C;&#x6210;&#x4E86;&#x521D;&#x59CB;&#x5316;&#x5DE5;&#x4F5C;</span>
+  <span class="token comment">// &#x8FDB;&#x7A0B;&#x6807;&#x7B7E;&#x8BBE;&#x7F6E;</span>
+  <span class="token comment">// seccomp&#x914D;&#x7F6E;</span>
+  <span class="token comment">// &#x8BBE;&#x7F6E;&#x6B63;&#x786E;&#x7684;capability&#xFF0C;&#x7528;&#x6237;&#x4EE5;&#x53CA;&#x5DE5;&#x4F5C;&#x76EE;&#x5F55;</span>
+  <span class="token comment">// &#x786E;&#x5B9A;&#x7528;&#x6237;&#x6307;&#x5B9A;&#x7684;&#x5BB9;&#x5668;&#x8FDB;&#x7A0B;&#x5728;&#x5BB9;&#x5668;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x4E2D;&#x7684;&#x8DEF;&#x5F84;</span>
+  <span class="token comment">// &#x5173;&#x95ED;&#x7BA1;&#x9053;&#xFF0C;&#x544A;&#x8BC9;runC&#x8FDB;&#x7A0B;&#xFF0C;&#x6211;&#x4EEC;&#x5DF2;&#x7ECF;&#x5B8C;&#x6210;&#x4E86;&#x521D;&#x59CB;&#x5316;&#x5DE5;&#x4F5C;</span>
+  <span class="token comment">// &#x5728;exec&#x7528;&#x6237;&#x8FDB;&#x7A0B;&#x4E4B;&#x524D;&#x7B49;&#x5F85;exec.fifo&#x7BA1;&#x9053;&#x5728;&#x53E6;&#x4E00;&#x7AEF;&#x88AB;&#x6253;&#x5F00;</span>
+  <span class="token comment">// &#x6211;&#x4EEC;&#x901A;&#x8FC7;/proc/self/fd/$fd&#x6253;&#x5F00;&#x5B83;</span>
+  <span class="token comment">// ......</span>
+  <span class="token comment">// &#x5411;exec.fifo&#x7BA1;&#x9053;&#x5199;&#x6570;&#x636E;&#xFF0C;&#x963B;&#x585E;&#xFF0C;&#x76F4;&#x5230;&#x7528;&#x6237;&#x8C03;&#x7528;`runc start`&#xFF0C;&#x8BFB;&#x53D6;&#x7BA1;&#x9053;&#x4E2D;&#x7684;&#x6570;&#x636E;</span>
+  <span class="token comment">// &#x6B64;&#x65F6;&#x5F53;&#x524D;&#x8FDB;&#x7A0B;&#x5DF2;&#x5904;&#x4E8E;&#x963B;&#x585E;&#x72B6;&#x6001;&#xFF0C;&#x7B49;&#x5F85;&#x4FE1;&#x53F7;&#x6267;&#x884C;&#x540E;&#x9762;&#x4EE3;&#x7801;</span>
+  <span class="token comment">//</span>
+    <span class="token keyword">if</span> <span class="token boolean">_</span><span class="token punctuation">,</span> err <span class="token operator">:=</span> unix<span class="token punctuation">.</span><span class="token function">Write</span><span class="token punctuation">(</span>fd<span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token function">byte</span><span class="token punctuation">(</span><span class="token string">&quot;0&quot;</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token function">newSystemErrorWithCause</span><span class="token punctuation">(</span>err<span class="token punctuation">,</span> <span class="token string">&quot;write 0 exec fifo&quot;</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+  <span class="token comment">// &#x5173;&#x95ED;fifofd&#x7BA1;&#x9053; fix CVE-2016-9962</span>
+  <span class="token comment">// &#x521D;&#x59CB;&#x5316;Seccomp&#x914D;&#x7F6E;</span>
+  <span class="token comment">// &#x8C03;&#x7528;&#x7CFB;&#x7EDF;exec()&#x547D;&#x4EE4;&#xFF0C;&#x6267;&#x884C;entrypoint</span>
+    <span class="token keyword">if</span> err <span class="token operator">:=</span> syscall<span class="token punctuation">.</span><span class="token function">Exec</span><span class="token punctuation">(</span>name<span class="token punctuation">,</span> l<span class="token punctuation">.</span>config<span class="token punctuation">.</span>Args<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">:</span><span class="token punctuation">]</span><span class="token punctuation">,</span> os<span class="token punctuation">.</span><span class="token function">Environ</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token function">newSystemErrorWithCause</span><span class="token punctuation">(</span>err<span class="token punctuation">,</span> <span class="token string">&quot;exec user process&quot;</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> <span class="token boolean">nil</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>&#x6B64;&#x65F6;&#x6574;&#x4E2A; run &#x7684;&#x5BB9;&#x5668;&#x6267;&#x884C;&#x6D41;&#x7A0B;&#x5728;&#x6267;&#x884C;&#x7528;&#x6237;&#x7A0B;&#x5E8F; entrypoint &#x540E;&#x5DF2;&#x63A5;&#x8FD1;&#x5C3E;&#x58F0;&#x3002;&#x4ECE;&#x6574;&#x4E2A;&#x6267;&#x884C;&#x8FC7;&#x7A0B;&#x6765;&#x770B; namespace &#x7684;&#x914D;&#x7F6E;&#x903B;&#x8F91;&#x4E3B;&#x8981;&#x5728; nsenter C &#x4EE3;&#x7801;&#x5185;&#xFF0C;&#x4E0B;&#x9762;&#x5148;&#x7B80;&#x8981;&#x67E5;&#x770B; runc &#x5185;&#x5BF9; namespace &#x76F8;&#x5173;&#x7684;&#x5B9A;&#x4E49;&#x4E0E;&#x5B9E;&#x73B0;&#x65B9;&#x6CD5;&#xFF0C;&#x540E;&#x9762;&#x5C06;&#x8BE6;&#x7EC6;&#x4ECB;&#x7ECD; nsenter &#x7684;&#x903B;&#x8F91;&#x4EE3;&#x7801;&#x5B9E;&#x73B0;&#x3002;</p>
+<h2 id="RunC_Namespace_&#x5B9A;&#x4E49;&#x4E0E;&#x5B9E;&#x73B0;">3. RunC Namespace &#x5B9A;&#x4E49;&#x4E0E;&#x5B9E;&#x73B0;</h2>
+<p>&#x5148;&#x6765;&#x770B;&#x4E00;&#x4E0B;&#x5BB9;&#x5668;&#x5185;&#x7684;&#x6267;&#x884C;&#x8FDB;&#x7A0B; config &#x914D;&#x7F6E;&#x7684; namespaces &#x5B9A;&#x4E49;</p>
+<div><p class="code-filename">libcontainer/configs/config.go:81</p></div>
+<pre class="language-"><code class="lang-go"><span class="token comment">// Config defines configuration options for executing a process inside a contained environment.</span>
+<span class="token keyword">type</span> Config <span class="token keyword">struct</span> <span class="token punctuation">{</span>
+  <span class="token comment">//...</span>
+    Namespaces Namespaces <span class="token string">`json:&quot;namespaces&quot;`</span>     <span class="token comment">// NameSpaces &#x5728; config &#x5B9A;&#x4E49;</span>
+  <span class="token comment">//...</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<div><p class="code-filename">libcontainer/configs/namespaces.go:5</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">type</span> Namespaces <span class="token punctuation">[</span><span class="token punctuation">]</span>Namespace     <span class="token comment">// Namespace &#x7C7B;&#x578B;slice</span>
+</code></pre>
+<div><p class="code-filename">libcontainer/configs/namespaces_linux.go:80</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">type</span> Namespace <span class="token keyword">struct</span> <span class="token punctuation">{</span>
+    Type NamespaceType <span class="token string">`json:&quot;type&quot;`</span>
+    Path <span class="token builtin">string</span>        <span class="token string">`json:&quot;path&quot;`</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>GetPath() &#x83B7;&#x53D6; namespace &#x8DEF;&#x5F84;&quot;/proc/$pid/ns/$nsType&quot;</p>
+<div><p class="code-filename">libcontainer/configs/namespaces_linux.go:85</p></div>
+<pre class="language-"><code class="lang-go"><span class="token comment">// &#x83B7;&#x53D6;&#x6307;&#x5B9A;pid&#x7684;&#x6307;&#x5B9A;&#x7C7B;&#x578B; namespace &#x8DEF;&#x5F84;&quot;/proc/$pid/ns/$nsType&quot;</span>
+<span class="token keyword">func</span> <span class="token punctuation">(</span>n <span class="token operator">*</span>Namespace<span class="token punctuation">)</span> <span class="token function">GetPath</span><span class="token punctuation">(</span>pid <span class="token builtin">int</span><span class="token punctuation">)</span> <span class="token builtin">string</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> fmt<span class="token punctuation">.</span><span class="token function">Sprintf</span><span class="token punctuation">(</span><span class="token string">&quot;/proc/%d/ns/%s&quot;</span><span class="token punctuation">,</span> pid<span class="token punctuation">,</span> <span class="token function">NsName</span><span class="token punctuation">(</span>n<span class="token punctuation">.</span>Type<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Namespace&#x7C7B;&#x578B;&#x5B57;&#x4E32;&#x8F6C;&#x5316;&#x4E3A;&#x7CFB;&#x7EDF;&#x6587;&#x4EF6;&#x540D;</span>
+<span class="token keyword">func</span> <span class="token function">NsName</span><span class="token punctuation">(</span>ns NamespaceType<span class="token punctuation">)</span> <span class="token builtin">string</span> <span class="token punctuation">{</span>
+    <span class="token keyword">switch</span> ns <span class="token punctuation">{</span>
+    <span class="token keyword">case</span> NEWNET<span class="token punctuation">:</span>
+        <span class="token keyword">return</span> <span class="token string">&quot;net&quot;</span>
+    <span class="token keyword">case</span> NEWNS<span class="token punctuation">:</span>
+        <span class="token keyword">return</span> <span class="token string">&quot;mnt&quot;</span>
+    <span class="token keyword">case</span> NEWPID<span class="token punctuation">:</span>
+        <span class="token keyword">return</span> <span class="token string">&quot;pid&quot;</span>
+    <span class="token keyword">case</span> NEWIPC<span class="token punctuation">:</span>
+        <span class="token keyword">return</span> <span class="token string">&quot;ipc&quot;</span>
+    <span class="token keyword">case</span> NEWUSER<span class="token punctuation">:</span>
+        <span class="token keyword">return</span> <span class="token string">&quot;user&quot;</span>
+    <span class="token keyword">case</span> NEWUTS<span class="token punctuation">:</span>
+        <span class="token keyword">return</span> <span class="token string">&quot;uts&quot;</span>
+    <span class="token keyword">case</span> NEWCGROUP<span class="token punctuation">:</span>
+        <span class="token keyword">return</span> <span class="token string">&quot;cgroup&quot;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> <span class="token string">&quot;&quot;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Namespaces &#x7C7B;&#x63D0;&#x4F9B;&#x7684;&#x64CD;&#x4F5C;&#x65B9;&#x6CD5;&#x5217;&#x8868;</p>
+<div><p class="code-filename">libcontainer/configs/namespaces_linux.go:89</p></div>
+<pre class="language-"><code class="lang-go"><span class="token comment">// &#x5220;&#x9664;,&#x4ECE;Namespaces slice&#x4E2D;&#x5220;&#x9664;&#x6307;&#x5B9A;&#x7C7B;&#x578B;&#x7684;Namespace&#x9879;</span>
+<span class="token keyword">func</span> <span class="token punctuation">(</span>n <span class="token operator">*</span>Namespaces<span class="token punctuation">)</span> <span class="token function">Remove</span><span class="token punctuation">(</span>t NamespaceType<span class="token punctuation">)</span> <span class="token builtin">bool</span> <span class="token punctuation">{</span>
+<span class="token comment">//...</span>
+<span class="token punctuation">}</span>
+<span class="token comment">// &#x589E;&#x52A0;</span>
+<span class="token keyword">func</span> <span class="token punctuation">(</span>n <span class="token operator">*</span>Namespaces<span class="token punctuation">)</span> <span class="token function">Add</span><span class="token punctuation">(</span>t NamespaceType<span class="token punctuation">,</span> path <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+<span class="token comment">//...</span>
+<span class="token punctuation">}</span>
+<span class="token comment">// &#x662F;&#x5426;&#x5B58;&#x5728;</span>
+<span class="token keyword">func</span> <span class="token punctuation">(</span>n <span class="token operator">*</span>Namespaces<span class="token punctuation">)</span> <span class="token function">Contains</span><span class="token punctuation">(</span>t NamespaceType<span class="token punctuation">)</span> <span class="token builtin">bool</span> <span class="token punctuation">{</span>
+<span class="token comment">//...</span>
+<span class="token punctuation">}</span>
+<span class="token comment">// &#x83B7;&#x53D6;&#x6307;&#x5B9A;Namespace&#x7C7B;&#x578B;&#x7684;Path</span>
+<span class="token keyword">func</span> <span class="token punctuation">(</span>n <span class="token operator">*</span>Namespaces<span class="token punctuation">)</span> <span class="token function">PathOf</span><span class="token punctuation">(</span>t NamespaceType<span class="token punctuation">)</span> <span class="token builtin">string</span> <span class="token punctuation">{</span>
+<span class="token comment">//...</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>ParentProcess &#x7528; init &#x7BA1;&#x9053;&#x5C06;&#x5BB9;&#x5668;&#x914D;&#x7F6E;&#x4FE1;&#x606F;&#x4F20;&#x8F93;&#x7ED9; runc init &#x8FDB;&#x7A0B;&#xFF0C;&#x90A3;&#x4E48;&#x6211;&#x4EEC;&#x5C31;&#x6765;&#x770B;&#x4E00;&#x4E0B; init &#x7BA1;&#x9053;&#x6240;&#x4F20;&#x8F93;&#x7684; bootstrapData &#x6570;&#x636E;&#x5185;&#x5BB9;&#x7684;&#x5B9A;&#x4E49;&#xFF0C;bootstrapData()&#x6700;&#x540E;&#x8FD4;&#x56DE;&#x5E8F;&#x5217;&#x5316;&#x540E;&#x7684;&#x6570;&#x636E;&#x8BFB;&#x53D6;&#x5668;io reader</p>
+<div><p class="code-filename">libcontainer/container_linux.go:1945</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>c <span class="token operator">*</span>linuxContainer<span class="token punctuation">)</span> <span class="token function">bootstrapData</span><span class="token punctuation">(</span>cloneFlags <span class="token builtin">uintptr</span><span class="token punctuation">,</span> nsMaps <span class="token keyword">map</span><span class="token punctuation">[</span>configs<span class="token punctuation">.</span>NamespaceType<span class="token punctuation">]</span><span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">(</span>io<span class="token punctuation">.</span>Reader<span class="token punctuation">,</span> <span class="token builtin">error</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token comment">// &#x521B;&#x5EFA; netlink &#x6D88;&#x606F;</span>
+    r <span class="token operator">:=</span> nl<span class="token punctuation">.</span><span class="token function">NewNetlinkRequest</span><span class="token punctuation">(</span><span class="token function">int</span><span class="token punctuation">(</span>InitMsg<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span>
+
+    <span class="token comment">// &#x5199;&#x5165; cloneFlags </span>
+    r<span class="token punctuation">.</span><span class="token function">AddData</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>Int32msg<span class="token punctuation">{</span>
+        Type<span class="token punctuation">:</span>  CloneFlagsAttr<span class="token punctuation">,</span>
+        Value<span class="token punctuation">:</span> <span class="token function">uint32</span><span class="token punctuation">(</span>cloneFlags<span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+    <span class="token comment">// &#x5199;&#x5165;&#x81EA;&#x5B9A;&#x4E49; namespace paths</span>
+    <span class="token keyword">if</span> <span class="token function">len</span><span class="token punctuation">(</span>nsMaps<span class="token punctuation">)</span> <span class="token operator">&gt;</span> <span class="token number">0</span> <span class="token punctuation">{</span>
+        nsPaths<span class="token punctuation">,</span> err <span class="token operator">:=</span> c<span class="token punctuation">.</span><span class="token function">orderNamespacePaths</span><span class="token punctuation">(</span>nsMaps<span class="token punctuation">)</span>
+        <span class="token keyword">if</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> <span class="token boolean">nil</span><span class="token punctuation">,</span> err
+        <span class="token punctuation">}</span>
+        r<span class="token punctuation">.</span><span class="token function">AddData</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>Bytemsg<span class="token punctuation">{</span>
+            Type<span class="token punctuation">:</span>  NsPathsAttr<span class="token punctuation">,</span>
+            Value<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token function">byte</span><span class="token punctuation">(</span>strings<span class="token punctuation">.</span><span class="token function">Join</span><span class="token punctuation">(</span>nsPaths<span class="token punctuation">,</span> <span class="token string">&quot;,&quot;</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+
+  <span class="token comment">// &#x4E3A;&#x65B0; user &#x5199;&#x5165; ns paths</span>
+    <span class="token boolean">_</span><span class="token punctuation">,</span> joinExistingUser <span class="token operator">:=</span> nsMaps<span class="token punctuation">[</span>configs<span class="token punctuation">.</span>NEWUSER<span class="token punctuation">]</span>
+    <span class="token keyword">if</span> <span class="token operator">!</span>joinExistingUser <span class="token punctuation">{</span>
+        <span class="token comment">// write uid mappings</span>
+        <span class="token keyword">if</span> <span class="token function">len</span><span class="token punctuation">(</span>c<span class="token punctuation">.</span>config<span class="token punctuation">.</span>UidMappings<span class="token punctuation">)</span> <span class="token operator">&gt;</span> <span class="token number">0</span> <span class="token punctuation">{</span>
+            <span class="token keyword">if</span> c<span class="token punctuation">.</span>config<span class="token punctuation">.</span>RootlessEUID <span class="token operator">&amp;&amp;</span> c<span class="token punctuation">.</span>newuidmapPath <span class="token operator">!=</span> <span class="token string">&quot;&quot;</span> <span class="token punctuation">{</span>
+                r<span class="token punctuation">.</span><span class="token function">AddData</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>Bytemsg<span class="token punctuation">{</span>
+                    Type<span class="token punctuation">:</span>  UidmapPathAttr<span class="token punctuation">,</span>
+                    Value<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token function">byte</span><span class="token punctuation">(</span>c<span class="token punctuation">.</span>newuidmapPath<span class="token punctuation">)</span><span class="token punctuation">,</span>
+                <span class="token punctuation">}</span><span class="token punctuation">)</span>
+            <span class="token punctuation">}</span>
+            b<span class="token punctuation">,</span> err <span class="token operator">:=</span> <span class="token function">encodeIDMapping</span><span class="token punctuation">(</span>c<span class="token punctuation">.</span>config<span class="token punctuation">.</span>UidMappings<span class="token punctuation">)</span>
+            <span class="token keyword">if</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+                <span class="token keyword">return</span> <span class="token boolean">nil</span><span class="token punctuation">,</span> err
+            <span class="token punctuation">}</span>
+            r<span class="token punctuation">.</span><span class="token function">AddData</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>Bytemsg<span class="token punctuation">{</span>
+                Type<span class="token punctuation">:</span>  UidmapAttr<span class="token punctuation">,</span>
+                Value<span class="token punctuation">:</span> b<span class="token punctuation">,</span>
+            <span class="token punctuation">}</span><span class="token punctuation">)</span>
+        <span class="token punctuation">}</span>
+
+        <span class="token comment">// &#x5199; gid mappings</span>
+        <span class="token keyword">if</span> <span class="token function">len</span><span class="token punctuation">(</span>c<span class="token punctuation">.</span>config<span class="token punctuation">.</span>GidMappings<span class="token punctuation">)</span> <span class="token operator">&gt;</span> <span class="token number">0</span> <span class="token punctuation">{</span>
+            b<span class="token punctuation">,</span> err <span class="token operator">:=</span> <span class="token function">encodeIDMapping</span><span class="token punctuation">(</span>c<span class="token punctuation">.</span>config<span class="token punctuation">.</span>GidMappings<span class="token punctuation">)</span>
+            <span class="token keyword">if</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+                <span class="token keyword">return</span> <span class="token boolean">nil</span><span class="token punctuation">,</span> err
+            <span class="token punctuation">}</span>
+            r<span class="token punctuation">.</span><span class="token function">AddData</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>Bytemsg<span class="token punctuation">{</span>
+                Type<span class="token punctuation">:</span>  GidmapAttr<span class="token punctuation">,</span>
+                Value<span class="token punctuation">:</span> b<span class="token punctuation">,</span>
+            <span class="token punctuation">}</span><span class="token punctuation">)</span>
+            <span class="token keyword">if</span> c<span class="token punctuation">.</span>config<span class="token punctuation">.</span>RootlessEUID <span class="token operator">&amp;&amp;</span> c<span class="token punctuation">.</span>newgidmapPath <span class="token operator">!=</span> <span class="token string">&quot;&quot;</span> <span class="token punctuation">{</span>
+                r<span class="token punctuation">.</span><span class="token function">AddData</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>Bytemsg<span class="token punctuation">{</span>
+                    Type<span class="token punctuation">:</span>  GidmapPathAttr<span class="token punctuation">,</span>
+                    Value<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token function">byte</span><span class="token punctuation">(</span>c<span class="token punctuation">.</span>newgidmapPath<span class="token punctuation">)</span><span class="token punctuation">,</span>
+                <span class="token punctuation">}</span><span class="token punctuation">)</span>
+            <span class="token punctuation">}</span>
+            <span class="token keyword">if</span> <span class="token function">requiresRootOrMappingTool</span><span class="token punctuation">(</span>c<span class="token punctuation">.</span>config<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                r<span class="token punctuation">.</span><span class="token function">AddData</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>Boolmsg<span class="token punctuation">{</span>
+                    Type<span class="token punctuation">:</span>  SetgroupAttr<span class="token punctuation">,</span>
+                    Value<span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+                <span class="token punctuation">}</span><span class="token punctuation">)</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">if</span> c<span class="token punctuation">.</span>config<span class="token punctuation">.</span>OomScoreAdj <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+        <span class="token comment">// &#x5982;&#x5B58;&#x5728;&#x914D;&#x7F6E; OomScorAdj &#xFF0C;&#x5199; oom_score_adj </span>
+        r<span class="token punctuation">.</span><span class="token function">AddData</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>Bytemsg<span class="token punctuation">{</span>
+            Type<span class="token punctuation">:</span>  OomScoreAdjAttr<span class="token punctuation">,</span>
+            Value<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token function">byte</span><span class="token punctuation">(</span>fmt<span class="token punctuation">.</span><span class="token function">Sprintf</span><span class="token punctuation">(</span><span class="token string">&quot;%d&quot;</span><span class="token punctuation">,</span> <span class="token operator">*</span>c<span class="token punctuation">.</span>config<span class="token punctuation">.</span>OomScoreAdj<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token comment">// &#x5199; rootless</span>
+    r<span class="token punctuation">.</span><span class="token function">AddData</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>Boolmsg<span class="token punctuation">{</span>
+        Type<span class="token punctuation">:</span>  RootlessEUIDAttr<span class="token punctuation">,</span>
+        Value<span class="token punctuation">:</span> c<span class="token punctuation">.</span>config<span class="token punctuation">.</span>RootlessEUID<span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+    <span class="token keyword">return</span> bytes<span class="token punctuation">.</span><span class="token function">NewReader</span><span class="token punctuation">(</span>r<span class="token punctuation">.</span><span class="token function">Serialize</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token boolean">nil</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h2 id="Nsenter_C&#x4EE3;&#x7801;&#x89E3;&#x6790;">4. Nsenter C&#x4EE3;&#x7801;&#x89E3;&#x6790;</h2>
+<p>&#x521A;&#x8BFB;&#x8FD9;&#x6BB5;&#x4EE3;&#x7801;&#x65F6;&#x6709;&#x4E9B;&#x7406;&#x89E3;&#x4E0A;&#x6DF7;&#x4E71;&#xFF0C;&#x591A;&#x5C42;&#x7236;&#x5B50;&#x8FDB;&#x884C;&#x4E4B;&#x95F4;&#x4EA4;&#x9519;&#x4F20;&#x9012;&#xFF0C;&#x7ECF;&#x8FC7;&#x53CD;&#x590D;&#x4ED4;&#x7EC6;&#x91CD;&#x8BFB;&#x548C;&#x63A8;&#x6572;&#x4EE3;&#x7801;&#x540E;&#x624D;&#x9010;&#x6E10;&#x6E05;&#x6670;&#x4F5C;&#x8005;&#x7684; &#x4EE3;&#x7801;&#x903B;&#x8F91;&#x601D;&#x60F3;&#x3002;</p>
+<p>&#x5728;&#x521D;&#x671F;&#x7406;&#x89E3;&#x4EE3;&#x7801;&#x903B;&#x8F91;&#x65F6;&#x672C;&#x4EBA;&#x5B58;&#x5728;&#x7684;&#x51E0;&#x4E2A;&#x7591;&#x60D1;&#x70B9;&#xFF1A;</p>
+<ol>
+<li><p>&#x4E3A;&#x4EC0;&#x4E48;&#x9700;&#x8981; fork &#x4E09;&#x5C42;&#x7EA7;&#x5173;&#x7CFB;&#x7684;&#x8FDB;&#x7A0B;&#x6765;&#x5B9E;&#x73B0; namespaces &#x7684;&#x914D;&#x7F6E;&#xFF1F;</p>
+</li>
+<li><p>&#x662F;&#x5426;&#x6BCF;&#x6B21; fork &#x7684;&#x5B50;&#x8FDB;&#x7A0B;&#x5C06;&#x7EE7;&#x627F;&#x5176;&#x7236;&#x7684; namespaces &#x914D;&#x7F6E; &#xFF1F;</p>
+</li>
+<li>&#x662F;&#x5426;&#x6709;&#x4EC0;&#x4E48;&#x503C;&#x4F20;&#x56DE;&#x7ED9;bootstrap&#x8FDB;&#x7A0B;&#xFF1F;</li>
+</ol>
+<p>&#x6211;&#x76F8;&#x4FE1;&#x770B;&#x5B8C;&#x4EE3;&#x7801;&#x5206;&#x6790;&#x540E;&#x80FD;&#x5F97;&#x5230;&#x7B54;&#x6848;&#x3002;</p>
+<p>Runc init &#x4F1A;&#x6709;&#x4E09;&#x4E2A;&#x8FDB;&#x7A0B;:</p>
+<ul>
+<li>&#x7B2C;&#x4E00;&#x4E2A;&#x8FDB;&#x7A0B;&#x79F0;&#x4E3A;&#x201C; parent &#x201D;&#xFF0C;&#x8BFB;&#x53D6; bootstrapData &#x5E76;&#x89E3;&#x6790;&#x4E3A; Config&#xFF0C;&#x5BF9; User map &#x8BBE;&#x7F6E;&#xFF0C;&#x5E76;&#x901A;&#x8FC7;&#x6D88;&#x606F;&#x534F;&#x8C03;&#x540E;&#x9762;&#x4E24;&#x4E2A;&#x8FDB;&#x7A0B;&#x7684;&#x8FD0;&#x884C;&#x7BA1;&#x7406;&#xFF0C;&#x5728;&#x6536;&#x5230; grandchild &#x56DE;&#x590D;&#x4EFB;&#x52A1;&#x5B8C;&#x6210;&#x6D88;&#x606F;&#x540E;&#x9000;&#x51FA;&#x3002;</li>
+<li>&#x7B2C;&#x4E8C;&#x4E2A;&#x8FDB;&#x7A0B;&#x79F0;&#x4E3A;&#x201C; child &#x201D;,&#x7531; Parent &#x521B;&#x5EFA;&#xFF0C;&#x5B8C;&#x6210; namespace &#x7684;&#x8BBE;&#x7F6E; &#xFF0C;fork &#x51FA; grandChild &#x8FDB;&#x7A0B;&#x5E76;&#x53D1;&#x9001;&#x7ED9;Parent &#x540E;&#x53D1;&#x9001;&#x4EFB;&#x52A1;&#x5B8C;&#x6210;&#x6D88;&#x606F;&#x540E;&#x9000;&#x51FA;&#x3002;</li>
+<li>&#x7B2C;&#x4E09;&#x4E2A;&#x8FDB;&#x7A0B;&#x79F0;&#x4E3A;&#x201C; grandChild &#x201D;&#x6216;&quot; init &quot;&#xFF0C;&#x8FDB;&#x884C;&#x6700;&#x540E;&#x7684;&#x73AF;&#x5883;&#x51C6;&#x5907;&#x5DE5;&#x4F5C;(sid&#x3001;uid&#x3001;gid&#x3001;cgroup namespace)&#xFF0C;&#x6267;&#x884C;&#x5B8C;&#x6210;&#x540E;return &#x81F3; init Go runtime &#x4EE3;&#x7801;&#x5904;&#x7EE7;&#x7EED;&#x6267;&#x884C;&#x6700;&#x540E;&#x8FDB;&#x5165; go &#x4EE3;&#x7801;&#x3002;</li>
+</ul>
+<p>&#x5148;&#x6765;&#x770B;&#x4E0B; Init pipe &#x914D;&#x7F6E; datas &#x8BFB;&#x53D6;&#x5E76;&#x89E3;&#x6790;&#x540E;&#x7684; config &#x5B9A;&#x4E49;</p>
+<div><p class="code-filename">libcontainer/nsenter/nsexec.c:70</p></div>
+<pre class="language-"><code class="lang-C">struct nlconfig_t {
+    char *data;
+
+    /* Process settings. */
+    uint32_t cloneflags;
+    char *oom_score_adj;
+    size_t oom_score_adj_len;
+
+    /* User namespace settings. */
+    char *uidmap;
+    size_t uidmap_len;
+    char *gidmap;
+    size_t gidmap_len;
+    char *namespaces;
+    size_t namespaces_len;
+    uint8_t is_setgroup;
+
+    /* Rootless container settings. */
+    uint8_t is_rootless_euid;    /* boolean */
+    char *uidmappath;
+    size_t uidmappath_len;
+    char *gidmappath;
+    size_t gidmappath_len;
+};
+</code></pre>
+<p>Nsexec() &#x4E3A; nsenter &#x4E3B;&#x5E72;&#x6267;&#x884C;&#x903B;&#x8F91;&#x4EE3;&#x7801;,&#x6240;&#x6709; namespaces &#x914D;&#x7F6E;&#x90FD;&#x5728;&#x6B64; func &#x5185;&#x6267;&#x884C;&#x5B8C;&#x6210; </p>
+<div><p class="code-filename">libcontainer/nsenter/nsexec.c:575</p></div>
+<pre class="language-"><code class="lang-c"><span class="token keyword">void</span> <span class="token function">nsexec</span><span class="token punctuation">(</span><span class="token keyword">void</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">int</span> pipenum<span class="token punctuation">;</span>
+    jmp_buf env<span class="token punctuation">;</span>
+    <span class="token keyword">int</span> sync_child_pipe<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">,</span> sync_grandchild_pipe<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">;</span>  <span class="token comment">//&#x7528;&#x4E8E;&#x540E;&#x9762;child&#x548C;grandchild&#x8FDB;&#x7A0B;&#x901A;&#x4FE1;</span>
+    <span class="token keyword">struct</span> nlconfig_t config <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token number">0</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// &#x914D;&#x7F6E;&#x53D1;&#x9001;&#x7ED9;&#x7236;&#x8FDB;&#x7A0B;&#x7684; logs &#x7BA1;&#x9053;</span>
+    <span class="token function">setup_logpipe</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// &#x4ECE;&#x73AF;&#x5883;&#x53D8;&#x91CF; _LIBCONTAINER_INITPIPE &#x4E2D;&#x53D6;&#x5F97; child pipe &#x7684; fd &#x7F16;&#x53F7;</span>
+  <span class="token comment">// linuxContainer.commandTemplate() &#x6307;&#x5B9A;&#x4E86;&#x5BB9;&#x5668;&#x76F8;&#x5173;&#x7684;&#x73AF;&#x5883;&#x53D8;&#x91CF;&quot; _LIBCONTAINER_* &quot;</span>
+    pipenum <span class="token operator">=</span> <span class="token function">initpipe</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>pipenum <span class="token operator">==</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span>
+    <span class="token comment">// &#x7531;&#x4E8E;&#x6B63;&#x5E38;&#x542F;&#x52A8;&#x7684; runc &#x662F;&#x6CA1;&#x6709;&#x8FD9;&#x4E2A;&#x73AF;&#x5883;&#x53D8;&#x91CF;&#x7684;&#xFF0C;&#x6240;&#x4EE5;&#x8FD9;&#x91CC;&#x4F1A;&#x76F4;&#x63A5;&#x8FD4;&#x56DE;&#xFF0C;&#x7136;&#x540E;&#x5C31;&#x5F00;&#x59CB;&#x6B63;&#x5E38;&#x7684;&#x6267;&#x884C; go &#x7A0B;&#x5E8F;&#x4E86;</span>
+        <span class="token keyword">return</span><span class="token punctuation">;</span>
+
+   <span class="token comment">// &#x786E;&#x4FDD;&#x5F53;&#x524D;&#x7684;&#x4E8C;&#x8FDB;&#x5236;&#x6587;&#x4EF6;&#x662F;&#x5DF2;&#x7ECF;&#x590D;&#x5236;&#x8FC7;&#x7684;&#xFF0C;&#x7528;&#x6765;&#x89C4;&#x907F; CVE-2019-5736 &#x6F0F;&#x6D1E;</span>
+   <span class="token comment">// ensure_cloned_binary &#x4E2D;&#x4F7F;&#x7528;&#x4E86;&#x4E24;&#x79CD;&#x65B9;&#x6CD5;&#xFF1A;</span>
+   <span class="token comment">// - &#x4F7F;&#x7528; memfd&#xFF0C;&#x5C06;&#x4E8C;&#x8FDB;&#x5236;&#x6587;&#x4EF6;&#x5199;&#x5165; memfd&#xFF0C;&#x7136;&#x540E;&#x91CD;&#x542F; runc</span>
+   <span class="token comment">// - &#x590D;&#x5236;&#x4E8C;&#x8FDB;&#x5236;&#x6587;&#x4EF6;&#x5230;&#x4E34;&#x65F6;&#x6587;&#x4EF6;&#xFF0C;&#x7136;&#x540E;&#x91CD;&#x542F; runc</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">ensure_cloned_binary</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span>
+        <span class="token function">bail</span><span class="token punctuation">(</span><span class="token string">&quot;could not ensure we are a cloned binary&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token function">write_log</span><span class="token punctuation">(</span>DEBUG<span class="token punctuation">,</span> <span class="token string">&quot;nsexec started&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// &#x4ECE; child pipe &#x4E2D;&#x8BFB;&#x53D6; namespace config &#x5E76;&#x89E3;&#x6790;&#x4E3A; config &#x7ED3;&#x6784;</span>
+  <span class="token comment">// &quot;child pipe&quot; &#x4E3A; linuxContainer.newParentProcess() &#x521B;&#x5EFA; init pipe&#xFF08;sockPair&#xFF09;</span>
+    <span class="token function">nl_parse</span><span class="token punctuation">(</span>pipenum<span class="token punctuation">,</span> <span class="token operator">&amp;</span>config<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// &#x8BBE;&#x7F6E; oom score&#xFF0C;&#x8FD9;&#x4E2A;&#x53EA;&#x80FD;&#x5728;&#x7279;&#x6743;&#x6A21;&#x5F0F;&#x4E0B;&#x8BBE;&#x7F6E;&#xFF0C;&#x6240;&#x4EE5;&#x5728;&#x8FD9;&#x91CC;&#x5C31;&#x8981;&#x4FEE;&#x6539;&#x5B8C;&#x6210;</span>
+    <span class="token function">update_oom_score_adj</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span>oom_score_adj<span class="token punctuation">,</span> config<span class="token punctuation">.</span>oom_score_adj_len<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// &#x8BBE;&#x7F6E;&#x8FDB;&#x7A0B;&#x4E0D;&#x53EF; dump</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>config<span class="token punctuation">.</span>namespaces<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">prctl</span><span class="token punctuation">(</span>PR_SET_DUMPABLE<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span>
+            <span class="token function">bail</span><span class="token punctuation">(</span><span class="token string">&quot;failed to set process as non-dumpable&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+  <span class="token comment">// &#x521B;&#x5EFA;&#x548C;&#x5B50;&#x8FDB;&#x7A0B;&#x901A;&#x4FE1;&#x7684; pipe,sync_child_pipe &#x524D;&#x9762;&#x6709;&#x5B9A;&#x4E49;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">socketpair</span><span class="token punctuation">(</span>AF_LOCAL<span class="token punctuation">,</span> SOCK_STREAM<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> sync_child_pipe<span class="token punctuation">)</span> <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span>
+        <span class="token function">bail</span><span class="token punctuation">(</span><span class="token string">&quot;failed to setup sync pipe between parent and child&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// &#x521B;&#x5EFA;&#x548C;&#x5B59;&#x8FDB;&#x7A0B;&#x901A;&#x4FE1;&#x7684; pipe,sync_grandchild_pipe &#x524D;&#x9762;&#x6709;&#x5B9A;&#x4E49;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">socketpair</span><span class="token punctuation">(</span>AF_LOCAL<span class="token punctuation">,</span> SOCK_STREAM<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> sync_grandchild_pipe<span class="token punctuation">)</span> <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span>
+        <span class="token function">bail</span><span class="token punctuation">(</span><span class="token string">&quot;failed to setup sync pipe between parent and grandchild&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// setjmp &#x5C06;&#x5F53;&#x524D;&#x6267;&#x884C;&#x4F4D;&#x7F6E;&#x7684;&#x73AF;&#x5883;&#x4FDD;&#x5B58;&#x4E0B;&#x6765;&#xFF0C;&#x7528;&#x4E8E;&#x591A;&#x8FDB;&#x7A0B;&#x73AF;&#x5883;&#x4E0B;&#x7684;&#x7A0B;&#x5E8F;&#x8DF3;&#x8F6C;</span>
+  <span class="token comment">// &#x6B64;&#x5904;&#x56E0;&#x540E;&#x9762;&#x5BF9;&#x81EA;&#x8EAB;&#x8FDB;&#x884C; fork &#x8FDB;&#x7A0B;&#xFF0C;&#x901A;&#x8FC7;&#x4E0D;&#x540C;&#x8FDB;&#x7A0B;&#x7684; env &#x503C;&#x8FDB;&#x884C;&#x8DF3;&#x8F6C;&#x903B;&#x8F91;&#x6267;&#x884C; </span>
+    <span class="token keyword">switch</span> <span class="token punctuation">(</span><span class="token function">setjmp</span><span class="token punctuation">(</span>env<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token comment">// +&#x540E;&#x9762;&#x8BE6;&#x8FF0;</span>
+      <span class="token comment">//...</span>
+  <span class="token punctuation">}</span>
+</code></pre>
+<p><strong>Parent</strong> &#x7236;&#x8FDB;&#x7A0B;&#x521B;&#x5EFA;&#x5B50;&#x8FDB;&#x7A0B;( Child &#x81EA;&#x8EAB;&#x4E5F;&#x521B;&#x5EFA;&#x5B50;&#x8FDB;&#x7A0B;&#x79F0;&#x4E3A; Grandchild ).&#x63A5;&#x6536; child &#x914D;&#x7F6E; uid_map &#x548C; gid_map &#x8BF7;&#x6C42;&#x6D88;&#x606F; ,&#x4E3A;&#x5BB9;&#x5668;&#x4E0E;&#x5BBF;&#x4E3B;&#x5B8C;&#x6210; uid/gid range &#x6620;&#x5C04;&#x540E;&#x53D1;&#x9001;&#x786E;&#x8BA4;&#x7ED9; child &#xFF1B;&#x5728;&#x63A5;&#x6536;&#x5230; child &#x53D1;&#x9001;&#x7684; grand pid &#x540E;&#xFF0C;&#x901A;&#x8FC7;&#x5BB9;&#x5668;&#x5916;&#x4F20;&#x8FDB;&#x6765;&#x7684; child pipe &#x628A;&#x5B50;&#x548C;&#x5B59;&#x8FDB;&#x7A0B; PID&#xFF0C;&#x5199;&#x56DE;&#x53BB;&#xFF0C;&#x7136;&#x540E;&#x8BA9;&#x5BB9;&#x5668;&#x5916;&#x7684; runc&#xFF08;bootstrap&#x8FDB;&#x7A0B;&#xFF09;&#x63A5;&#x7BA1; PID&#xFF1B;&#x7136;&#x540E;&#x7B49;&#x5F85;child &#x5B8C;&#x6210;&#x4EFB;&#x52A1;&#x6D88;&#x606F;&#x3002;&#x5176;&#x540E;&#x53D1;&#x9001; grandchild &#x51C6;&#x5907;&#x8FD0;&#x884C;&#x6D88;&#x606F;&#x540E;&#x7B49;&#x5F85; grandchild &#x56DE;&#x590D;&#x5B8C;&#x6210;&#x4EFB;&#x52A1;&#x6D88;&#x606F;&#x540E;&#x9000;&#x51FA;&#x8FDB;&#x7A0B;&#x3002;</p>
+<div><p class="code-filename">libcontainer/nsenter/nsexec.c:700</p></div>
+<pre class="language-"><code class="lang-c">        <span class="token comment">/*
+         * Stage 0: We&apos;re in the parent. Our job is just to create a new child
+         *          (stage 1: JUMP_CHILD) process and write its uid_map and
+         *          gid_map. That process will go on to create a new process, then
+         *          it will send us its PID which we will send to the bootstrap
+         *          process.
+         */</span>
+    <span class="token comment">// &#x7B2C;&#x4E00;&#x6B21;&#x6267;&#x884C;&#x7684;&#x65F6;&#x5019; setjmp &#x8FD4;&#x56DE; 0&#xFF0C;&#x5BF9;&#x5E94; JUMP_PARENT</span>
+    <span class="token keyword">case</span> JUMP_PARENT<span class="token punctuation">:</span><span class="token punctuation">{</span>
+            <span class="token keyword">int</span> len<span class="token punctuation">;</span>
+            pid_t child<span class="token punctuation">,</span> first_child <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+            bool ready <span class="token operator">=</span> false<span class="token punctuation">;</span>
+
+            <span class="token comment">/* For debugging. */</span>
+            <span class="token function">prctl</span><span class="token punctuation">(</span>PR_SET_NAME<span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token keyword">unsigned</span> <span class="token keyword">long</span><span class="token punctuation">)</span><span class="token string">&quot;runc:[0:PARENT]&quot;</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+      <span class="token comment">// clone_parent &#x521B;&#x5EFA;&#x4E86;&#x548C;&#x5F53;&#x524D;&#x8FDB;&#x7A0B;&#x5B8C;&#x5168;&#x4E00;&#x81F4;&#x7684;&#x4E00;&#x4E2A;&#x8FDB;&#x7A0B;&#xFF08;&#x5B50;&#x8FDB;&#x7A0B;&#xFF09;</span>
+      <span class="token comment">// &#x5728; clone_parent &#x4E2D;&#xFF0C;&#x901A;&#x8FC7; longjmp() &#x8DF3;&#x8F6C;&#x5230; env &#x4FDD;&#x5B58;&#x7684;&#x4F4D;&#x7F6E;</span>
+      <span class="token comment">// &#x5E76;&#x4E14; setjmp &#x8FD4;&#x56DE;&#x503C;&#x4E3A; JUMP_CHILD</span>
+      <span class="token comment">// &#x8FD9;&#x6837;&#x8FD9;&#x4E2A;&#x5B50;&#x8FDB;&#x7A0B;&#x5C31;&#x4F1A;&#x6839;&#x636E; switch &#x6267;&#x884C;&#x5230; JUMP_CHILD &#x5206;&#x652F;</span>
+      <span class="token comment">// &#x800C;&#x5F53;&#x524D; runc init &#x548C; &#x5B50; runc init &#x4E4B;&#x95F4;&#x901A;&#x8FC7;&#x4E0A;&#x9762;&#x521B;&#x5EFA;&#x7684;</span>
+      <span class="token comment">// sync_child_pipe &#x8FDB;&#x884C;&#x540C;&#x6B65;&#x901A;&#x4FE1;</span>
+            child <span class="token operator">=</span> <span class="token function">clone_parent</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>env<span class="token punctuation">,</span> JUMP_CHILD<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>child <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span>
+                <span class="token function">bail</span><span class="token punctuation">(</span><span class="token string">&quot;unable to fork: child_func&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+     <span class="token comment">// &#x901A;&#x8FC7; sync_child_pipe &#x5FAA;&#x73AF;&#x8BFB;&#x53D6;&#x6765;&#x81EA;&#x5B50;&#x8FDB;&#x7A0B;&#x7684;&#x6D88;&#x606F;&#xFF0C;&#x201C;&#x6D88;&#x606F;&#x201D;&#x5B9A;&#x4E49;&#x5982;&#x4E0B;&#xFF1A;</span>
+     <span class="token comment">// enum sync_t {</span>
+       <span class="token comment">//      SYNC_USERMAP_PLS = 0x40,    /* Request parent to map our users. */</span>
+       <span class="token comment">//      SYNC_USERMAP_ACK = 0x41,    /* Mapping finished by the parent. */</span>
+       <span class="token comment">//      SYNC_RECVPID_PLS = 0x42,    /* Tell parent we&apos;re sending the PID. */</span>
+       <span class="token comment">//      SYNC_RECVPID_ACK = 0x43,    /* PID was correctly received by parent. */</span>
+       <span class="token comment">//      SYNC_GRANDCHILD = 0x44,    /* The grandchild is ready to run. */</span>
+       <span class="token comment">//      SYNC_CHILD_READY = 0x45,    /* The child or grandchild is ready to return. */</span>
+     <span class="token comment">//   };</span>
+
+      <span class="token comment">// &#x4E0E; child &#x5B50;&#x8FDB;&#x7A0B;&#x4E92;&#x901A;&#x6D88;&#x606F;&#x5E76;&#x5904;&#x7406;</span>
+      <span class="token comment">// &#x901A;&#x8FC7; sync_child_pipe &#x5FAA;&#x73AF;&#x8BFB;&#x53D6;&#x6765;&#x81EA;&#x5B50;&#x8FDB;&#x7A0B;&#x7684;&#x6D88;&#x606F;</span>
+            <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token operator">!</span>ready<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token keyword">enum</span> sync_t s<span class="token punctuation">;</span>
+
+                syncfd <span class="token operator">=</span> sync_child_pipe<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+                <span class="token function">close</span><span class="token punctuation">(</span>sync_child_pipe<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token comment">// &#x7B49;&#x5F85;(&#x8BFB;&#x53D6;) Child &#x7684;&#x6D88;&#x606F;</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">read</span><span class="token punctuation">(</span>syncfd<span class="token punctuation">,</span> <span class="token operator">&amp;</span>s<span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>s<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>s<span class="token punctuation">)</span><span class="token punctuation">)</span>
+                    <span class="token function">bail</span><span class="token punctuation">(</span><span class="token string">&quot;failed to sync with child: next state&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+                <span class="token keyword">switch</span> <span class="token punctuation">(</span>s<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// &#x8FD9;&#x91CC;&#x8BBE;&#x7F6E; user map&#xFF0C;&#x56E0;&#x4E3A;&#x5B50;&#x8FDB;&#x7A0B;&#x4FEE;&#x6539;&#x81EA;&#x8EAB;&#x7684; user namespace &#x4E4B;&#x540E;&#xFF0C;&#x5C31;&#x6CA1;&#x6709;&#x6743;&#x9650;&#x518D;&#x8BBE;&#x7F6E; user map &#x4E86;</span>
+                <span class="token keyword">case</span> SYNC_USERMAP_PLS<span class="token punctuation">:</span>   <span class="token comment">// &#x6536;&#x5230;&#x5B50;&#x8FDB;&#x7A0B;&#x8BF7;&#x6C42;&#x8BBE;&#x7F6E; usermap &#x6D88;&#x606F;</span>
+
+                    <span class="token keyword">if</span> <span class="token punctuation">(</span>config<span class="token punctuation">.</span>is_rootless_euid <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span>config<span class="token punctuation">.</span>is_setgroup<span class="token punctuation">)</span>
+                        <span class="token function">update_setgroups</span><span class="token punctuation">(</span>child<span class="token punctuation">,</span> SETGROUPS_DENY<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+                    <span class="token comment">/* Set up mappings. */</span>
+                    <span class="token function">update_uidmap</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span>uidmappath<span class="token punctuation">,</span> child<span class="token punctuation">,</span> config<span class="token punctuation">.</span>uidmap<span class="token punctuation">,</span> config<span class="token punctuation">.</span>uidmap_len<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token function">update_gidmap</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span>gidmappath<span class="token punctuation">,</span> child<span class="token punctuation">,</span> config<span class="token punctuation">.</span>gidmap<span class="token punctuation">,</span> config<span class="token punctuation">.</span>gidmap_len<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+          <span class="token comment">// &#x5411;&#x5B50;&#x8FDB;&#x7A0B;&#x53D1;&#x9001; SYNC_USERMAP_ACK&#xFF0C;&#x8868;&#x793A;&#x5904;&#x7406;&#x5B8C;&#x6210;</span>
+                    s <span class="token operator">=</span> SYNC_USERMAP_ACK<span class="token punctuation">;</span>
+                    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">write</span><span class="token punctuation">(</span>syncfd<span class="token punctuation">,</span> <span class="token operator">&amp;</span>s<span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>s<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>s<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                        <span class="token function">kill</span><span class="token punctuation">(</span>child<span class="token punctuation">,</span> SIGKILL<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                        <span class="token function">bail</span><span class="token punctuation">(</span><span class="token string">&quot;failed to sync with child: write(SYNC_USERMAP_ACK)&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token punctuation">}</span>
+                    <span class="token keyword">break</span><span class="token punctuation">;</span>
+                <span class="token keyword">case</span> SYNC_RECVPID_PLS<span class="token punctuation">:</span><span class="token punctuation">{</span>   <span class="token comment">// &#x6536;&#x5230;&#x5B50;&#x8FDB;&#x7A0B;&#x4F20;&#x9012;&#x7684; grandchild &#x7684; PID &#x63A5;&#x6536;&#x8BF7;&#x6C42;&#x6D88;&#x606F;</span>
+                        first_child <span class="token operator">=</span> child<span class="token punctuation">;</span>
+            <span class="token comment">// &#x63A5;&#x6536;&#x5B59;&#x8FDB;&#x7A0B;&#x7684;pid</span>
+                        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">read</span><span class="token punctuation">(</span>syncfd<span class="token punctuation">,</span> <span class="token operator">&amp;</span>child<span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>child<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>child<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                            <span class="token function">kill</span><span class="token punctuation">(</span>first_child<span class="token punctuation">,</span> SIGKILL<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                            <span class="token function">bail</span><span class="token punctuation">(</span><span class="token string">&quot;failed to sync with child: read(childpid)&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                        <span class="token punctuation">}</span>
+
+                        s <span class="token operator">=</span> SYNC_RECVPID_ACK<span class="token punctuation">;</span>   <span class="token comment">// &#x56DE;&#x590D;&#x63A5;&#x6536;&#x786E;&#x8BA4;&#x6D88;&#x606F;&#x7ED9; child </span>
+                        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">write</span><span class="token punctuation">(</span>syncfd<span class="token punctuation">,</span> <span class="token operator">&amp;</span>s<span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>s<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>s<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                            <span class="token function">kill</span><span class="token punctuation">(</span>first_child<span class="token punctuation">,</span> SIGKILL<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                            <span class="token function">kill</span><span class="token punctuation">(</span>child<span class="token punctuation">,</span> SIGKILL<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                            <span class="token function">bail</span><span class="token punctuation">(</span><span class="token string">&quot;failed to sync with child: write(SYNC_RECVPID_ACK)&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                        <span class="token punctuation">}</span>
+
+                    <span class="token comment">// &#x901A;&#x8FC7;&#x5BB9;&#x5668;&#x5916;&#x4F20;&#x8FDB;&#x6765;&#x7684; child pipe &#x628A;&#x5B50;&#x548C;&#x5B59;&#x8FDB;&#x7A0B; PID&#xFF0C;&#x5199;&#x56DE;&#x53BB;&#xFF0C;&#x7136;&#x540E;&#x8BA9;&#x5BB9;&#x5668;&#x5916;&#x7684; runc &#x63A5;&#x7BA1; PID</span>
+            <span class="token comment">// &#x8FD9;&#x4E2A;&#x662F;&#x56E0;&#x4E3A; clone_parent &#x7684;&#x65F6;&#x5019;&#x53C2;&#x6570;&#x4F20;&#x4E86; CLONE_PARENT&#xFF0C;&#x5BFC;&#x81F4;&#x5B50;&#x5B59;&#x7684;&#x7236;&#x8FDB;&#x7A0B;&#x90FD;&#x662F;&#x5BB9;&#x5668;&#x5916;&#x7684;&#x90A3;</span>
+            <span class="token comment">// &#x4E2A; runc&#xFF0C; &#x6240;&#x4EE5;&#x5F53;&#x524D;&#x8FDB;&#x7A0B;&#x65E0;&#x6CD5;&#x63A5;&#x7BA1;&#x8FD9;&#x4E9B; PID</span>
+                        len <span class="token operator">=</span> <span class="token function">dprintf</span><span class="token punctuation">(</span>pipenum<span class="token punctuation">,</span> <span class="token string">&quot;{\&quot;pid\&quot;: %d, \&quot;pid_first\&quot;: %d}\n&quot;</span><span class="token punctuation">,</span> child<span class="token punctuation">,</span> first_child<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                        <span class="token keyword">if</span> <span class="token punctuation">(</span>len <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                            <span class="token function">kill</span><span class="token punctuation">(</span>child<span class="token punctuation">,</span> SIGKILL<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                            <span class="token function">bail</span><span class="token punctuation">(</span><span class="token string">&quot;unable to generate JSON for child pid&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                        <span class="token punctuation">}</span>
+                    <span class="token punctuation">}</span>
+                    <span class="token keyword">break</span><span class="token punctuation">;</span>
+                <span class="token keyword">case</span> SYNC_CHILD_READY<span class="token punctuation">:</span>      <span class="token comment">// &#x6536;&#x5230;&#x5B50;&#x8FDB;&#x7A0B;&#x4EFB;&#x52A1;&#x5B8C;&#x6210;&#x6D88;&#x606F;</span>
+          <span class="token comment">// &#x5B50;&#x8FDB;&#x7A0B;&#x5DF2;&#x7ECF;&#x5904;&#x7406;&#x5B8C;&#x4E86;&#x6240;&#x6709;&#x4E8B;&#x60C5;&#xFF0C;&#x7236;&#x8FDB;&#x7A0B;&#x53EF;&#x9000;&#x51FA;&#x5FAA;&#x73AF;</span>
+                    ready <span class="token operator">=</span> true<span class="token punctuation">;</span>
+                    <span class="token keyword">break</span><span class="token punctuation">;</span>
+                <span class="token keyword">default</span><span class="token punctuation">:</span>
+                    <span class="token function">bail</span><span class="token punctuation">(</span><span class="token string">&quot;unexpected sync value: %u&quot;</span><span class="token punctuation">,</span> s<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">}</span>
+            <span class="token punctuation">}</span>
+
+      <span class="token comment">// &#x4E0E; Grandchild &#x5B59;&#x8FDB;&#x7A0B;&#x4E92;&#x901A;&#x6D88;&#x606F;&#x5E76;&#x5904;&#x7406;</span>
+      <span class="token comment">// &#x901A;&#x8FC7; sync_grandchild_pipe &#x5FAA;&#x73AF;&#x8BFB;&#x53D6;&#x6765;&#x81EA;&#x5B59;&#x8FDB;&#x7A0B;&#x7684;&#x6D88;&#x606F;</span>
+            ready <span class="token operator">=</span> false<span class="token punctuation">;</span>
+            <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token operator">!</span>ready<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token keyword">enum</span> sync_t s<span class="token punctuation">;</span>
+
+                syncfd <span class="token operator">=</span> sync_grandchild_pipe<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+                <span class="token function">close</span><span class="token punctuation">(</span>sync_grandchild_pipe<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+                s <span class="token operator">=</span> SYNC_GRANDCHILD<span class="token punctuation">;</span>     <span class="token comment">//  &#x53D1;&#x9001; &quot;SYNC_GRANDCHILD&quot; &#x51C6;&#x5907;&#x8FD0;&#x884C;&#x6D88;&#x606F;</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">write</span><span class="token punctuation">(</span>syncfd<span class="token punctuation">,</span> <span class="token operator">&amp;</span>s<span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>s<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>s<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                    <span class="token function">kill</span><span class="token punctuation">(</span>child<span class="token punctuation">,</span> SIGKILL<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token function">bail</span><span class="token punctuation">(</span><span class="token string">&quot;failed to sync with child: write(SYNC_GRANDCHILD)&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">}</span>
+
+                <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">read</span><span class="token punctuation">(</span>syncfd<span class="token punctuation">,</span> <span class="token operator">&amp;</span>s<span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>s<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>s<span class="token punctuation">)</span><span class="token punctuation">)</span>
+                    <span class="token function">bail</span><span class="token punctuation">(</span><span class="token string">&quot;failed to sync with child: next state&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+                <span class="token keyword">switch</span> <span class="token punctuation">(</span>s<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token keyword">case</span> SYNC_CHILD_READY<span class="token punctuation">:</span>   <span class="token comment">//  &#x63A5;&#x6536;&#x5B59;&#x8FDB;&#x7A0B;&#x4EFB;&#x52A1;&#x5B8C;&#x6210;&#x6D88;&#x606F;</span>
+                    ready <span class="token operator">=</span> true<span class="token punctuation">;</span>
+                    <span class="token keyword">break</span><span class="token punctuation">;</span>
+                <span class="token keyword">default</span><span class="token punctuation">:</span>
+                    <span class="token function">bail</span><span class="token punctuation">(</span><span class="token string">&quot;unexpected sync value: %u&quot;</span><span class="token punctuation">,</span> s<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">}</span>
+            <span class="token punctuation">}</span>
+       <span class="token comment">// &#x9000;&#x51FA;&#x3002;&#x5F88;&#x660E;&#x663E;&#xFF0C;&#x5F53;&#x524D; runc init &#x9000;&#x51FA;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x5B50; runc init &#x4E00;&#x5B9A;&#x4E5F;&#x9000;&#x51FA;&#x4E86;&#xFF0C;</span>
+       <span class="token comment">// &#x4F46;&#x662F;&#x5B59; runc init &#x8FD8;&#x6CA1;&#x6709;&#x9000;&#x51FA;</span>
+       <span class="token comment">// &#x8FD9;&#x4E5F;&#x662F;&#x4E3A;&#x4EC0;&#x4E48;&#x5BB9;&#x5668;&#x5916;&#x7684; runc &#x7B49;&#x5F85;&#x5B50;&#x8FDB;&#x7A0B;&#x9000;&#x51FA;&#xFF0C;&#x5374;&#x53C8;&#x5411; pipe &#x91CC;&#x5199;&#x6570;&#x636E;&#x7684;&#x539F;&#x56E0;&#xFF0C;</span>
+       <span class="token comment">// &#x56E0;&#x4E3A;&#x5B59; runc init &#x8FD8;&#x5728;&#x7B49;&#x7740;&#x5BB9;&#x5668;&#x914D;&#x7F6E;</span>
+       <span class="token comment">// &#x8FDB;&#x7A0B;&#x6B63;&#x5E38;&#x9000;&#x51FA;&#xFF08;&#x4E0D;&#x7ED9; go &#x4EE3;&#x7801;&#x6267;&#x884C;&#x7684;&#x673A;&#x4F1A;&#xFF09;</span>
+            <span class="token function">exit</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+</code></pre>
+<p><strong>Child</strong> &#x5B50;&#x8FDB;&#x7A0B;&#x52A0;&#x5165;&#x4E86; init pipe &#x4F20;&#x9012;&#x7684; namespaces &#x914D;&#x7F6E;&#xFF0C;unshare &#x8BBE;&#x7F6E;&#x4E86; user namespace&#xFF0C;&#x5E76;&#x901A;&#x77E5; parent &#x5BF9; usermap(uid/gid map) &#x8FDB;&#x884C;&#x914D;&#x7F6E;&#x540E;&#xFF0C;&#x5C06;&#x5F53;&#x524D;&#x5BB9;&#x5668;&#x7684; uid &#x8BBE;&#x7F6E;&#x4E3A; 0 (root) &#xFF1B;&#x6700;&#x540E;&#x521B;&#x5EFA;&#x5C06; fork &#x7684; grantchild &#x8FDB;&#x7A0B;pid&#x53D1;&#x9001;&#x7ED9; parent &#x3002;</p>
+<div><p class="code-filename">libcontainer/nsenter/nsexec.c:969</p></div>
+<pre class="language-"><code class="lang-c">        <span class="token comment">/*
+         * Stage 1: We&apos;re in the first child process. Our job is to join any
+         *          provided namespaces in the netlink payload and unshare all
+         *          of the requested namespaces. If we&apos;ve been asked to
+         *          CLONE_NEWUSER, we will ask our parent (stage 0) to set up
+         *          our user mappings for us. Then, we create a new child
+         *          (stage 2: JUMP_INIT) for PID namespace. We then send the
+         *          child&apos;s PID to our parent (stage 0).
+         */</span>  
+    <span class="token keyword">case</span> JUMP_CHILD<span class="token punctuation">:</span><span class="token punctuation">{</span>
+            pid_t child<span class="token punctuation">;</span>
+            <span class="token keyword">enum</span> sync_t s<span class="token punctuation">;</span>
+
+            syncfd <span class="token operator">=</span> sync_child_pipe<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+            <span class="token function">close</span><span class="token punctuation">(</span>sync_child_pipe<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+            <span class="token comment">/* For debugging. */</span>
+            <span class="token function">prctl</span><span class="token punctuation">(</span>PR_SET_NAME<span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token keyword">unsigned</span> <span class="token keyword">long</span><span class="token punctuation">)</span><span class="token string">&quot;runc:[1:CHILD]&quot;</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+      <span class="token comment">// &#x901A;&#x8FC7; setns &#x52A0;&#x5165;&#x73B0;&#x6709;&#x7684; namespaces </span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>config<span class="token punctuation">.</span>namespaces<span class="token punctuation">)</span>
+                <span class="token function">join_namespaces</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span>namespaces<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+      <span class="token comment">// &#x5982;&#x679C; clone flag &#x91CC;&#x6709; CLONE_NEWUSER&#xFF0C;&#x8BF4;&#x660E;&#x9700;&#x8981;&#x521B;&#x5EFA;&#x65B0;&#x7684; user namespace&#xFF0C;</span>
+      <span class="token comment">// &#x4F7F;&#x7528; unshare() &#x521B;&#x5EFA; user namespace </span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>config<span class="token punctuation">.</span>cloneflags <span class="token operator">&amp;</span> CLONE_NEWUSER<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">unshare</span><span class="token punctuation">(</span>CLONE_NEWUSER<span class="token punctuation">)</span> <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span>
+                    <span class="token function">bail</span><span class="token punctuation">(</span><span class="token string">&quot;failed to unshare user namespace&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                config<span class="token punctuation">.</span>cloneflags <span class="token operator">&amp;</span><span class="token operator">=</span> <span class="token operator">~</span>CLONE_NEWUSER<span class="token punctuation">;</span>
+
+                <span class="token comment">/* Switching is only necessary if we joined namespaces. */</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span>config<span class="token punctuation">.</span>namespaces<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">prctl</span><span class="token punctuation">(</span>PR_SET_DUMPABLE<span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span>
+                        <span class="token function">bail</span><span class="token punctuation">(</span><span class="token string">&quot;failed to set process as dumpable&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">}</span>
+
+        <span class="token comment">// &#x7B49;&#x5F85;&#x7236; runc init &#x914D;&#x7F6E; user map </span>
+        <span class="token comment">// &#x53D1;&#x9001; SYNC_USERMAP_PLS &#x6D88;&#x606F;&#x7ED9; parent ,&#x5E76;&#x63A5;&#x6536;&#x5176; SYNC_USERMAP_ACK &#x786E;&#x8BA4;&#x6D88;&#x606F;</span>
+                s <span class="token operator">=</span> SYNC_USERMAP_PLS<span class="token punctuation">;</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">write</span><span class="token punctuation">(</span>syncfd<span class="token punctuation">,</span> <span class="token operator">&amp;</span>s<span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>s<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>s<span class="token punctuation">)</span><span class="token punctuation">)</span>
+                    <span class="token function">bail</span><span class="token punctuation">(</span><span class="token string">&quot;failed to sync with parent: write(SYNC_USERMAP_PLS)&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">read</span><span class="token punctuation">(</span>syncfd<span class="token punctuation">,</span> <span class="token operator">&amp;</span>s<span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>s<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>s<span class="token punctuation">)</span><span class="token punctuation">)</span>
+                    <span class="token function">bail</span><span class="token punctuation">(</span><span class="token string">&quot;failed to sync with parent: read(SYNC_USERMAP_ACK)&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span>s <span class="token operator">!=</span> SYNC_USERMAP_ACK<span class="token punctuation">)</span>
+                    <span class="token function">bail</span><span class="token punctuation">(</span><span class="token string">&quot;failed to sync with parent: SYNC_USERMAP_ACK: got %u&quot;</span><span class="token punctuation">,</span> s<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token comment">/* Switching is only necessary if we joined namespaces. */</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span>config<span class="token punctuation">.</span>namespaces<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">prctl</span><span class="token punctuation">(</span>PR_SET_DUMPABLE<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span>
+                        <span class="token function">bail</span><span class="token punctuation">(</span><span class="token string">&quot;failed to set process as dumpable&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">}</span>
+
+        <span class="token comment">// &#x8BBE;&#x7F6E;&#x5F53;&#x524D;&#x8FDB;&#x7A0B;&#x7684; uid &#x4E3A; 0&#xFF0C;&#x5373;&#x5BB9;&#x5668;&#x5185;&#x7684; root &#x7528;&#x6237;</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">setresuid</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span>
+                    <span class="token function">bail</span><span class="token punctuation">(</span><span class="token string">&quot;failed to become root in user namespace&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+           <span class="token comment">// &#x4F7F;&#x7528; unshare() &#x5176;&#x4ED6;&#x9700;&#x8981;&#x65B0;&#x5EFA;&#x7684; namespace</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">unshare</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span>cloneflags <span class="token operator">&amp;</span> <span class="token operator">~</span>CLONE_NEWCGROUP<span class="token punctuation">)</span> <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span>
+                <span class="token function">bail</span><span class="token punctuation">(</span><span class="token string">&quot;failed to unshare namespaces&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+
+     <span class="token comment">// &#x521B;&#x5EFA;&#x5B59;&#x8FDB;&#x7A0B;&#xFF0C;&#x5F53;&#x524D;&#x8FDB;&#x7A0B;&#x5DF2;&#x7ECF;&#x5B8C;&#x6210;&#x4E86; namespace &#x7684;&#x8BBE;&#x7F6E;&#xFF0C;&#x5B59;&#x8FDB;&#x7A0B;&#x4F1A;&#x7EE7;&#x627F;&#x8FD9;&#x4E9B;&#x8BBE;&#x7F6E;</span>
+            child <span class="token operator">=</span> <span class="token function">clone_parent</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>env<span class="token punctuation">,</span> JUMP_INIT<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>child <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span>
+                <span class="token function">bail</span><span class="token punctuation">(</span><span class="token string">&quot;unable to fork: init_func&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+     <span class="token comment">// &#x5C06;&#x5B59;&#x8FDB;&#x7A0B; PID &#x4F20;&#x7ED9; parent &#x6D88;&#x606F;&quot; SYNC_RECVPID_PLS + Grandchild_pid &quot;</span>
+            s <span class="token operator">=</span> SYNC_RECVPID_PLS<span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">write</span><span class="token punctuation">(</span>syncfd<span class="token punctuation">,</span> <span class="token operator">&amp;</span>s<span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>s<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>s<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token function">kill</span><span class="token punctuation">(</span>child<span class="token punctuation">,</span> SIGKILL<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token function">bail</span><span class="token punctuation">(</span><span class="token string">&quot;failed to sync with parent: write(SYNC_RECVPID_PLS)&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">write</span><span class="token punctuation">(</span>syncfd<span class="token punctuation">,</span> <span class="token operator">&amp;</span>child<span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>child<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>child<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token function">kill</span><span class="token punctuation">(</span>child<span class="token punctuation">,</span> SIGKILL<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token function">bail</span><span class="token punctuation">(</span><span class="token string">&quot;failed to sync with parent: write(childpid)&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+
+      <span class="token comment">// &#x7B49;&#x5F85;&#x7236; runc init &#x63A5;&#x6536;PID &#x786E;&#x8BA4;&#x6D88;&#x606F;&quot; SYNC_RECVPID_ACK &quot;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">read</span><span class="token punctuation">(</span>syncfd<span class="token punctuation">,</span> <span class="token operator">&amp;</span>s<span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>s<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>s<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token function">kill</span><span class="token punctuation">(</span>child<span class="token punctuation">,</span> SIGKILL<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token function">bail</span><span class="token punctuation">(</span><span class="token string">&quot;failed to sync with parent: read(SYNC_RECVPID_ACK)&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>s <span class="token operator">!=</span> SYNC_RECVPID_ACK<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token function">kill</span><span class="token punctuation">(</span>child<span class="token punctuation">,</span> SIGKILL<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token function">bail</span><span class="token punctuation">(</span><span class="token string">&quot;failed to sync with parent: SYNC_RECVPID_ACK: got %u&quot;</span><span class="token punctuation">,</span> s<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+
+      <span class="token comment">// &#x53D1;&#x9001; SYNC_CHILD_READY &#x7ED9; parent , Child &#x4EFB;&#x52A1;&#x5DF2;&#x5B8C;&#x6210; </span>
+            s <span class="token operator">=</span> SYNC_CHILD_READY<span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">write</span><span class="token punctuation">(</span>syncfd<span class="token punctuation">,</span> <span class="token operator">&amp;</span>s<span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>s<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>s<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token function">kill</span><span class="token punctuation">(</span>child<span class="token punctuation">,</span> SIGKILL<span class="token punctuation">)</span><span class="token punctuation">;</span>   
+                <span class="token function">bail</span><span class="token punctuation">(</span><span class="token string">&quot;failed to sync with parent: write(SYNC_CHILD_READY)&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+            <span class="token comment">// &#x5B50; runc init &#x7684;&#x5DE5;&#x4F5C;&#x5230;&#x6B64;&#x7ED3;&#x675F;&#xFF0C;&#x8FDB;&#x7A0B;&#x6B63;&#x5E38;&#x9000;&#x51FA;&#xFF08;&#x4E0D;&#x7ED9; go &#x4EE3;&#x7801;&#x6267;&#x884C;&#x7684;&#x673A;&#x4F1A;&#xFF09;</span>
+            <span class="token function">exit</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+</code></pre>
+<p><strong>Grandchild</strong> (final child) &#x5B59;&#x8FDB;&#x7A0B;&#x662F;&#x771F;&#x6B63;&#x542F;&#x52A8;&#x5BB9;&#x5668; entrypoint &#x7684; init &#x8FDB;&#x7A0B;&#xFF0C;&#x5E76;&#x4E14;&#x5728;&#x542F;&#x52A8;&#x4E4B;&#x524D;&#xFF0C;&#x8FDB;&#x884C;&#x6700;&#x540E;&#x7684;&#x73AF;&#x5883;&#x51C6;&#x5907;&#x5DE5;&#x4F5C;(sid&#x3001;uid&#x3001;gid&#x3001;cgroup namespace)&#xFF0C;&#x6267;&#x884C;&#x5B8C;&#x6210;&#x540E;return &#x81F3; init Go runtime &#x4EE3;&#x7801;&#x5904;&#x7EE7;&#x7EED;&#x6267;&#x884C;&#x3002;</p>
+<div><p class="code-filename">libcontainer/nsenter/nsexec.c:969</p></div>
+<pre class="language-"><code class="lang-C">        /*
+         * Stage 2: We&apos;re the final child process, and the only process that will
+         *          actually return to the Go runtime. Our job is to just do the
+         *          final cleanup steps and then return to the Go runtime to allow
+         *          init_linux.go to run.
+         */
+    case JUMP_INIT:{
+       // 
+            enum sync_t s;
+
+            syncfd = sync_grandchild_pipe[0];   
+            close(sync_grandchild_pipe[1]);
+            close(sync_child_pipe[0]);
+            close(sync_child_pipe[1]);
+
+            /* For debugging. */
+            prctl(PR_SET_NAME, (unsigned long)&quot;runc:[2:INIT]&quot;, 0, 0, 0);
+
+      // &#x7B49;&#x5F85;&#xFF08;&#x8BFB;&#x53D6;pipe&#xFF09; parent(&#x7956;&#x7236;) &#x8FDB;&#x7A0B;&#x7684; SYNC_GRANDCHILD &#x51C6;&#x5907;&#x8FD0;&#x884C;&#x6D88;&#x606F;
+            if (read(syncfd, &amp;s, sizeof(s)) != sizeof(s))
+                bail(&quot;failed to sync with parent: read(SYNC_GRANDCHILD)&quot;);
+            if (s != SYNC_GRANDCHILD)
+                bail(&quot;failed to sync with parent: SYNC_GRANDCHILD: got %u&quot;, s);
+
+      // &#x8BBE;&#x7F6E;sid 
+            if (setsid() &lt; 0)
+                bail(&quot;setsid failed&quot;);
+
+      // &#x8BBE;&#x7F6E;uid root
+            if (setuid(0) &lt; 0)
+                bail(&quot;setuid failed&quot;);
+
+      // &#x8BBE;&#x7F6E;gid root
+            if (setgid(0) &lt; 0)
+                bail(&quot;setgid failed&quot;);
+
+            if (!config.is_rootless_euid &amp;&amp; config.is_setgroup) {
+                if (setgroups(0, NULL) &lt; 0)
+                    bail(&quot;setgroups failed&quot;);
+            }
+
+      // &#x7B49;&#x5F85;&#x6765;&#x81EA;&#x5BB9;&#x5668;&#x5916; runc &#x7684; child pipe &#x7684;&#x5173;&#x4E8E; cgroup namespace &#x7684;&#x6D88;&#x606F; 0x80&#xFF08;CREATECGROUPNS&#xFF09;
+            if (config.cloneflags &amp; CLONE_NEWCGROUP) {
+                uint8_t value;
+
+        // &#x4ECE; pipenum &#x8BFB;&#x53D6;&#xFF0C;&#x8BF7;&#x6CE8;&#x610F;&#x6B64;&#x5904;&#x8FD8;&#x4ECE; bootstrap &#x8FDB;&#x7A0B;&#x901A;&#x8FC5; pipe &#x83B7;&#x53D6;&#x914D;&#x7F6E;
+                if (read(pipenum, &amp;value, sizeof(value)) != sizeof(value))
+                    bail(&quot;read synchronisation value failed&quot;);
+                if (value == CREATECGROUPNS) {
+          // &#x4F7F;&#x7528; unshare() &#x521B;&#x5EFA; cgroup namespace
+                    if (unshare(CLONE_NEWCGROUP) &lt; 0)
+                        bail(&quot;failed to unshare cgroup namespace&quot;);
+                } else
+                    bail(&quot;received unknown synchronisation value&quot;);
+            }
+
+      // &#x53D1;&#x9001;&#x5B59;&#x8FDB;&#x7A0B;&#x51C6;&#x5907;&#x5B8C;&#x6210;&#x7684;&#x6D88;&#x606F;&#x7ED9; parent, &#x6B64;&#x6D88;&#x606F;&#x53D1;&#x9001;&#x540E; parent &#x8FDB;&#x7A0B;&#x63A5;&#x6536;&#x540E;&#x5DF2;&#x5B8C;&#x6210;&#x5176;&#x5168;&#x90E8;&#x4EFB;&#x52A1;&#x9000;&#x51FA;
+            s = SYNC_CHILD_READY;
+            if (write(syncfd, &amp;s, sizeof(s)) != sizeof(s))
+                bail(&quot;failed to sync with patent: write(SYNC_CHILD_READY)&quot;);
+
+      // &#x5173;&#x95ED;&#x8D44;&#x6E90;
+            /* Close sync pipes. */
+            close(sync_grandchild_pipe[0]);
+            /* Free netlink data. */
+            nl_free(&amp;config);
+
+      // &#x7236;/&#x7956;&#x7236; runc init &#x90FD;&#x9000;&#x51FA;&#x4E86;
+      // return&#xFF0C;&#x7136;&#x540E;&#x5F00;&#x59CB;&#x6267;&#x884C; go &#x4EE3;&#x7801;
+            return;
+        }
+    default:
+        bail(&quot;unexpected jump value&quot;);
+    }
+
+    /* Should never be reached. */
+    bail(&quot;should never be reached&quot;);
+}
+</code></pre>
+<p>&#x6B64;&#x65F6;&#x4EE3;&#x7801;&#x5DF2; return &#x56DE;&#x5230;&#x4E86; runC init &#x547D;&#x4EE4;&#x7684; go &#x4EE3;&#x7801;&#x7EE7;&#x7EED;&#x6267;&#x884C;&#xFF0C;&#x6267;&#x884C;&#x7684;&#x8FDB;&#x7A0B;&#x7A7A;&#x95F4;&#x4ECD;&#x662F;&#x5DF2;&#x5B8C;&#x6210; namespace &#x914D;&#x7F6E;&#x540E;&#x7684;&#x6700;&#x540E;&#x7684;&#x8FDB;&#x7A0B;(&#x5373; grandchild &#x8FDB;&#x7A0B;&#x5728;&#x5BB9;&#x5668;&#x6D41;&#x7A0B;&#x4E2D;&#x79F0;&#x4E3A; init &#x8FDB;&#x7A0B;)&#xFF0C;&#x540E;&#x9762;&#x7684;init go&#x6267;&#x884C;&#x6D41;&#x7A0B;&#x672C;&#x6587;&#x524D;&#x9762;&#x5DF2;&#x6709;&#x7B80;&#x5355;&#x4ECB;&#x7ECD;&#xFF0C;&#x66F4;&#x8BE6;&#x7EC6;&#x7684;&#x6267;&#x884C;&#x6D41;&#x7A0B;&#x5206;&#x6790;&#x53EF;&#x53C2;&#x7167;&#x300A;RunC &#x6E90;&#x7801;&#x901A;&#x8BFB;&#x6307;&#x5357;&#x4E4B; Run&#x300B;&#x3002;</p>
+<p><strong>&#x76F8;&#x5173;&#x6587;&#x6863;</strong>&#xFF1A; // TODO &#x8865;&#x5145;&#x94FE;&#x63A5;</p>
+<ul>
+<li>&#x300A;RunC &#x6E90;&#x7801;&#x901A;&#x8BFB;&#x6307;&#x5357;&#x4E4B; Run&#x300B;</li>
+<li>&#x300A;RunC &#x6E90;&#x7801;&#x901A;&#x8BFB;&#x6307;&#x5357;&#x4E4B; Create &amp; Start&#x300B;</li>
+<li>&#x300A;RunC &#x6E90;&#x7801;&#x901A;&#x8BFB;&#x6307;&#x5357;&#x4E4B; Cgroup&#x300B;</li>
+<li>&#x300A;RunC &#x6E90;&#x7801;&#x901A;&#x8BFB;&#x6307;&#x5357;&#x4E4B; Networks&#x300B;</li>
+</ul>
+<p><strong>~&#x672C;&#x6587; END~</strong></p>
+<footer class="page-footer"><span class="copyright">Copyright &#xA9; farmer.hutao@outlook.com 2019 all right reserved&#xFF0C;powered by Gitbook</span><span class="footer-modification">&#x8BE5;&#x6587;&#x4EF6;&#x4FEE;&#x8BA2;&#x65F6;&#x95F4;&#xFF1A;
+2019-08-27 15:36:44
+</span></footer><div id="anchors-navbar"><i class="fa fa-anchor"></i><ul><p><a href="#RunC_&#x6E90;&#x7801;&#x901A;&#x8BFB;&#x6307;&#x5357;&#x4E4B;_NameSpace">RunC &#x6E90;&#x7801;&#x901A;&#x8BFB;&#x6307;&#x5357;&#x4E4B; NameSpace</a></p><li><a href="#&#x6982;&#x8FF0;">1. &#x6982;&#x8FF0;</a></li><li><a href="#RunC_init_&#x6267;&#x884C;&#x6D41;&#x7A0B;&#x4E0E;_namespace">2. RunC init &#x6267;&#x884C;&#x6D41;&#x7A0B;&#x4E0E; namespace</a></li><li><a href="#RunC_Namespace_&#x5B9A;&#x4E49;&#x4E0E;&#x5B9E;&#x73B0;">3. RunC Namespace &#x5B9A;&#x4E49;&#x4E0E;&#x5B9E;&#x73B0;</a></li><li><a href="#Nsenter_C&#x4EE3;&#x7801;&#x89E3;&#x6790;">4. Nsenter C&#x4EE3;&#x7801;&#x89E3;&#x6790;</a></li></ul></div><a href="#&#x6982;&#x8FF0;" id="goTop"><i class="fa fa-arrow-up"></i></a>
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="./" class="navigation navigation-prev " aria-label="Previous page: RunC">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="cgroup.html" class="navigation navigation-next " aria-label="Next page: RunC 源码通读之 Cgroup">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"RunC 源码通读之 NameSpace","level":"3.3.1","depth":2,"next":{"title":"RunC 源码通读之 Cgroup","level":"3.3.2","depth":2,"path":"around/runc/cgroup.md","ref":"./around/runc/cgroup.md","articles":[]},"previous":{"title":"RunC","level":"3.3","depth":1,"path":"around/runc/README.md","ref":"./around/runc/README.md","articles":[{"title":"RunC 源码通读之 NameSpace","level":"3.3.1","depth":2,"path":"around/runc/namespace.md","ref":"./around/runc/namespace.md","articles":[]},{"title":"RunC 源码通读之 Cgroup","level":"3.3.2","depth":2,"path":"around/runc/cgroup.md","ref":"./around/runc/cgroup.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["theme-comscore","codeblock-filename","navigator","simple-page-toc","expandable-chapters-small","search-pro","splitter","multipart","tbfed-pagefooter","prism","-highlight","editlink","github","github-buttons@2.1.0","donate","copy-code-button"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"tbfed-pagefooter":{"copyright":"Copyright &copy farmer.hutao@outlook.com 2019","modify_label":"该文件修订时间：","modify_format":"YYYY-MM-DD HH:mm:ss"},"prism":{},"github":{"url":"https://github.com/farmer-hutao/k8s-source-code-analysis"},"editlink":{"label":"编辑本页","multilingual":false,"base":"https://github.com/farmer-hutao/k8s-source-code-analysis/edit/master"},"simple-page-toc":{"maxDepth":4,"skipFirstH1":true},"splitter":{},"search-pro":{"cutWordLib":"nodejieba","defineWord":["Gitbook Use"]},"search":{},"multipart":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"donate":{"alipay":"","alipayText":"支付宝打赏","button":"鼓励作者","title":"催作者快快更新","wechat":"./image/wx.jpg","wechatText":"微信小额捐赠，鼓励作者尽快更新～"},"fontsettings":{"theme":"white","family":"sans","size":2},"codeblock-filename":{},"theme-comscore":{},"navigator":{},"github-buttons":{"repo":"farmer-hutao/k8s-source-code-analysis","types":["star"],"size":"small"},"expandable-chapters-small":{},"copy-code-button":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":true}},"theme":"default","author":"Tao Hu <farmer.hutao@outlook.com>","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"《k8s-1.13版本源码分析》","gitbook":"*","description":"k8s source code analysis"},"file":{"path":"around/runc/namespace.md","mtime":"2019-08-27T07:36:44.402Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-08-27T11:22:39.392Z"},"basePath":"../..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../../gitbook/gitbook.js"></script>
+    <script src="../../gitbook/theme.js"></script>
+    
+        
+        <script src="../../gitbook/gitbook-plugin-expandable-chapters-small/expandable-chapters-small.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-search-pro/jquery.mark.min.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-search-pro/search.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-splitter/splitter.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-editlink/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-github/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-github-buttons/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-donate/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-copy-code-button/toggle.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-theme-comscore/test.js"></script>
+        
+    
+
+    </body>
+</html>
+

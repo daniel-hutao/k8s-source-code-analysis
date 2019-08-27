@@ -1,0 +1,1582 @@
+
+<!DOCTYPE HTML>
+<html lang="" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>RunC 源码通读之 Cgroup · 《k8s-1.13版本源码分析》</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        <meta name="author" content="Tao Hu <farmer.hutao@outlook.com>">
+        
+        
+    
+    <link rel="stylesheet" href="../../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-codeblock-filename/block.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-navigator/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-expandable-chapters-small/expandable-chapters-small.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-search-pro/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-splitter/splitter.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-multipart/multipart.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-tbfed-pagefooter/footer.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-prism/prism.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-donate/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-theme-comscore/test.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    
+    <link rel="prev" href="namespace.html" />
+    
+
+    <style>
+    @media only screen and (max-width: 640px) {
+        .book-header .hidden-mobile {
+            display: none;
+        }
+    }
+    </style>
+    <script>
+        window["gitbook-plugin-github-buttons"] = {"repo":"farmer-hutao/k8s-source-code-analysis","types":["star"],"size":"small"};
+    </script>
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        <li class="header">Part I - 准备工作</li>
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../../">
+            
+                <a href="../../">
+            
+                    
+                        <b>1.1.</b>
+                    
+                    前言
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="../../prepare/">
+            
+                <a href="../../prepare/">
+            
+                    
+                        <b>1.2.</b>
+                    
+                    k8s源码分析准备工作
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.2.1" data-path="../../prepare/get-code.html">
+            
+                <a href="../../prepare/get-code.html">
+            
+                    
+                        <b>1.2.1.</b>
+                    
+                    源码准备
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.2" data-path="../../prepare/debug-environment.html">
+            
+                <a href="../../prepare/debug-environment.html">
+            
+                    
+                        <b>1.2.2.</b>
+                    
+                    测试环境搭建-单节点
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.3" data-path="../../prepare/debug-environment-3node.html">
+            
+                <a href="../../prepare/debug-environment-3node.html">
+            
+                    
+                        <b>1.2.3.</b>
+                    
+                    测试环境搭建-三节点
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.4" data-path="../../prepare/debug.html">
+            
+                <a href="../../prepare/debug.html">
+            
+                    
+                        <b>1.2.4.</b>
+                    
+                    源码调试
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part II - 核心组件</li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="../../core/">
+            
+                <a href="../../core/">
+            
+                    
+                        <b>2.1.</b>
+                    
+                    概述
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2" data-path="../../core/scheduler/">
+            
+                <a href="../../core/scheduler/">
+            
+                    
+                        <b>2.2.</b>
+                    
+                    scheduler
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.2.1" data-path="../../core/scheduler/design.html">
+            
+                <a href="../../core/scheduler/design.html">
+            
+                    
+                        <b>2.2.1.</b>
+                    
+                    调度器设计
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.2" data-path="../../core/scheduler/before-scheduler-run.html">
+            
+                <a href="../../core/scheduler/before-scheduler-run.html">
+            
+                    
+                        <b>2.2.2.</b>
+                    
+                    调度程序启动前逻辑
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.3" data-path="../../core/scheduler/scheduler-framework.html">
+            
+                <a href="../../core/scheduler/scheduler-framework.html">
+            
+                    
+                        <b>2.2.3.</b>
+                    
+                    调度器框架
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.4" data-path="../../core/scheduler/generic-scheduler.html">
+            
+                <a href="../../core/scheduler/generic-scheduler.html">
+            
+                    
+                        <b>2.2.4.</b>
+                    
+                    一般调度过程
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.5" data-path="../../core/scheduler/predicate.html">
+            
+                <a href="../../core/scheduler/predicate.html">
+            
+                    
+                        <b>2.2.5.</b>
+                    
+                    预选过程
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.6" data-path="../../core/scheduler/priority.html">
+            
+                <a href="../../core/scheduler/priority.html">
+            
+                    
+                        <b>2.2.6.</b>
+                    
+                    优选过程
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.7" data-path="../../core/scheduler/preempt.html">
+            
+                <a href="../../core/scheduler/preempt.html">
+            
+                    
+                        <b>2.2.7.</b>
+                    
+                    抢占调度
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.8" data-path="../../core/scheduler/init.html">
+            
+                <a href="../../core/scheduler/init.html">
+            
+                    
+                        <b>2.2.8.</b>
+                    
+                    调度器初始化
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.9" data-path="../../core/scheduler/affinity.html">
+            
+                <a href="../../core/scheduler/affinity.html">
+            
+                    
+                        <b>2.2.9.</b>
+                    
+                    专题-亲和性调度
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.10" data-path="../../core/scheduler/summarize.html">
+            
+                <a href="../../core/scheduler/summarize.html">
+            
+                    
+                        <b>2.2.10.</b>
+                    
+                    scheduler 总结
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.3" data-path="../../core/controller-manager/">
+            
+                <a href="../../core/controller-manager/">
+            
+                    
+                        <b>2.3.</b>
+                    
+                    controller-manager
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.3.1" data-path="../../core/controller-manager/controller.html">
+            
+                <a href="../../core/controller-manager/controller.html">
+            
+                    
+                        <b>2.3.1.</b>
+                    
+                    控制器概述
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.3.2" data-path="../../core/controller-manager/custom-controller.html">
+            
+                <a href="../../core/controller-manager/custom-controller.html">
+            
+                    
+                        <b>2.3.2.</b>
+                    
+                    自定义控制器
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.4" data-path="../../core/apiserver/">
+            
+                <a href="../../core/apiserver/">
+            
+                    
+                        <b>2.4.</b>
+                    
+                    apiserver
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.5" data-path="../../core/kube-proxy/">
+            
+                <a href="../../core/kube-proxy/">
+            
+                    
+                        <b>2.5.</b>
+                    
+                    kube-proxy
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.5.1" data-path="../../core/kube-proxy/arch.html">
+            
+                <a href="../../core/kube-proxy/arch.html">
+            
+                    
+                        <b>2.5.1.</b>
+                    
+                    Proxy 服务框架
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.5.2" data-path="../../core/kube-proxy/iptables.html">
+            
+                <a href="../../core/kube-proxy/iptables.html">
+            
+                    
+                        <b>2.5.2.</b>
+                    
+                    Iptables-mode Proxier
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.5.3" data-path="../../core/kube-proxy/ipvs.html">
+            
+                <a href="../../core/kube-proxy/ipvs.html">
+            
+                    
+                        <b>2.5.3.</b>
+                    
+                    Ipvs-Mode Proxier
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.5.4" data-path="../../core/kube-proxy/userspace.html">
+            
+                <a href="../../core/kube-proxy/userspace.html">
+            
+                    
+                        <b>2.5.4.</b>
+                    
+                    Userspace-mode Proxier
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.6" data-path="../../core/kubelet/">
+            
+                <a href="../../core/kubelet/">
+            
+                    
+                        <b>2.6.</b>
+                    
+                    kubelet
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Part III - 周边项目</li>
+        
+        
+    
+        <li class="chapter " data-level="3.1" data-path="../">
+            
+                <a href="../">
+            
+                    
+                        <b>3.1.</b>
+                    
+                    概述
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2" data-path="../client-go/">
+            
+                <a href="../client-go/">
+            
+                    
+                        <b>3.2.</b>
+                    
+                    client-go
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.2.1" data-path="../client-go/informer.html">
+            
+                <a href="../client-go/informer.html">
+            
+                    
+                        <b>3.2.1.</b>
+                    
+                    Informer (一)
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2.2" data-path="../client-go/informer2.html">
+            
+                <a href="../client-go/informer2.html">
+            
+                    
+                        <b>3.2.2.</b>
+                    
+                    Informer(二)
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.3" data-path="./">
+            
+                <a href="./">
+            
+                    
+                        <b>3.3.</b>
+                    
+                    RunC
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.3.1" data-path="namespace.html">
+            
+                <a href="namespace.html">
+            
+                    
+                        <b>3.3.1.</b>
+                    
+                    RunC 源码通读之 NameSpace
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="3.3.2" data-path="cgroup.html">
+            
+                <a href="cgroup.html">
+            
+                    
+                        <b>3.3.2.</b>
+                    
+                    RunC 源码通读之 Cgroup
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="../.." >RunC 源码通读之 Cgroup</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="RunC_&#x6E90;&#x7801;&#x901A;&#x8BFB;&#x6307;&#x5357;&#x4E4B;_Cgroup">RunC &#x6E90;&#x7801;&#x901A;&#x8BFB;&#x6307;&#x5357;&#x4E4B; Cgroup</h1>
+<!--toc-->
+<h2 id="&#x6982;&#x8FF0;">1. &#x6982;&#x8FF0;</h2>
+<p>Runc &#x4F5C;&#x4E3A; OCI &#x8FD0;&#x884C;&#x65F6;&#x6807;&#x51C6;&#x7684;&#x5B9E;&#x73B0;&#x7248;&#x672C;&#x5DE5;&#x5177;&#xFF0C;&#x5176;&#x7EE7;&#x627F;&#x65E9;&#x671F;&#x7248;&#x672C; Docker &#x7684;&#x6838;&#x5FC3;&#x5E93; libcontainer &#x6765; &#x5B9E;&#x73B0;&#x7684; linux &#x7CFB;&#x7EDF;&#x5C42;&#x7684;&#x8D44;&#x6E90;&#x9694;&#x79BB; &#x3001;&#x9650;&#x5236;&#x53CA;&#x63A7;&#x5236;&#x7B49;&#x529F;&#x80FD;&#x3002;Docker &#x5BB9;&#x5668;&#x6280;&#x672F;&#x901A;&#x8FC7;&#x5229;&#x7528; linux &#x7684;&#x5185;&#x6838;&#x7279;&#x6027;&#x529F;&#x80FD; cgroup &#x6765;&#x9650;&#x5236;&#x4E0E;&#x63A7;&#x5236; container &#x7684;&#x8D44;&#x6E90;&#x4F7F;&#x7528;&#x3002;&#x672C;&#x6587;&#x5C06;&#x901A;&#x8FC7;&#x5BF9; Runc &#x7684; Cgroup &#x76F8;&#x5173;&#x6E90;&#x7801;&#x89E3;&#x6790;&#x63ED;&#x5F00;&#x5982;&#x4F55;&#x5BF9; cgroup &#x5229;&#x7528;&#x4E0E;&#x5B9E;&#x73B0;&#x5BF9;&#x5BB9;&#x5668;&#x8D44;&#x6E90;&#x7BA1;&#x63A7;&#x7684;&#x9762;&#x7EB1;&#x3002;linux &#x7CFB;&#x7EDF;&#x5C42;&#x7684; cgroup &#x7684;&#x57FA;&#x7840;&#x77E5;&#x8BC6;&#x672C;&#x6587;&#x5C06;&#x4E0D;&#x505A;&#x8FC7;&#x591A;&#x7684;&#x4ECB;&#x7ECD;&#xFF0C;<a href="https://www.kernel.org/doc/Documentation/cgroup-v1/cgroups.txt" target="_blank"><strong>&#x8BF7;&#x53C2;&#x8003;</strong></a>&#x3002;</p>
+<p>Runc &#x652F;&#x6301;&#x4E24;&#x79CD; cgroup driver: &#x4E00;&#x79CD;&#x662F; cgroupfs ,&#x4E00;&#x79CD;&#x662F; systemd&#xFF0C;&#x5728; runc &#x6E90;&#x7801;&#x76EE;&#x5F55;&#x4E0A;&#x4E5F;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x76F8;&#x5E94;&#x7684;&#x4E24;&#x4E2A;&#x76EE;&#x5F55; fs &#x548C; systemd&#x3002;&#x800C; kubelet &#x6307;&#x5B9A;&#x7684; cgroup driver &#x4E3A; cgroupfs,&#x6211;&#x4EEC;&#x672C;&#x6587;&#x4E5F;&#x4EC5;&#x5173;&#x6CE8;&#x4E8E; cgroupfs &#x7684;&#x5206;&#x6790;,&#x4EE3;&#x7801;&#x6587;&#x4EF6;libcontainer/cgroups/fs/apply_raw.go &#x4E3A;&#x5B9E;&#x73B0; cgroupfs Manager&#x7BA1;&#x7406;&#x64CD;&#x4F5C;&#x3002;&#x66F4;&#x591A;&#x5173;&#x4E8E; cgroup &#x6587;&#x4EF6;&#x3001;&#x76EE;&#x5F55;&#x8BE6;&#x7EC6;&#x8BF4;&#x660E;&#x53EF;&#x53C2;&#x8003;&#x672C;&#x6587;&#x540E;&#x7684;<strong>&#x9644;&#x5F55;&#x4E00;</strong>&#x3002;</p>
+<p>linux &#x7CFB;&#x7EDF;&#x9ED8;&#x8BA4;&#x60C5;&#x51B5;&#x4E0B;&#x5C06; mount cgroupfs &#x76EE;&#x5F55;&quot; /sys/fs/cgroup/ &quot;&#x548C;&quot; /proc/<em>$pid</em>/cgroup &quot;&#x4E24;&#x4E2A;&#x76EE;&#x5F55;&#x4E0B;&#x64CD;&#x4F5C;&#x5B9E;&#x73B0;&#x5BF9; &#x8FDB;&#x7A0B;&#x7684;&#x8D44;&#x6E90;&#x9650;&#x5236;&#x3002;&#x5BF9;&#x4E8E; cgroupfs &#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x64CD;&#x4F5C;&#x65B9;&#x5F0F;&#x4E5F;&#x540C;&#x6837;&#x662F; runC &#x5B9E;&#x73B0;&#x7684; cgroup &#x64CD;&#x4F5C;&#x7684;&#x5173;&#x952E;&#x63A5;&#x53E3;&#x6240;&#x5728;,&#x8FD9;&#x4E5F;&#x662F;runC&#x5BF9;Cgroup&#x64CD;&#x4F5C;&#x6839;&#x672C;&#x539F;&#x7406;&#x6240;&#x5728;&#x3002;</p>
+<p>&#x672C;&#x6587;&#x5148;&#x4ECE; runc &#x6267;&#x884C;&#x8FC7;&#x7A0B;&#x4E2D;&#x6D89;&#x53CA; cgroup &#x7684;&#x521D;&#x59CB;&#x5316;&#x3001;&#x914D;&#x7F6E;&#x3001;&#x5E94;&#x7528;&#x7684;&#x6574;&#x4E2A;&#x76F8;&#x5173;&#x7684;&#x8FC7;&#x7A0B;&#x5206;&#x6790;,&#x5982;&#x8981;&#x4E86;&#x89E3;&#x5B8C;&#x6574;&#x7684; container run &#x7684;&#x6240;&#x6709;&#x8BE6;&#x7EC6;&#x6267;&#x884C;&#x8FC7;&#x7A0B;&#x53EF;&#x53C2;&#x8003;&#x672C;&#x5957; RunC &#x7CFB;&#x5217;&#x6587;&#x6863;&#x300A; RunC &#x6E90;&#x7801;&#x901A;&#x8BFB;&#x6307;&#x5357;&#x4E4B; Run &#x300B;&#xFF0C;&#x672C;&#x6587;&#x4EC5;&#x6307;&#x51FA;&#x6267;&#x884C;&#x6D41;&#x7A0B;&#x4E2D;&#x4E0E; cgroup &#x76F8;&#x5173;&#x521D;&#x59CB;&#x5316;&#x53CA;&#x5E94;&#x7528;&#x7684;&#x8FC7;&#x7A0B;&#x3002;&#x5176;&#x540E;&#x5206;&#x6790;&#x4E86;cgroup manager &#x548C; subsystem &#x7684;&#x5B9E;&#x73B0;&#x8BE6;&#x7EC6;&#x5206;&#x6790;&#xFF0C;&#x5176;&#x5B9E;&#x5C31;&#x662F;&#x5BF9; cgroup &#x7684; CRUD &#x64CD;&#x4F5C;&#x5B9E;&#x73B0;&#x7EC6;&#x8282;&#x3002;&#x6700;&#x540E;&#x5728;&#x9644;&#x5F55;&#x5185;&#x9644;&#x6709; cgroup&#x5305;&#x7684;&#x6587;&#x4EF6;&#x8BF4;&#x660E;&#x3001;&#x516C;&#x5171; utils &#x65B9;&#x6CD5;&#x529F;&#x80FD;&#x89E3;&#x6790;&#x8BF4;&#x660E;&#x4EE5;&#x53CA;&#x5404; subsystem &#x9650;&#x5236;&#x8D44;&#x6E90;&#x914D;&#x7F6E;&#x9879;&#x7684;&#x7528;&#x9014;&#x8BF4;&#x660E;&#x3002;</p>
+<h2 id="RunC_&#x6267;&#x884C;&#x6D41;&#x7A0B;&#x4E0E;_cgroup_&#x7684;&#x5E94;&#x7528;">2. RunC &#x6267;&#x884C;&#x6D41;&#x7A0B;&#x4E0E; cgroup &#x7684;&#x5E94;&#x7528;</h2>
+<p>Container &#x7684;&#x521B;&#x5EFA;&#x8FC7;&#x7A0B;&#x7531; factory &#x8C03;&#x7528; create &#x65B9;&#x6CD5;&#x5B9E;&#x73B0;&#xFF0C;&#x5728;&#x521B;&#x5EFA; factory &#x5BF9;&#x8C61;&#x65F6;&#x6307;&#x5B9A;&#x4E86;NewCgroupsManage func&#xFF0C;&#x5728; factory &#x521B;&#x5EFA; container &#x65F6;&#x8C03;&#x7528; func &#x4E3A;&#x5BB9;&#x5668;&#x914D;&#x7F6E;&#x4E86;fs.Manager&#x5BF9;&#x8C61;&#x3002;&#x8C03;&#x7528;&#x8FC7;&#x7A0B; runc create &#x547D;&#x4EE4;&#x521B;&#x5EFA;&#x5BB9;&#x5668;&#x5F00;&#x59CB;: startContainer() =&gt; createContainer() =&gt; loadFactory()  =&gt;  libcontainer.New()</p>
+<div><p class="code-filename">libcontainer/factory_linux.go:131</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token function">New</span><span class="token punctuation">(</span>root <span class="token builtin">string</span><span class="token punctuation">,</span> options <span class="token operator">...</span><span class="token keyword">func</span><span class="token punctuation">(</span><span class="token operator">*</span>LinuxFactory<span class="token punctuation">)</span> <span class="token builtin">error</span><span class="token punctuation">)</span> <span class="token punctuation">(</span>Factory<span class="token punctuation">,</span> <span class="token builtin">error</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token comment">//...</span>
+    l <span class="token operator">:=</span> <span class="token operator">&amp;</span>LinuxFactory<span class="token punctuation">{</span>
+        Root<span class="token punctuation">:</span>      root<span class="token punctuation">,</span>
+        InitPath<span class="token punctuation">:</span>  <span class="token string">&quot;/proc/self/exe&quot;</span><span class="token punctuation">,</span>
+        InitArgs<span class="token punctuation">:</span>  <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">string</span><span class="token punctuation">{</span>os<span class="token punctuation">.</span>Args<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token string">&quot;init&quot;</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+        Validator<span class="token punctuation">:</span> validate<span class="token punctuation">.</span><span class="token function">New</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+        CriuPath<span class="token punctuation">:</span>  <span class="token string">&quot;criu&quot;</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span>
+    <span class="token function">Cgroupfs</span><span class="token punctuation">(</span>l<span class="token punctuation">)</span>                   <span class="token comment">//&#x4E3A;LinuxFactory&#x914D;&#x7F6E;NewCgroupsManage&#x5B9E;&#x73B0;func</span>
+    <span class="token comment">//...</span>
+    <span class="token keyword">return</span> l<span class="token punctuation">,</span> <span class="token boolean">nil</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>&#x521D;&#x59CB;&#x5316;&#x914D;&#x7F6E;LinuxFactory&#x5BF9;&#x8C61;&#x7684;NewCgroupsManage&#x7684;func&#x8D4B;&#x503C;&#xFF0C;func&#x5C06;&#x6839;&#x636E;&#x53C2;&#x6570;&#x914D;&#x7F6E;&#x8FD4;&#x56DE;&#x4E00;&#x4E2A;fs.Manager&#x5BF9;&#x8C61;</p>
+<div><p class="code-filename">libcontainer/factory_linux.go:65</p></div>
+<pre class="language-"><code class="lang-go"><span class="token comment">// Cgroupfs is an options func to configure a LinuxFactory to return containers</span>
+<span class="token comment">// that use the native cgroups filesystem implementation to create and manage</span>
+<span class="token comment">// cgroups.</span>
+<span class="token keyword">func</span> <span class="token function">Cgroupfs</span><span class="token punctuation">(</span>l <span class="token operator">*</span>LinuxFactory<span class="token punctuation">)</span> <span class="token builtin">error</span> <span class="token punctuation">{</span>
+    l<span class="token punctuation">.</span>NewCgroupsManager <span class="token operator">=</span> <span class="token keyword">func</span><span class="token punctuation">(</span>config <span class="token operator">*</span>configs<span class="token punctuation">.</span>Cgroup<span class="token punctuation">,</span> paths <span class="token keyword">map</span><span class="token punctuation">[</span><span class="token builtin">string</span><span class="token punctuation">]</span><span class="token builtin">string</span><span class="token punctuation">)</span> cgroups<span class="token punctuation">.</span>Manager <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token operator">&amp;</span>fs<span class="token punctuation">.</span>Manager<span class="token punctuation">{</span>
+            Cgroups<span class="token punctuation">:</span> config<span class="token punctuation">,</span>
+            Paths<span class="token punctuation">:</span>   paths<span class="token punctuation">,</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> <span class="token boolean">nil</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>&#x521B;&#x5EFA; Container &#x5BB9;&#x5668;&#x5BF9;&#x8C61;&#xFF0C;&#x8FD4;&#x56DE; linuxContainer &#x7ED3;&#x6784;&#x3002;LinuxFactory.NewCgroupsManager() &#x8C03;&#x7528;&#x6839;&#x636E;&#x5168;&#x5C40; config &#x8D4B;&#x503C;&#x5E76;&#x8FD4;&#x56DE;  Cgroup Manager &#x5BF9;&#x8C61; fs.Manger </p>
+<div><p class="code-filename">libcontainer/factory_linux.go:188</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>l <span class="token operator">*</span>LinuxFactory<span class="token punctuation">)</span> <span class="token function">Create</span><span class="token punctuation">(</span>id <span class="token builtin">string</span><span class="token punctuation">,</span> config <span class="token operator">*</span>configs<span class="token punctuation">.</span>Config<span class="token punctuation">)</span> <span class="token punctuation">(</span>Container<span class="token punctuation">,</span> <span class="token builtin">error</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token comment">//...</span>
+    c <span class="token operator">:=</span> <span class="token operator">&amp;</span>linuxContainer<span class="token punctuation">{</span>
+        id<span class="token punctuation">:</span>            id<span class="token punctuation">,</span>
+        root<span class="token punctuation">:</span>          containerRoot<span class="token punctuation">,</span>
+        config<span class="token punctuation">:</span>        config<span class="token punctuation">,</span>
+        initPath<span class="token punctuation">:</span>      l<span class="token punctuation">.</span>InitPath<span class="token punctuation">,</span>
+        initArgs<span class="token punctuation">:</span>      l<span class="token punctuation">.</span>InitArgs<span class="token punctuation">,</span>
+        criuPath<span class="token punctuation">:</span>      l<span class="token punctuation">.</span>CriuPath<span class="token punctuation">,</span>
+        newuidmapPath<span class="token punctuation">:</span> l<span class="token punctuation">.</span>NewuidmapPath<span class="token punctuation">,</span>
+        newgidmapPath<span class="token punctuation">:</span> l<span class="token punctuation">.</span>NewgidmapPath<span class="token punctuation">,</span>
+        cgroupManager<span class="token punctuation">:</span> l<span class="token punctuation">.</span><span class="token function">NewCgroupsManager</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span>Cgroups<span class="token punctuation">,</span> <span class="token boolean">nil</span><span class="token punctuation">)</span><span class="token punctuation">,</span>  <span class="token comment">//&#x4E3A;&#x5BB9;&#x5668;&#x6307;&#x5B9A;fs.Manager</span>
+    <span class="token punctuation">}</span>
+  <span class="token comment">//...</span>
+    <span class="token keyword">return</span> c<span class="token punctuation">,</span> <span class="token boolean">nil</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>&#x4ECE;&#x5BB9;&#x5668;&#x7684;&#x6267;&#x884C;&#x6D41;&#x7A0B;&#x6765;&#x770B;&#xFF0C;&#x6B64;&#x65F6;&#x5DF2;&#x5B8C;&#x6210; container &#x5BF9;&#x8C61;&#x7684;&#x521B;&#x5EFA;&#xFF0C;&#x63A5;&#x4E0B;&#x6765;startContainer()&#x4E2D;&#x5DF2;&#x521B;&#x5EFA;&#x7684; runner &#x5BF9;&#x8C61; run() &#x65B9;&#x6CD5;&#x6267;&#x884C;&#xFF0C;&#x5BB9;&#x5668;&#x8FDB;&#x5165;&#x8FD0;&#x884C;&#x9636;&#x6BB5;&#x3002;&#x6267;&#x884C;&#x6D41;&#x7A0B;runc run&#x547D;&#x4EE4;&#xFF1A;runner.run() =&gt; newProcess() =&gt; runner.container.Run(process) =&gt; linuxContainer.strat() =&gt; linuxContainer.newParentProcess(process) =&gt; =&gt;linuxContainer.commandTemplate() =&gt; linuxContaine.newInitProcess() =&gt;parent.start() =&gt; initProcess.start() &#x3002;</p>
+<p>Parent.start() &#x6267;&#x884C;&#x5176;&#x5B9E;&#x5219;&#x662F; runc init &#x547D;&#x4EE4;&#x7684;&#x6267;&#x884C;,&#x5176;&#x57FA;&#x672C;&#x7684;&#x6267;&#x884C;&#x6D41;&#x7A0B;(&#x8BE6;&#x7EC6;&#x8BF7;&#x53C2;&#x8003;&#x300A; RunC &#x6E90;&#x7801;&#x901A;&#x8BFB;&#x6307;&#x5357;&#x4E4B; Run &#x300B;)&#xFF1A;</p>
+<ol>
+<li>parentproces &#x521B;&#x5EFA;<strong>runc init&#x5B50;&#x8FDB;&#x7A0B;</strong>&#xFF0C;&#x4E2D;&#x95F4;&#x4F1A;&#x88AB; /runc/libcontainer/nsenter &#x52AB;&#x6301;(c&#x4EE3;&#x7801;&#x90E8;&#x5206;preamble)&#xFF0C;&#x4F7F; runc init &#x5B50;&#x8FDB;&#x7A0B;&#x4F4D;&#x4E8E;&#x5BB9;&#x5668;&#x914D;&#x7F6E;&#x6307;&#x5B9A;&#x7684;&#x5404;&#x4E2A; namespace &#x5185;</li>
+<li>parentProcess &#x7528;<strong>init&#x7BA1;&#x9053;</strong>&#x5C06;&#x5BB9;&#x5668;&#x914D;&#x7F6E;&#x4FE1;&#x606F;&#x4F20;&#x8F93;&#x7ED9;runc init&#x8FDB;&#x7A0B;&#xFF0C;runc init&#x518D;&#x636E;&#x6B64;&#x8FDB;&#x884C;&#x5BB9;&#x5668;&#x7684;&#x521D;&#x59CB;&#x5316;&#x64CD;&#x4F5C;&#x3002;&#x521D;&#x59CB;&#x5316;&#x5B8C;&#x6210;&#x4E4B;&#x540E;&#xFF0C;&#x518D;&#x5411;&#x53E6;&#x4E00;&#x4E2A;&#x7BA1;&#x9053;exec.fifo&#x8FDB;&#x884C;&#x5199;&#x64CD;&#x4F5C;&#xFF0C;&#x8FDB;&#x5165;&#x963B;&#x585E;&#x72B6;&#x6001;</li>
+</ol>
+<p>InitProcess.start()&#x6267;&#x884C;&#x8FC7;&#x7A0B;&#x4E2D;&#x5BF9;cgroup &#x8D44;&#x6E90;&#x7EC4;&#x7684;&#x914D;&#x7F6E;&#x4E0E;&#x5E94;&#x7528;&#x5DE5;&#x4F5C;</p>
+<div><p class="code-filename">libcontainer/process_linux.go:282</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>p <span class="token operator">*</span>initProcess<span class="token punctuation">)</span> <span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token builtin">error</span> <span class="token punctuation">{</span>
+    <span class="token keyword">defer</span> p<span class="token punctuation">.</span>messageSockPair<span class="token punctuation">.</span>parent<span class="token punctuation">.</span><span class="token function">Close</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token comment">//  &#x5F53;&#x524D;&#x6267;&#x884C;&#x7A7A;&#x95F4;&#x8FDB;&#x7A0B;&#x79F0;&#x4E3A;bootstrap&#x8FDB;&#x7A0B;</span>
+  <span class="token comment">//  &#x542F;&#x52A8;&#x4E86; cmd&#xFF0C;&#x5373;&#x542F;&#x52A8;&#x4E86; runc init &#x547D;&#x4EE4;,&#x521B;&#x5EFA; runc init &#x5B50;&#x8FDB;&#x7A0B; </span>
+  <span class="token comment">//  &#x540C;&#x65F6;&#x4E5F;&#x6FC0;&#x6D3B;&#x4E86;C&#x4EE3;&#x7801;nsenter&#x6A21;&#x5757;&#x7684;&#x6267;&#x884C;&#xFF08;&#x4E3A;&#x4E86; namespace &#x7684;&#x8BBE;&#x7F6E; clone &#x4E86;&#x4E09;&#x4E2A;&#x8FDB;&#x7A0B;parent&#x3001;child&#x3001;init&#xFF09;</span>
+  <span class="token comment">//  C &#x4EE3;&#x7801;&#x6267;&#x884C;&#x540E;&#x8FD4;&#x56DE; go &#x4EE3;&#x7801;&#x90E8;&#x5206;,&#x6700;&#x540E;&#x7684; init &#x5B50;&#x8FDB;&#x7A0B;&#x4E3A;&#x4E86;&#x597D;&#x533A;&#x5206;&#x6B64;&#x5904;&#x547D;&#x540D;&#x4E3A;&quot; nsInit &quot;&#xFF08;&#x5373;&#x914D;&#x7F6E;&#x4E86;Namespace&#x7684;init&#xFF09;</span>
+  <span class="token comment">//  runc init go&#x4EE3;&#x7801;&#x4E3A;&#x5BB9;&#x5668;&#x521D;&#x59CB;&#x5316;&#x5176;&#x5B83;&#x90E8;&#x5206;(&#x7F51;&#x7EDC;&#x3001;rootfs&#x3001;&#x8DEF;&#x7531;&#x3001;&#x4E3B;&#x673A;&#x540D;&#x3001;console&#x3001;&#x5B89;&#x5168;&#x7B49;)</span>
+    err <span class="token operator">:=</span> p<span class="token punctuation">.</span>cmd<span class="token punctuation">.</span><span class="token function">Start</span><span class="token punctuation">(</span><span class="token punctuation">)</span>  <span class="token comment">// runc init</span>
+
+  <span class="token comment">//...</span>
+
+  <span class="token comment">// &#x4E3A;&#x8FDB;&#x7A0B; runc init &#x5E94;&#x7528; Cgroup &#xFF08;p.cmd.Process.Pid()&#xFF09;</span>
+    <span class="token keyword">if</span> err <span class="token operator">:=</span> p<span class="token punctuation">.</span>manager<span class="token punctuation">.</span><span class="token function">Apply</span><span class="token punctuation">(</span>p<span class="token punctuation">.</span><span class="token function">pid</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token function">newSystemErrorWithCause</span><span class="token punctuation">(</span>err<span class="token punctuation">,</span> <span class="token string">&quot;applying cgroup configuration for process&quot;</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+
+   <span class="token comment">//...</span>
+   <span class="token comment">// messageSockPair &#x7BA1;&#x9053;&#x5199;&#x5165; bootstrapData </span>
+    <span class="token keyword">if</span> <span class="token boolean">_</span><span class="token punctuation">,</span> err <span class="token operator">:=</span> io<span class="token punctuation">.</span><span class="token function">Copy</span><span class="token punctuation">(</span>p<span class="token punctuation">.</span>messageSockPair<span class="token punctuation">.</span>parent<span class="token punctuation">,</span> p<span class="token punctuation">.</span>bootstrapData<span class="token punctuation">)</span><span class="token punctuation">;</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token function">newSystemErrorWithCause</span><span class="token punctuation">(</span>err<span class="token punctuation">,</span> <span class="token string">&quot;copying bootstrap data to pipe&quot;</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+
+  <span class="token comment">// &#x83B7;&#x53D6; nsInit pid</span>
+    childPid<span class="token punctuation">,</span> err <span class="token operator">:=</span> p<span class="token punctuation">.</span><span class="token function">getChildPid</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token keyword">if</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token function">newSystemErrorWithCause</span><span class="token punctuation">(</span>err<span class="token punctuation">,</span> <span class="token string">&quot;getting the final child&apos;s pid from pipe&quot;</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+
+  <span class="token comment">//...</span>
+
+  <span class="token comment">// &#x4E3A; nsInit &#x8FDB;&#x7A0B;&#x5E94;&#x7528; Cgroup </span>
+    <span class="token keyword">if</span> err <span class="token operator">:=</span> p<span class="token punctuation">.</span>manager<span class="token punctuation">.</span><span class="token function">Apply</span><span class="token punctuation">(</span>childPid<span class="token punctuation">)</span><span class="token punctuation">;</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token function">newSystemErrorWithCause</span><span class="token punctuation">(</span>err<span class="token punctuation">,</span> <span class="token string">&quot;applying cgroup configuration for process&quot;</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+  <span class="token comment">// &#x4E3A; child &#x8FDB;&#x7A0B;&#x5E94;&#x7528; intel RDT </span>
+    <span class="token keyword">if</span> p<span class="token punctuation">.</span>intelRdtManager <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+        <span class="token keyword">if</span> err <span class="token operator">:=</span> p<span class="token punctuation">.</span>intelRdtManager<span class="token punctuation">.</span><span class="token function">Apply</span><span class="token punctuation">(</span>childPid<span class="token punctuation">)</span><span class="token punctuation">;</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> <span class="token function">newSystemErrorWithCause</span><span class="token punctuation">(</span>err<span class="token punctuation">,</span> <span class="token string">&quot;applying Intel RDT configuration for process&quot;</span><span class="token punctuation">)</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+
+  <span class="token comment">//...</span>
+  <span class="token comment">// &#x89E3;&#x6790;runc init&#x5B50;&#x8FDB;&#x7A0B;&#x7684;&#x6240;&#x6709;&#x540C;&#x6B65;&#x6D88;&#x606F;&#xFF0C;&#x5F53;io.EOF&#x8FD4;&#x56DE;</span>
+    ierr <span class="token operator">:=</span> <span class="token function">parseSync</span><span class="token punctuation">(</span>p<span class="token punctuation">.</span>messageSockPair<span class="token punctuation">.</span>parent<span class="token punctuation">,</span> <span class="token keyword">func</span><span class="token punctuation">(</span>sync <span class="token operator">*</span>syncT<span class="token punctuation">)</span> <span class="token builtin">error</span> <span class="token punctuation">{</span>
+        <span class="token keyword">switch</span> sync<span class="token punctuation">.</span>Type <span class="token punctuation">{</span>
+        <span class="token keyword">case</span> procReady<span class="token punctuation">:</span>   
+            <span class="token comment">// prestart hooks &#x542F;&#x52A8;&#x524D;&#x6267;&#x884C;&#x52FE;&#x5B50;</span>
+            <span class="token keyword">if</span> <span class="token operator">!</span>p<span class="token punctuation">.</span>config<span class="token punctuation">.</span>Config<span class="token punctuation">.</span>Namespaces<span class="token punctuation">.</span><span class="token function">Contains</span><span class="token punctuation">(</span>configs<span class="token punctuation">.</span>NEWNS<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// &#x6839;&#x636E;&#x5168;&#x5C40;&#x914D;&#x7F6E;&#x8BBE;&#x7F6E;Cgroup </span>
+                <span class="token keyword">if</span> err <span class="token operator">:=</span> p<span class="token punctuation">.</span>manager<span class="token punctuation">.</span><span class="token function">Set</span><span class="token punctuation">(</span>p<span class="token punctuation">.</span>config<span class="token punctuation">.</span>Config<span class="token punctuation">)</span><span class="token punctuation">;</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+                    <span class="token keyword">return</span> <span class="token function">newSystemErrorWithCause</span><span class="token punctuation">(</span>err<span class="token punctuation">,</span> <span class="token string">&quot;setting cgroup config for ready process&quot;</span><span class="token punctuation">)</span>
+                <span class="token punctuation">}</span>
+           <span class="token comment">//...</span>
+               <span class="token comment">// &#x8FD0;&#x884C;&#x6267;&#x884C;&#x524D;&#x52FE;&#x5B50;</span>
+                    <span class="token keyword">for</span> i<span class="token punctuation">,</span> hook <span class="token operator">:=</span> <span class="token keyword">range</span> p<span class="token punctuation">.</span>config<span class="token punctuation">.</span>Config<span class="token punctuation">.</span>Hooks<span class="token punctuation">.</span>Prestart <span class="token punctuation">{</span>
+                        <span class="token keyword">if</span> err <span class="token operator">:=</span> hook<span class="token punctuation">.</span><span class="token function">Run</span><span class="token punctuation">(</span>s<span class="token punctuation">)</span><span class="token punctuation">;</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+                            <span class="token keyword">return</span> <span class="token function">newSystemErrorWithCausef</span><span class="token punctuation">(</span>err<span class="token punctuation">,</span> <span class="token string">&quot;running prestart hook %d&quot;</span><span class="token punctuation">,</span> i<span class="token punctuation">)</span>
+                        <span class="token punctuation">}</span>
+                    <span class="token punctuation">}</span>
+                <span class="token punctuation">}</span>
+            <span class="token punctuation">}</span>
+            <span class="token comment">// &#x4E0E;&#x5B50;&#x8FDB;&#x7A0B; runC init &#x540C;&#x6B65;</span>
+            <span class="token keyword">if</span> err <span class="token operator">:=</span> <span class="token function">writeSync</span><span class="token punctuation">(</span>p<span class="token punctuation">.</span>messageSockPair<span class="token punctuation">.</span>parent<span class="token punctuation">,</span> procRun<span class="token punctuation">)</span><span class="token punctuation">;</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+                <span class="token keyword">return</span> <span class="token function">newSystemErrorWithCause</span><span class="token punctuation">(</span>err<span class="token punctuation">,</span> <span class="token string">&quot;writing syncT &apos;run&apos;&quot;</span><span class="token punctuation">)</span>
+            <span class="token punctuation">}</span>
+            sentRun <span class="token operator">=</span> <span class="token boolean">true</span>
+        <span class="token keyword">case</span> procHooks<span class="token punctuation">:</span>   
+      <span class="token comment">//  &#x914D;&#x7F6E; cgroup</span>
+             <span class="token keyword">if</span> err <span class="token operator">:=</span> p<span class="token punctuation">.</span>manager<span class="token punctuation">.</span><span class="token function">Set</span><span class="token punctuation">(</span>p<span class="token punctuation">.</span>config<span class="token punctuation">.</span>Config<span class="token punctuation">)</span><span class="token punctuation">;</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+                <span class="token keyword">return</span> <span class="token function">newSystemErrorWithCause</span><span class="token punctuation">(</span>err<span class="token punctuation">,</span> <span class="token string">&quot;setting cgroup config for procHooks process&quot;</span><span class="token punctuation">)</span>
+            <span class="token punctuation">}</span>
+      <span class="token comment">//...</span>
+            <span class="token keyword">if</span> p<span class="token punctuation">.</span>config<span class="token punctuation">.</span>Config<span class="token punctuation">.</span>Hooks <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+            <span class="token comment">//...</span>
+        <span class="token comment">// &#x6267;&#x884C;&#x52FE;&#x5B50;&#x5B9A;&#x4E49;&#x4EFB;&#x52A1;</span>
+              <span class="token comment">// &#x4E0E;&#x5B50;&#x8FDB;&#x7A0B; runc-init &#x540C;&#x6B65;</span>
+            <span class="token punctuation">}</span>
+            sentResume <span class="token operator">=</span> <span class="token boolean">true</span>
+        <span class="token keyword">default</span><span class="token punctuation">:</span>
+            <span class="token keyword">return</span> <span class="token function">newSystemError</span><span class="token punctuation">(</span>fmt<span class="token punctuation">.</span><span class="token function">Errorf</span><span class="token punctuation">(</span><span class="token string">&quot;invalid JSON payload from child&quot;</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">return</span> <span class="token boolean">nil</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span>
+   <span class="token comment">//...</span>
+    <span class="token keyword">return</span> <span class="token boolean">nil</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>&#x4ECE;&#x6574;&#x4E2A;&#x6267;&#x884C;&#x8FC7;&#x7A0B;&#x6765;&#x770B;&#xFF0C;&#x5BB9;&#x5668; init go &#x4EE3;&#x7801;&#x8FD0;&#x884C;&#x521D;&#x59CB;&#x5316;&#x914D;&#x7F6E;&#x540E;&#x5411;exec.fifo&#x7BA1;&#x9053;&#x5199;&#x6570;&#x636E;&#xFF0C;&#x963B;&#x585E;&#xFF0C;&#x76F4;&#x5230;&#x7528;&#x6237;&#x8C03;&#x7528;<code>runc start</code>&#xFF0C;&#x8BFB;&#x53D6;&#x7BA1;&#x9053;&#x4E2D;&#x7684;&#x6570;&#x636E;&#x5C06;&#x6700;&#x540E;&#x6267;&#x884C;&#x7528;&#x6237;&#x5B9A;&#x4E49;&#x7684;entrypoint&#x7A0B;&#x5E8F;&#x3002;</p>
+<p>&#x4E0A;&#x9762;&#x5DF2;&#x4E3A;Cgroup&#x5728;&#x5BB9;&#x5668;&#x521B;&#x5EFA;&#x8FC7;&#x7A0B;&#x4E2D;&#x7684;&#x914D;&#x7F6E;&#x4E0E;&#x5E94;&#x7528;&#x7684;&#x7BA1;&#x7406;&#x8FC7;&#x7A0B;&#xFF0C;&#x800C;&#x63A5;&#x4E0B;&#x6765;&#x6211;&#x4EEC;&#x5C06;&#x770B;&#x770B;&#x5E95;&#x5C42;&#x662F;&#x5982;&#x4F55;&#x5B9E;&#x73B0;cgroup&#x7684;&#x3002;</p>
+<h2 id="Cgroup_manager_&#x5B9E;&#x73B0;">3. Cgroup manager &#x5B9E;&#x73B0;</h2>
+<p>Cgroup manger &#x4E3A; Runc &#x5B9E;&#x73B0;&#x5BF9;&#x7CFB;&#x7EDF;&#x7684; cgroup &#x64CD;&#x4F5C;&#x7684;&#x7BA1;&#x7406;&#x5668;&#x62BD;&#x8C61;&#x3002;manger&#x5BF9;&#x8C61;&#x5B9E;&#x73B0;&#x5BF9; cgroup &#x7684;&#x914D;&#x7F6E;&#x9879;&#x503C;&#x8BBE;&#x7F6E;&#x3001;pid&#x5E94;&#x7528;&#x3001;&#x9500;&#x6BC1; &#x3001;&#x6682;&#x505C;/&#x6062;&#x590D;&#x3001;&#x83B7;&#x53D6;&#x914D;&#x7F6E;&#x7B49;&#x64CD;&#x4F5C;&#x3002;&#x8FD9;&#x91CC;Apply() &#x548C; Set() &#x6CE8;&#x610F;&#x4E00;&#x4E0B;&#x4E24;&#x8005;&#x7684;&#x5DEE;&#x522B;&#xFF0C;&#x4E00;&#x4E2A;&#x662F;&#x8BBE;&#x7F6E;&#x5B50;&#x7CFB;&#x7EDF;&#x7684;&#x76F8;&#x5173;&#x8D44;&#x6E90;&#x7EA6;&#x675F;&#x9879;&#x7684;&#x503C;&#xFF0C;&#x4E00;&#x4E2A;&#x662F;&#x5C06;&#x8FDB;&#x7A0B;pid&#x64CD;&#x4F5C;&#x5E94;&#x7528;&#x81F3;&#x76F8;&#x5173;&#x7684;cgroup&#x5B50;&#x7CFB;&#x7EDF;&#x3002;</p>
+<p>&#x6211;&#x4EEC;&#x5148;&#x6765;&#x67E5;&#x770B;&#x51E0;&#x4E2A;&#x5173;&#x952E;&#x63A5;&#x53E3;&#x3001;&#x7ED3;&#x6784;&#x4F53;&#x5B9A;&#x4E49;&#xFF1A;</p>
+<ul>
+<li>cgroup manager&#x63A5;&#x53E3;&#x5B9A;&#x4E49;</li>
+</ul>
+<div><p class="code-filename">libcontainer/cgroups/cgroups.go:11</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">type</span> Manager <span class="token keyword">interface</span> <span class="token punctuation">{</span>
+  <span class="token comment">// &#x4E3A;&#x6307;&#x5B9A;&#x7684; pid &#x5E94;&#x7528; cgroup &#x914D;&#x7F6E;</span>
+    <span class="token function">Apply</span><span class="token punctuation">(</span>pid <span class="token builtin">int</span><span class="token punctuation">)</span> <span class="token builtin">error</span>
+    <span class="token comment">// &#x8FD4;&#x56DE; cgroup &#x96C6;&#x5185;&#x6240;&#x6709; pid</span>
+    <span class="token function">GetPids</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">int</span><span class="token punctuation">,</span> <span class="token builtin">error</span><span class="token punctuation">)</span>
+  <span class="token comment">// &#x8FD4;&#x56DE; cgroup &#x96C6;&#x548C; subcgroups &#x7684;&#x6240;&#x6709; pid</span>
+    <span class="token function">GetAllPids</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">int</span><span class="token punctuation">,</span> <span class="token builtin">error</span><span class="token punctuation">)</span>
+  <span class="token comment">// &#x8FD4;&#x56DE; cgroup &#x96C6;&#x7EDF;&#x8BA1;&#x4FE1;&#x606F;</span>
+    <span class="token function">GetStats</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token operator">*</span>Stats<span class="token punctuation">,</span> <span class="token builtin">error</span><span class="token punctuation">)</span>
+    <span class="token comment">// &#x4EFB;&#x52A1;&#x6682;&#x505C;&#x4E0E;&#x6062;&#x590D;&#x64CD;&#x4F5C;</span>
+    <span class="token function">Freeze</span><span class="token punctuation">(</span>state configs<span class="token punctuation">.</span>FreezerState<span class="token punctuation">)</span> <span class="token builtin">error</span>
+  <span class="token comment">// &#x9500;&#x6BC1; cgroup &#x96C6;</span>
+    <span class="token function">Destroy</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token builtin">error</span>
+  <span class="token comment">// &#x83B7;&#x53D6;&#x4FDD;&#x5B58; cgroup &#x72B6;&#x6001;&#x6587;&#x4EF6;&#x8DEF;&#x5F84;</span>
+    <span class="token function">GetPaths</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">map</span><span class="token punctuation">[</span><span class="token builtin">string</span><span class="token punctuation">]</span><span class="token builtin">string</span>
+    <span class="token comment">// &#x8BBE;&#x7F6E; Cgroup &#x914D;&#x7F6E;&#x503C;</span>
+    <span class="token function">Set</span><span class="token punctuation">(</span>container <span class="token operator">*</span>configs<span class="token punctuation">.</span>Config<span class="token punctuation">)</span> <span class="token builtin">error</span>           <span class="token comment">// +configs.Config &#x5BB9;&#x5668;&#x8FDB;&#x7A0B;&#x914D;&#x7F6E;&#x7ED3;&#x6784;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li>Configs.Config &#x5BB9;&#x5668;&#x8FDB;&#x7A0B;&#x914D;&#x7F6E;&#x7684;&#x7ED3;&#x6784;&#x4F53;&#x5185; cgroups &#x76F8;&#x5173;&#x5B9A;&#x4E49;</li>
+</ul>
+<div><p class="code-filename">libcontainer/configs/config.go:81</p></div>
+<pre class="language-"><code class="lang-go"><span class="token comment">// &#x5B9A;&#x4E49;&#x5BB9;&#x5668;&#x5185;&#x6267;&#x884C;&#x8FDB;&#x7A0B;&#x7684;&#x914D;&#x7F6E;&#x9879;&#xFF0C;&#x6B64;&#x5904;&#x4EC5;&#x5173;&#x6CE8; Cgroup &#x76F8;&#x5173;</span>
+<span class="token keyword">type</span> Config <span class="token keyword">struct</span> <span class="token punctuation">{</span>
+   <span class="token comment">//...</span>
+   <span class="token comment">// &#x5BB9;&#x5668;&#x7684; Cgroups &#x8D44;&#x6E90;&#x9650;&#x5236;&#x914D;&#x7F6E;</span>
+    Cgroups <span class="token operator">*</span>Cgroup <span class="token string">`json:&quot;cgroups&quot;`</span>              <span class="token comment">//+Cgroup &#x7ED3;&#x6784;</span>
+   <span class="token comment">// ....</span>
+   <span class="token comment">// &#x5F53; RootlessCgroups &#x8BBE;&#x7F6E;&#x4E3A; true,cgroups &#x9519;&#x8BEF;&#x5C06;&#x88AB;&#x5FFD;&#x7565;</span>
+    RootlessCgroups <span class="token builtin">bool</span> <span class="token string">`json:&quot;rootless_cgroups,omitempty&quot;`</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li>Configs.cgroups &#x7684;&#x7ED3;&#x6784;&#x5B9A;&#x4E49;</li>
+</ul>
+<div><p class="code-filename">libcontainer/configs/cgroup_linux.go:11</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">type</span> Cgroup <span class="token keyword">struct</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Deprecated, use Path instead</span>
+    Name <span class="token builtin">string</span> <span class="token string">`json:&quot;name,omitempty&quot;`</span>
+
+    <span class="token comment">// name of parent of cgroup or slice</span>
+    <span class="token comment">// Deprecated, use Path instead</span>
+    Parent <span class="token builtin">string</span> <span class="token string">`json:&quot;parent,omitempty&quot;`</span>
+
+  <span class="token comment">// Path&#x6307;&#x5B9A;&#x7531;&#x5BB9;&#x5668;&#x521B;&#x5EFA;(&#x548C;/&#x6216;)&#x8FDE;&#x63A5;&#x7684;cgroup&#x7684;&#x8DEF;&#x5F84;&#x3002;&#x5047;&#x5B9A;&#x8DEF;&#x5F84;&#x76F8;&#x5BF9;&#x4E8E;&#x4E3B;&#x673A;&#x7CFB;&#x7EDF;cgroup&#x6302;&#x8F7D;&#x70B9;&#x3002;</span>
+    Path <span class="token builtin">string</span> <span class="token string">`json:&quot;path&quot;`</span>
+
+    <span class="token comment">// ScopePrefix describes prefix for the scope name</span>
+    ScopePrefix <span class="token builtin">string</span> <span class="token string">`json:&quot;scope_prefix&quot;`</span>
+
+    <span class="token comment">// Paths represent the absolute cgroups paths to join.</span>
+    <span class="token comment">// This takes precedence over Path.</span>
+    Paths <span class="token keyword">map</span><span class="token punctuation">[</span><span class="token builtin">string</span><span class="token punctuation">]</span><span class="token builtin">string</span>
+    <span class="token comment">// &#x8D44;&#x6E90;&#x5305;&#x542B;&#x5404;&#x79CD;Cgroup&#x7684;&#x5E94;&#x7528;&#x8BBE;&#x7F6E;</span>
+    <span class="token operator">*</span>Resources                                    <span class="token comment">// +&#x53C2;&#x8003;&#x4E0B;&#x9762;&#x5B9A;&#x4E49;</span>
+<span class="token punctuation">}</span>       
+
+<span class="token comment">// &#x6BCF;&#x9879;&#x8BE6;&#x7EC6;&#x8BF4;&#x660E;&#x53C2;&#x8003;&#x672C;&#x6587;&#x9644;&#x5F55;&#x4E00;</span>
+<span class="token keyword">type</span> Resources <span class="token keyword">struct</span> <span class="token punctuation">{</span>
+    AllowAllDevices <span class="token operator">*</span><span class="token builtin">bool</span> <span class="token string">`json:&quot;allow_all_devices,omitempty&quot;`</span>
+    AllowedDevices <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">*</span>Device <span class="token string">`json:&quot;allowed_devices,omitempty&quot;`</span>
+    DeniedDevices <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">*</span>Device <span class="token string">`json:&quot;denied_devices,omitempty&quot;`</span>
+    Devices <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">*</span>Device <span class="token string">`json:&quot;devices&quot;`</span>
+    Memory <span class="token builtin">int64</span> <span class="token string">`json:&quot;memory&quot;`</span>
+    MemoryReservation <span class="token builtin">int64</span> <span class="token string">`json:&quot;memory_reservation&quot;`</span>
+    MemorySwap <span class="token builtin">int64</span> <span class="token string">`json:&quot;memory_swap&quot;`</span>
+    KernelMemory <span class="token builtin">int64</span> <span class="token string">`json:&quot;kernel_memory&quot;`</span>
+    KernelMemoryTCP <span class="token builtin">int64</span> <span class="token string">`json:&quot;kernel_memory_tcp&quot;`</span>
+    CpuShares <span class="token builtin">uint64</span> <span class="token string">`json:&quot;cpu_shares&quot;`</span>
+    CpuQuota <span class="token builtin">int64</span> <span class="token string">`json:&quot;cpu_quota&quot;`</span>
+    CpuPeriod <span class="token builtin">uint64</span> <span class="token string">`json:&quot;cpu_period&quot;`</span>
+    CpuRtRuntime <span class="token builtin">int64</span> <span class="token string">`json:&quot;cpu_rt_quota&quot;`</span>
+    CpuRtPeriod <span class="token builtin">uint64</span> <span class="token string">`json:&quot;cpu_rt_period&quot;`</span>
+    CpusetCpus <span class="token builtin">string</span> <span class="token string">`json:&quot;cpuset_cpus&quot;`</span>
+    CpusetMems <span class="token builtin">string</span> <span class="token string">`json:&quot;cpuset_mems&quot;`</span>
+    PidsLimit <span class="token builtin">int64</span> <span class="token string">`json:&quot;pids_limit&quot;`</span>
+    BlkioWeight <span class="token builtin">uint16</span> <span class="token string">`json:&quot;blkio_weight&quot;`</span>
+    BlkioLeafWeight <span class="token builtin">uint16</span> <span class="token string">`json:&quot;blkio_leaf_weight&quot;`</span>
+    BlkioWeightDevice <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">*</span>WeightDevice <span class="token string">`json:&quot;blkio_weight_device&quot;`</span>
+    BlkioThrottleReadBpsDevice <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">*</span>ThrottleDevice <span class="token string">`json:&quot;blkio_throttle_read_bps_device&quot;`</span>
+    BlkioThrottleWriteBpsDevice <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">*</span>ThrottleDevice <span class="token string">`json:&quot;blkio_throttle_write_bps_device&quot;`</span>
+    BlkioThrottleReadIOPSDevice <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">*</span>ThrottleDevice <span class="token string">`json:&quot;blkio_throttle_read_iops_device&quot;`</span>
+    BlkioThrottleWriteIOPSDevice <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">*</span>ThrottleDevice <span class="token string">`json:&quot;blkio_throttle_write_iops_device&quot;`</span>
+    Freezer FreezerState <span class="token string">`json:&quot;freezer&quot;`</span>
+    HugetlbLimit <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">*</span>HugepageLimit <span class="token string">`json:&quot;hugetlb_limit&quot;`</span>
+    OomKillDisable <span class="token builtin">bool</span> <span class="token string">`json:&quot;oom_kill_disable&quot;`</span>
+    MemorySwappiness <span class="token operator">*</span><span class="token builtin">uint64</span> <span class="token string">`json:&quot;memory_swappiness&quot;`</span>
+    NetPrioIfpriomap <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">*</span>IfPrioMap <span class="token string">`json:&quot;net_prio_ifpriomap&quot;`</span>
+    NetClsClassid <span class="token builtin">uint32</span> <span class="token string">`json:&quot;net_cls_classid_u&quot;`</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Runc &#x4EE3;&#x7801;&#x5728; Manager &#x63A5;&#x53E3;&#x7684;&#x5B9E;&#x73B0;&#x7C7B;&#x6709;&#x4E24;&#x4E2A;&#x7248;&#x672C;driver,&#x4E00;&#x4E2A;&#x5B9E;&#x73B0;&#x7C7B; fs.Manager ,&#x4E00;&#x4E2A;&#x662F;  systemd.Manager &#xFF0C;&#x672C;&#x6587;&#x4E3B;&#x8981;&#x5206;&#x6790; cgroupfs &#x9A71;&#x52A8;&#x5373; fs.Manager &#x7684;&#x5B9E;&#x73B0;&#x4EE3;&#x7801;&#x3002;</p>
+<p>&#x6211;&#x4EEC;&#x5148;&#x770B;&#x4E00;&#x4E0B; fs.Manager &#x7684;&#x5B9A;&#x4E49; </p>
+<div><p class="code-filename">libcontainer/cgroups/fs/apply_raw.go:65</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">type</span> Manager <span class="token keyword">struct</span> <span class="token punctuation">{</span>
+    mu       sync<span class="token punctuation">.</span>Mutex
+    Cgroups  <span class="token operator">*</span>configs<span class="token punctuation">.</span>Cgroup           <span class="token comment">// &#x5168;&#x5C40;&#x914D;&#x7F6E;&#x7684; cgroup &#x9879;&#x5B9A;&#x4E49;&#xFF08;configs.Cgroup&#x524D;&#x9762;&#x6709;&#x7ED3;&#x6784;&#x4F53;&#x8BF4;&#x660E;&#xFF09;</span>
+    Rootless <span class="token builtin">bool</span>                      
+    Paths    <span class="token keyword">map</span><span class="token punctuation">[</span><span class="token builtin">string</span><span class="token punctuation">]</span><span class="token builtin">string</span>         <span class="token comment">// &#x5B58;&#x653E;&#x5B50;&#x7CFB;&#x7EDF;&#x540D;&#x4E0E;&#x8DEF;&#x5F84;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>cgroupData cgroup &#x914D;&#x7F6E;&#x6570;&#x636E;&#x5B9A;&#x4E49;</p>
+<div><p class="code-filename">libcontainer/cgroups/fs/apply_raw.go:98</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">type</span> cgroupData <span class="token keyword">struct</span> <span class="token punctuation">{</span>
+    root      <span class="token builtin">string</span>                    <span class="token comment">// cgroup &#x6839;&#x8DEF;&#x5F84;</span>
+    innerPath <span class="token builtin">string</span>                    <span class="token comment">// &#x6307;&#x5B9A;&#x7531;&#x5BB9;&#x5668;&#x521B;&#x5EFA;(&#x548C;/&#x6216;)&#x8FDE;&#x63A5;&#x7684;cgroup&#x7684;&#x8DEF;&#x5F84;</span>
+    config    <span class="token operator">*</span>configs<span class="token punctuation">.</span>Cgroup           <span class="token comment">// Cgroup &#x5168;&#x5C40;&#x914D;&#x7F6E;&#x9879;</span>
+    pid       <span class="token builtin">int</span>                       <span class="token comment">// &#x8FDB;&#x7A0B;id</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>manager.<strong>Apply()</strong> &#x5C06;&#x6307;&#x5B9A;&#x7684; pid &#x5E94;&#x7528;&#x8D44;&#x6E90;&#x7684;&#x9650;&#x5236;</p>
+<div><p class="code-filename">libcontainer/cgroups/fs/apply_raw.go:132</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>m <span class="token operator">*</span>Manager<span class="token punctuation">)</span> <span class="token function">Apply</span><span class="token punctuation">(</span>pid <span class="token builtin">int</span><span class="token punctuation">)</span> <span class="token punctuation">(</span>err <span class="token builtin">error</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> m<span class="token punctuation">.</span>Cgroups <span class="token operator">==</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>                       <span class="token comment">// &#x5168;&#x5C40; cgroup &#x914D;&#x7F6E;&#x662F;&#x5426;&#x5B58;&#x5728;&#x68C0;&#x6D4B;</span>
+        <span class="token keyword">return</span> <span class="token boolean">nil</span>
+    <span class="token punctuation">}</span>
+  <span class="token comment">//...</span>
+    <span class="token keyword">var</span> c <span class="token operator">=</span> m<span class="token punctuation">.</span>Cgroups
+    d<span class="token punctuation">,</span> err <span class="token operator">:=</span> <span class="token function">getCgroupData</span><span class="token punctuation">(</span>m<span class="token punctuation">.</span>Cgroups<span class="token punctuation">,</span> pid<span class="token punctuation">)</span>     <span class="token comment">// +&#x83B7;&#x53D6;&#x4E0E;&#x6784;&#x5EFA; cgroupData &#x5BF9;&#x8C61;</span>
+  <span class="token comment">//...</span>
+    m<span class="token punctuation">.</span>Paths <span class="token operator">=</span> <span class="token function">make</span><span class="token punctuation">(</span><span class="token keyword">map</span><span class="token punctuation">[</span><span class="token builtin">string</span><span class="token punctuation">]</span><span class="token builtin">string</span><span class="token punctuation">)</span>
+  <span class="token comment">// &#x5982;&#x679C;&#x5168;&#x5C40;&#x914D;&#x7F6E;&#x5B58;&#x5728; cgroup paths &#x914D;&#x7F6E;&#xFF0C;</span>
+    <span class="token keyword">if</span> c<span class="token punctuation">.</span>Paths <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>                        
+        <span class="token keyword">for</span> name<span class="token punctuation">,</span> path <span class="token operator">:=</span> <span class="token keyword">range</span> c<span class="token punctuation">.</span>Paths <span class="token punctuation">{</span>
+            <span class="token boolean">_</span><span class="token punctuation">,</span> err <span class="token operator">:=</span> d<span class="token punctuation">.</span><span class="token function">path</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span>                 <span class="token comment">// &#x67E5;&#x627E;&#x5B50;&#x7CFB;&#x7EDF;&#x7684; cgroup path &#x662F;&#x5426;&#x5B58;&#x5728;</span>
+            <span class="token keyword">if</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+                <span class="token keyword">if</span> cgroups<span class="token punctuation">.</span><span class="token function">IsNotFound</span><span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                    <span class="token keyword">continue</span>
+                <span class="token punctuation">}</span>
+                <span class="token keyword">return</span> err
+            <span class="token punctuation">}</span>
+            m<span class="token punctuation">.</span>Paths<span class="token punctuation">[</span>name<span class="token punctuation">]</span> <span class="token operator">=</span> path
+        <span class="token punctuation">}</span>
+        <span class="token keyword">return</span> cgroups<span class="token punctuation">.</span><span class="token function">EnterPid</span><span class="token punctuation">(</span>m<span class="token punctuation">.</span>Paths<span class="token punctuation">,</span> pid<span class="token punctuation">)</span>    <span class="token comment">// &#x5C06; pid &#x5199;&#x5165;&#x5B50;&#x7CFB;&#x7EDF;&#x7684; cgroup.procs &#x6587;&#x4EF6;</span>
+    <span class="token punctuation">}</span>
+
+  <span class="token comment">// &#x904D;&#x5386;&#x6240;&#x6709; cgroup &#x5B50;&#x7CFB;&#x7EDF;,&#x5C06;&#x914D;&#x7F6E;&#x5E94;&#x7528; cgroup &#x8D44;&#x6E90;&#x9650;&#x5236;</span>
+    <span class="token keyword">for</span> <span class="token boolean">_</span><span class="token punctuation">,</span> sys <span class="token operator">:=</span> <span class="token keyword">range</span> subsystems <span class="token punctuation">{</span>
+        p<span class="token punctuation">,</span> err <span class="token operator">:=</span> d<span class="token punctuation">.</span><span class="token function">path</span><span class="token punctuation">(</span>sys<span class="token punctuation">.</span><span class="token function">Name</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>             <span class="token comment">// &#x67E5;&#x627E;&#x5B50;&#x7CFB;&#x7EDF;&#x7684; cgroup path</span>
+        <span class="token keyword">if</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+          <span class="token comment">//...</span>
+            <span class="token keyword">return</span> err
+        <span class="token punctuation">}</span>
+        m<span class="token punctuation">.</span>Paths<span class="token punctuation">[</span>sys<span class="token punctuation">.</span><span class="token function">Name</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">]</span> <span class="token operator">=</span> p                 
+    <span class="token keyword">if</span> err <span class="token operator">:=</span> sys<span class="token punctuation">.</span><span class="token function">Apply</span><span class="token punctuation">(</span>d<span class="token punctuation">)</span><span class="token punctuation">;</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>     <span class="token comment">// &#x5404;&#x5B50;&#x7CFB;&#x7EDF; apply() &#x65B9;&#x6CD5;&#x8C03;&#x7528;</span>
+    <span class="token comment">//...</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> <span class="token boolean">nil</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>&#x83B7;&#x53D6;&#x4E0E;&#x6784;&#x5EFA; cgroupData &#x5BF9;&#x8C61;</p>
+<div><p class="code-filename">libcontainer/cgroups/fs/apply_raw.go:291</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token function">getCgroupData</span><span class="token punctuation">(</span>c <span class="token operator">*</span>configs<span class="token punctuation">.</span>Cgroup<span class="token punctuation">,</span> pid <span class="token builtin">int</span><span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token operator">*</span>cgroupData<span class="token punctuation">,</span> <span class="token builtin">error</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    root<span class="token punctuation">,</span> err <span class="token operator">:=</span> <span class="token function">getCgroupRoot</span><span class="token punctuation">(</span><span class="token punctuation">)</span>          <span class="token comment">// +&#x83B7;&#x53D6;cgroup root&#x6839;&#x76EE;&#x5F55;</span>
+    <span class="token keyword">if</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token boolean">nil</span><span class="token punctuation">,</span> err
+    <span class="token punctuation">}</span>
+
+  <span class="token comment">//...</span>
+    <span class="token keyword">return</span> <span class="token operator">&amp;</span>cgroupData<span class="token punctuation">{</span>                  
+        root<span class="token punctuation">:</span>      root<span class="token punctuation">,</span>
+        innerPath<span class="token punctuation">:</span> innerPath<span class="token punctuation">,</span>                   
+        config<span class="token punctuation">:</span>    c<span class="token punctuation">,</span>
+        pid<span class="token punctuation">:</span>       pid<span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token boolean">nil</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>cgroupRoot &#x5168;&#x5C40;&#x53D8;&#x91CF;&#x4E3A;&#x7A7A;&#x5219;&#x901A;&#x8FC7;&#x67E5;&#x627E;&quot; /proc/self/mountinfo &quot;&#x6EE1;&#x8DB3;&#x6761;&#x4EF6;&#x4E3A;&quot; filesystem &#x5217;&#x4E3A; cgroup &quot;&#x7684;&#x6302;&#x8F7D;&#x70B9;&#x76EE;&#x5F55;&#xFF0C;&#x5219;&#x4E3A; cgroup &#x7684;&#x6839;&#x76EE;&#x5F55;</p>
+<div><p class="code-filename">libcontainer/cgroups/fs/apply_raw.go:77</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token function">getCgroupRoot</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">error</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    cgroupRootLock<span class="token punctuation">.</span><span class="token function">Lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token keyword">defer</span> cgroupRootLock<span class="token punctuation">.</span><span class="token function">Unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+    <span class="token keyword">if</span> cgroupRoot <span class="token operator">!=</span> <span class="token string">&quot;&quot;</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> cgroupRoot<span class="token punctuation">,</span> <span class="token boolean">nil</span>
+    <span class="token punctuation">}</span>
+
+    root<span class="token punctuation">,</span> err <span class="token operator">:=</span> cgroups<span class="token punctuation">.</span><span class="token function">FindCgroupMountpointDir</span><span class="token punctuation">(</span><span class="token punctuation">)</span>  <span class="token comment">// &#x67E5;&#x627E;&quot;/proc/self/mountinfo&quot;&#x6302;&#x8F7D;&#x70B9;&#x76EE;&#x5F55;</span>
+    <span class="token keyword">if</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token string">&quot;&quot;</span><span class="token punctuation">,</span> err
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">if</span> <span class="token boolean">_</span><span class="token punctuation">,</span> err <span class="token operator">:=</span> os<span class="token punctuation">.</span><span class="token function">Stat</span><span class="token punctuation">(</span>root<span class="token punctuation">)</span><span class="token punctuation">;</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>        <span class="token comment">//&#x5224;&#x65AD;&#x662F;&#x5426;&#x5B58;&#x5728;</span>
+        <span class="token keyword">return</span> <span class="token string">&quot;&quot;</span><span class="token punctuation">,</span> err  
+    <span class="token punctuation">}</span>
+
+    cgroupRoot <span class="token operator">=</span> root
+    <span class="token keyword">return</span> cgroupRoot<span class="token punctuation">,</span> <span class="token boolean">nil</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>manager.<strong>Set()</strong>  &#x6839;&#x636E;&#x5BB9;&#x5668;&#x7684;&#x5168;&#x5C40;&#x914D;&#x7F6E; Config &#x7684; Cgroups &#x8D44;&#x6E90;&#x9650;&#x5236;&#x9879;&#xFF0C;&#x5C06; configs &#x5199;&#x5165;&#x81F3; cgroup &#x5B50;&#x7CFB;&#x7EDF;&#x6587;&#x4EF6;</p>
+<div><p class="code-filename">libcontainer/cgroups/fs/apply_raw.go:282</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>m <span class="token operator">*</span>Manager<span class="token punctuation">)</span> <span class="token function">Set</span><span class="token punctuation">(</span>container <span class="token operator">*</span>configs<span class="token punctuation">.</span>Config<span class="token punctuation">)</span> <span class="token builtin">error</span> <span class="token punctuation">{</span>
+  <span class="token comment">//...</span>
+    paths <span class="token operator">:=</span> m<span class="token punctuation">.</span><span class="token function">GetPaths</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token comment">// &#x904D;&#x5386;&#x6240;&#x6709;&#x5B50;&#x7CFB;&#x7EDF;&#xFF0C;&#x8BBE;&#x7F6E;&#x5BB9;&#x5668;&#x7684;&#x5168;&#x5C40;&#x914D;&#x7F6E; Config &#x7684; Cgroups &#x8D44;&#x6E90;&#x9650;&#x5236;&#x9879;</span>
+    <span class="token keyword">for</span> <span class="token boolean">_</span><span class="token punctuation">,</span> sys <span class="token operator">:=</span> <span class="token keyword">range</span> subsystems <span class="token punctuation">{</span>
+        path <span class="token operator">:=</span> paths<span class="token punctuation">[</span>sys<span class="token punctuation">.</span><span class="token function">Name</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">]</span>
+        <span class="token keyword">if</span> err <span class="token operator">:=</span> sys<span class="token punctuation">.</span><span class="token function">Set</span><span class="token punctuation">(</span>path<span class="token punctuation">,</span> container<span class="token punctuation">.</span>Cgroups<span class="token punctuation">)</span><span class="token punctuation">;</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+        <span class="token comment">//...</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> <span class="token boolean">nil</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>manager.<strong>Freeze()</strong>   &#x6839;&#x636E;&#x5BB9;&#x5668;&#x7684;&#x5168;&#x5C40; configs &#x914D;&#x7F6E;&#x5E94;&#x7528; cgroup &#x6682;&#x505C;&#x4E0E;&#x6062;&#x590D;&#x64CD;&#x4F5C;&#x72B6;&#x6001;&#x503C;</p>
+<div><p class="code-filename">libcontainer/cgroups/fs/apply_raw.go:264</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>m <span class="token operator">*</span>Manager<span class="token punctuation">)</span> <span class="token function">Freeze</span><span class="token punctuation">(</span>state configs<span class="token punctuation">.</span>FreezerState<span class="token punctuation">)</span> <span class="token builtin">error</span> <span class="token punctuation">{</span>
+    paths <span class="token operator">:=</span> m<span class="token punctuation">.</span><span class="token function">GetPaths</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    dir <span class="token operator">:=</span> paths<span class="token punctuation">[</span><span class="token string">&quot;freezer&quot;</span><span class="token punctuation">]</span>                     <span class="token comment">// &#x83B7;&#x53D6;&#x5B50;&#x7CFB;&#x7EDF;&#x7684; path</span>
+    prevState <span class="token operator">:=</span> m<span class="token punctuation">.</span>Cgroups<span class="token punctuation">.</span>Resources<span class="token punctuation">.</span>Freezer
+    m<span class="token punctuation">.</span>Cgroups<span class="token punctuation">.</span>Resources<span class="token punctuation">.</span>Freezer <span class="token operator">=</span> state
+    freezer<span class="token punctuation">,</span> err <span class="token operator">:=</span> subsystems<span class="token punctuation">.</span><span class="token function">Get</span><span class="token punctuation">(</span><span class="token string">&quot;freezer&quot;</span><span class="token punctuation">)</span>   
+    <span class="token keyword">if</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> err
+    <span class="token punctuation">}</span>
+    err <span class="token operator">=</span> freezer<span class="token punctuation">.</span><span class="token function">Set</span><span class="token punctuation">(</span>dir<span class="token punctuation">,</span> m<span class="token punctuation">.</span>Cgroups<span class="token punctuation">)</span>          <span class="token comment">// &#x8BBE;&#x7F6E; state &#x72B6;&#x6001;&#x503C;</span>
+  <span class="token comment">//...</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>&#x5176;&#x5B83; manager &#x65B9;&#x6CD5;&#xFF1A;manager.<strong>GetPids()</strong>    /manager.<strong>GetAllPids()</strong>  / manager.<strong>GetPaths()</strong>  / manager.<strong>Destroy()</strong> / manager.<strong>GetStats()</strong> &#x7565;</p>
+<h2 id="Cgroup__subsystem_&#x5B9E;&#x73B0;">4. Cgroup  subsystem &#x5B9E;&#x73B0;</h2>
+<p>Cgroupfs &#x5B50;&#x7CFB;&#x7EDF;&#x63A5;&#x53E3;&#x3001;&#x5173;&#x952E;&#x7C7B;&#x578B;&#x3001;&#x5173;&#x952E;&#x5168;&#x5C40;&#x53D8;&#x91CF;&#x5B9A;&#x4E49;</p>
+<div><p class="code-filename">libcontainer/cgroups/fs/apply_raw.go</p></div>
+<pre class="language-"><code class="lang-go"><span class="token comment">// &#x5B50;&#x7CFB;&#x7EDF;&#x63A5;&#x53E3;&#x5B9A;&#x4E49;</span>
+<span class="token keyword">type</span> subsystem <span class="token keyword">interface</span> <span class="token punctuation">{</span>
+  <span class="token comment">// &#x8FD4;&#x56DE;&#x5B50;&#x7CFB;&#x7EDF;&#x7684;&#x540D;&#x79F0;</span>
+    <span class="token function">Name</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token builtin">string</span>
+    <span class="token comment">// &#x8FD4;&#x56DE;cgroup stats&#x72B6;&#x6001;</span>
+    <span class="token function">GetStats</span><span class="token punctuation">(</span>path <span class="token builtin">string</span><span class="token punctuation">,</span> stats <span class="token operator">*</span>cgroups<span class="token punctuation">.</span>Stats<span class="token punctuation">)</span> <span class="token builtin">error</span>
+    <span class="token comment">// &#x79FB;&#x9664;cgroup</span>
+    <span class="token function">Remove</span><span class="token punctuation">(</span><span class="token operator">*</span>cgroupData<span class="token punctuation">)</span> <span class="token builtin">error</span>
+  <span class="token comment">// &#x521B;&#x5EFA;&#x548C;&#x52A0;&#x5165;cgroup</span>
+    <span class="token function">Apply</span><span class="token punctuation">(</span><span class="token operator">*</span>cgroupData<span class="token punctuation">)</span> <span class="token builtin">error</span>
+    <span class="token comment">// &#x8BBE;&#x7F6E;cgroup&#x914D;&#x7F6E;&#x9879;&#x503C;</span>
+    <span class="token function">Set</span><span class="token punctuation">(</span>path <span class="token builtin">string</span><span class="token punctuation">,</span> cgroup <span class="token operator">*</span>configs<span class="token punctuation">.</span>Cgroup<span class="token punctuation">)</span> <span class="token builtin">error</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// &#x5B50;&#x7CFB;&#x7EDF;&#x96C6;&#x7C7B;&#x578B;&#x5B9A;&#x4E49;</span>
+<span class="token keyword">type</span> subsystemSet <span class="token punctuation">[</span><span class="token punctuation">]</span>subsystem
+
+<span class="token comment">// subsystems&#x5168;&#x5C40;&#x53D8;&#x91CF;&#x5B9A;&#x4E49;&#x4E86;&#x652F;&#x6301;&#x7684;&#x5B50;&#x7CFB;&#x7EDF;&#x5217;&#x8868;&#xFF1B;</span>
+<span class="token comment">// &quot;&amp;CpusetGroup{}...&quot;&#x90FD;&#x4E3A;subsystem&#x63A5;&#x53E3;&#x7684;&#x5177;&#x4F53;&#x5B9E;&#x73B0;</span>
+<span class="token keyword">var</span> <span class="token punctuation">(</span>
+    subsystems <span class="token operator">=</span> subsystemSet<span class="token punctuation">{</span>
+        <span class="token operator">&amp;</span>CpusetGroup<span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+        <span class="token operator">&amp;</span>DevicesGroup<span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+        <span class="token operator">&amp;</span>MemoryGroup<span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+        <span class="token operator">&amp;</span>CpuGroup<span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+        <span class="token operator">&amp;</span>CpuacctGroup<span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+        <span class="token operator">&amp;</span>PidsGroup<span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+        <span class="token operator">&amp;</span>BlkioGroup<span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+        <span class="token operator">&amp;</span>HugetlbGroup<span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+        <span class="token operator">&amp;</span>NetClsGroup<span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+        <span class="token operator">&amp;</span>NetPrioGroup<span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+        <span class="token operator">&amp;</span>PerfEventGroup<span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+        <span class="token operator">&amp;</span>FreezerGroup<span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+        <span class="token operator">&amp;</span>NameGroup<span class="token punctuation">{</span>GroupName<span class="token punctuation">:</span> <span class="token string">&quot;name=systemd&quot;</span><span class="token punctuation">,</span> Join<span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span>
+</code></pre>
+<p>&quot;cgroups/fs/&quot; &#x76EE;&#x5F55;&#x4E0B;&#x5305;&#x542B;&#x4E86;&#x5404;&#x79CD;&#x652F;&#x6301;&#x7684;&#x5B50;&#x7CFB;&#x7EDF;&#x5B9E;&#x73B0;&#x4EE3;&#x7801;&#xFF0C;&#x4E0B;&#x9762;&#x6211;&#x4EEC;&#x7528; cpu subsystem &#x7684;&#x5B9E;&#x73B0;&#x4EE3;&#x7801;&#x8BE6;&#x7EC6;&#x5206;&#x6790;&#x4F5C;&#x4E3A;&#x4EE3;&#x8868;&#xFF0C;&#x5176;&#x5B83;&#x5B50;&#x7CFB;&#x7EDF;&#x7684;&#x5B9E;&#x73B0;&#x903B;&#x8F91;&#x7C7B;&#x4F3C;&#xFF0C;&#x672C;&#x6587;&#x5C06;&#x4E0D;&#x4F5C;&#x8BE6;&#x7EC6;&#x7684;&#x4E00;&#x4E00;&#x5206;&#x6790;&#x3002;</p>
+<p>&quot;cgroups/fs/cpu.go&quot; &#x6587;&#x4EF6;&#x5185;&#x5305;&#x542B;&#x4E86; cpu subsystem &#x7684;&#x5B9E;&#x73B0;&#x4EE3;&#x7801;&#xFF1A;</p>
+<p>CpuGroup.<strong>Name()</strong> &#x83B7;&#x53D6; cpu &#x5B50;&#x7CFB;&#x7EDF;&#x540D;&#x79F0;</p>
+<div><p class="code-filename">libcontainer/cgroups/fs/cpu.go:18</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>s <span class="token operator">*</span>CpuGroup<span class="token punctuation">)</span> <span class="token function">Name</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token builtin">string</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token string">&quot;cpu&quot;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>CpuGroup.<strong>Apply()</strong> &#x57FA;&#x4E8E; Cgroup configs &#x8BBE;&#x7F6E;&#x9879;&#xFF0C;&#x5E94;&#x7528; CPU &#x8D44;&#x6E90;&#x9650;&#x5236;</p>
+<div><p class="code-filename">libcontainer/cgroups/fs/cpu.go:22</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>s <span class="token operator">*</span>CpuGroup<span class="token punctuation">)</span> <span class="token function">Apply</span><span class="token punctuation">(</span>d <span class="token operator">*</span>cgroupData<span class="token punctuation">)</span> <span class="token builtin">error</span> <span class="token punctuation">{</span>
+    path<span class="token punctuation">,</span> err <span class="token operator">:=</span> d<span class="token punctuation">.</span><span class="token function">path</span><span class="token punctuation">(</span><span class="token string">&quot;cpu&quot;</span><span class="token punctuation">)</span>
+    <span class="token keyword">if</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span>cgroups<span class="token punctuation">.</span><span class="token function">IsNotFound</span><span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> err
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> s<span class="token punctuation">.</span><span class="token function">ApplyDir</span><span class="token punctuation">(</span>path<span class="token punctuation">,</span> d<span class="token punctuation">.</span>config<span class="token punctuation">,</span> d<span class="token punctuation">.</span>pid<span class="token punctuation">)</span> <span class="token comment">// +&#x521B;&#x5EFA;&#x76EE;&#x5F55;&#x548C;pid&#x5199;cgroup.procs&#x6587;&#x4EF6;&#x5E94;&#x7528;cpu&#x9650;&#x5236;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>&#x521B;&#x5EFA;&#x76EE;&#x5F55;&#x548C; pid &#x5199;&#x5165; cgroup.procs &#x6587;&#x4EF6;&#x5E94;&#x7528; cpu &#x9650;&#x5236;</p>
+<div><p class="code-filename">libcontainer/cgroups/fs/cpu.go:32</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>s <span class="token operator">*</span>CpuGroup<span class="token punctuation">)</span> <span class="token function">ApplyDir</span><span class="token punctuation">(</span>path <span class="token builtin">string</span><span class="token punctuation">,</span> cgroup <span class="token operator">*</span>configs<span class="token punctuation">.</span>Cgroup<span class="token punctuation">,</span> pid <span class="token builtin">int</span><span class="token punctuation">)</span> <span class="token builtin">error</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> path <span class="token operator">==</span> <span class="token string">&quot;&quot;</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token boolean">nil</span>
+    <span class="token punctuation">}</span>
+  <span class="token comment">// &#x521B;&#x5EFA;&#x76EE;&#x5F55;</span>
+    <span class="token keyword">if</span> err <span class="token operator">:=</span> os<span class="token punctuation">.</span><span class="token function">MkdirAll</span><span class="token punctuation">(</span>path<span class="token punctuation">,</span> <span class="token number">0755</span><span class="token punctuation">)</span><span class="token punctuation">;</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> err
+    <span class="token punctuation">}</span>
+  <span class="token comment">// &#x8BBE;&#x7F6E; RT(realtime)&#x8C03;&#x5EA6;&#x503C;&#xFF1A; cpu.rt_period_us &#xFF0C;cpu.rt_runtime_us</span>
+    <span class="token keyword">if</span> err <span class="token operator">:=</span> s<span class="token punctuation">.</span><span class="token function">SetRtSched</span><span class="token punctuation">(</span>path<span class="token punctuation">,</span> cgroup<span class="token punctuation">)</span><span class="token punctuation">;</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> err
+    <span class="token punctuation">}</span>
+  <span class="token comment">// pid&#x52A0;&#x5165;cgroup procs&#x6587;&#x4EF6;&#x5E94;&#x7528;cgroup&#x7EC4;&#x9650;&#x5236;</span>
+    <span class="token keyword">return</span> cgroups<span class="token punctuation">.</span><span class="token function">WriteCgroupProc</span><span class="token punctuation">(</span>path<span class="token punctuation">,</span> pid<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>CpuGroup.<strong>Set()</strong> &#x57FA;&#x4E8E; Cgroup configs &#x8BBE;&#x7F6E;&#x9879;&#xFF0C;&#x5199;&#x5165;&#x914D;&#x7F6E;&#x503C;&#x81F3;&#x76F8;&#x5E94;&#x7684;&#x5B50;&#x7CFB;&#x7EDF;&#x63A7;&#x5236;&#x8D44;&#x6E90;&#x6587;&#x4EF6;&#xFF0C;&#x5B9E;&#x73B0; CPU &#x7684;&#x9650;&#x5236;&#x8C03;&#x8282;</p>
+<div><p class="code-filename">libcontainer/cgroups/fs/cpu.go:66</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>s <span class="token operator">*</span>CpuGroup<span class="token punctuation">)</span> <span class="token function">Set</span><span class="token punctuation">(</span>path <span class="token builtin">string</span><span class="token punctuation">,</span> cgroup <span class="token operator">*</span>configs<span class="token punctuation">.</span>Cgroup<span class="token punctuation">)</span> <span class="token builtin">error</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> cgroup<span class="token punctuation">.</span>Resources<span class="token punctuation">.</span>CpuShares <span class="token operator">!=</span> <span class="token number">0</span> <span class="token punctuation">{</span>
+    <span class="token comment">// &#x5199;&#x5165;&#x6587;&#x4EF6;&#x503C;&#xFF0C;&#x63A7;&#x5236;cgroup&#x7EC4;&#x4E4B;&#x95F4;&#x7684;&#x914D;&#x989D;&#x5360;&#x6BD4;</span>
+        <span class="token keyword">if</span> err <span class="token operator">:=</span> <span class="token function">writeFile</span><span class="token punctuation">(</span>path<span class="token punctuation">,</span> <span class="token string">&quot;cpu.shares&quot;</span><span class="token punctuation">,</span> strconv<span class="token punctuation">.</span><span class="token function">FormatUint</span><span class="token punctuation">(</span>cgroup<span class="token punctuation">.</span>Resources<span class="token punctuation">.</span>CpuShares<span class="token punctuation">,</span> <span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> err
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">if</span> cgroup<span class="token punctuation">.</span>Resources<span class="token punctuation">.</span>CpuPeriod <span class="token operator">!=</span> <span class="token number">0</span> <span class="token punctuation">{</span>
+    <span class="token comment">// &#x5199;&#x5165;&#x6587;&#x4EF6;&#x503C;&#xFF0C;CFS&#x8C03;&#x5EA6; CPU &#x65F6;&#x95F4;&#x7684;&#x5468;&#x671F;</span>
+        <span class="token keyword">if</span> err <span class="token operator">:=</span> <span class="token function">writeFile</span><span class="token punctuation">(</span>path<span class="token punctuation">,</span> <span class="token string">&quot;cpu.cfs_period_us&quot;</span><span class="token punctuation">,</span> strconv<span class="token punctuation">.</span><span class="token function">FormatUint</span><span class="token punctuation">(</span>cgroup<span class="token punctuation">.</span>Resources<span class="token punctuation">.</span>CpuPeriod<span class="token punctuation">,</span> <span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> err
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">if</span> cgroup<span class="token punctuation">.</span>Resources<span class="token punctuation">.</span>CpuQuota <span class="token operator">!=</span> <span class="token number">0</span> <span class="token punctuation">{</span>
+    <span class="token comment">// &#x5199;&#x5165;&#x6587;&#x4EF6;&#x503C;&#xFF0C;CFS&#x8C03;&#x5EA6; &#x671F;&#x95F4;&#x5185;&#x53EF;&#x4F7F;&#x7528;&#x7684; cpu &#x65F6;&#x95F4;</span>
+        <span class="token keyword">if</span> err <span class="token operator">:=</span> <span class="token function">writeFile</span><span class="token punctuation">(</span>path<span class="token punctuation">,</span> <span class="token string">&quot;cpu.cfs_quota_us&quot;</span><span class="token punctuation">,</span> strconv<span class="token punctuation">.</span><span class="token function">FormatInt</span><span class="token punctuation">(</span>cgroup<span class="token punctuation">.</span>Resources<span class="token punctuation">.</span>CpuQuota<span class="token punctuation">,</span> <span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> err
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+  <span class="token comment">// &#x8BBE;&#x7F6E; RT(realtime)&#x8C03;&#x5EA6;&#x503C;&#xFF1A; cpu.rt_period_us &#xFF0C;cpu.rt_runtime_us</span>
+    <span class="token keyword">return</span> s<span class="token punctuation">.</span><span class="token function">SetRtSched</span><span class="token punctuation">(</span>path<span class="token punctuation">,</span> cgroup<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>CpuGroup.<strong>GetStats()</strong> &#x83B7;&#x53D6;&#x5B50;&#x7CFB;&#x7EDF;&#x7684; cpu.stat &#x72B6;&#x6001;&#x6587;&#x4EF6;&#x4FE1;&#x606F;</p>
+<div><p class="code-filename">libcontainer/cgroups/fs/cpu.go:89</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>s <span class="token operator">*</span>CpuGroup<span class="token punctuation">)</span> <span class="token function">GetStats</span><span class="token punctuation">(</span>path <span class="token builtin">string</span><span class="token punctuation">,</span> stats <span class="token operator">*</span>cgroups<span class="token punctuation">.</span>Stats<span class="token punctuation">)</span> <span class="token builtin">error</span> <span class="token punctuation">{</span>
+    f<span class="token punctuation">,</span> err <span class="token operator">:=</span> os<span class="token punctuation">.</span><span class="token function">Open</span><span class="token punctuation">(</span>filepath<span class="token punctuation">.</span><span class="token function">Join</span><span class="token punctuation">(</span>path<span class="token punctuation">,</span> <span class="token string">&quot;cpu.stat&quot;</span><span class="token punctuation">)</span><span class="token punctuation">)</span>   <span class="token comment">// cpu.stat&#x6587;&#x4EF6;</span>
+    <span class="token keyword">if</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+        <span class="token keyword">if</span> os<span class="token punctuation">.</span><span class="token function">IsNotExist</span><span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> <span class="token boolean">nil</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">return</span> err
+    <span class="token punctuation">}</span>
+    <span class="token keyword">defer</span> f<span class="token punctuation">.</span><span class="token function">Close</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+    sc <span class="token operator">:=</span> bufio<span class="token punctuation">.</span><span class="token function">NewScanner</span><span class="token punctuation">(</span>f<span class="token punctuation">)</span>
+    <span class="token keyword">for</span> sc<span class="token punctuation">.</span><span class="token function">Scan</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        t<span class="token punctuation">,</span> v<span class="token punctuation">,</span> err <span class="token operator">:=</span> <span class="token function">getCgroupParamKeyValue</span><span class="token punctuation">(</span>sc<span class="token punctuation">.</span><span class="token function">Text</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>  <span class="token comment">// K/V&#x89E3;&#x6790;</span>
+        <span class="token keyword">if</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> err
+        <span class="token punctuation">}</span>
+        <span class="token keyword">switch</span> t <span class="token punctuation">{</span>
+        <span class="token keyword">case</span> <span class="token string">&quot;nr_periods&quot;</span><span class="token punctuation">:</span>                              <span class="token comment">//&quot;nr_periods&quot;  &#x8FDB;&#x5165;&#x5468;&#x671F;&#x7684;&#x6B21;&#x6570;</span>
+            stats<span class="token punctuation">.</span>CpuStats<span class="token punctuation">.</span>ThrottlingData<span class="token punctuation">.</span>Periods <span class="token operator">=</span> v
+
+        <span class="token keyword">case</span> <span class="token string">&quot;nr_throttled&quot;</span><span class="token punctuation">:</span>                            <span class="token comment">//&quot;nr_throttled&quot; &#x8FD0;&#x884C;&#x65F6;&#x95F4;&#x88AB;&#x8C03;&#x6574;&#x7684;&#x6B21;&#x6570;</span>
+            stats<span class="token punctuation">.</span>CpuStats<span class="token punctuation">.</span>ThrottlingData<span class="token punctuation">.</span>ThrottledPeriods <span class="token operator">=</span> v
+
+        <span class="token keyword">case</span> <span class="token string">&quot;throttled_time&quot;</span><span class="token punctuation">:</span>                          <span class="token comment">//&quot;throttled_time&quot; &#x7528;&#x4E8E;&#x8C03;&#x6574;&#x7684;&#x65F6;&#x95F4;</span>
+            stats<span class="token punctuation">.</span>CpuStats<span class="token punctuation">.</span>ThrottlingData<span class="token punctuation">.</span>ThrottledTime <span class="token operator">=</span> v
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> <span class="token boolean">nil</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>CpuGroup.<strong>remove()</strong> &#x5220;&#x9664; cpu &#x5B50;&#x7CFB;&#x7EDF;</p>
+<div><p class="code-filename">libcontainer/cgroups/fs/cpu.go:85</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>s <span class="token operator">*</span>CpuGroup<span class="token punctuation">)</span> <span class="token function">Remove</span><span class="token punctuation">(</span>d <span class="token operator">*</span>cgroupData<span class="token punctuation">)</span> <span class="token builtin">error</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token function">removePath</span><span class="token punctuation">(</span>d<span class="token punctuation">.</span><span class="token function">path</span><span class="token punctuation">(</span><span class="token string">&quot;cpu&quot;</span><span class="token punctuation">)</span><span class="token punctuation">)</span>  <span class="token comment">//&#x5220;&#x9664;path</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>&#x5176;&#x5B83; cgroup &#x7684;&#x5B50;&#x7CFB;&#x7EDF;&#x8D44;&#x6E90;&#x8BBE;&#x7F6E;&#x9879;&#x8BF4;&#x660E;&#x53EF;&#x53C2;&#x8003;&#x540E;&#x9762;&#x7684;&#x9644;&#x5F55;&#x3002;</p>
+<h2 id="&#x9644;&#x5F55;_&#x4E00;">5. &#x9644;&#x5F55; &#x4E00;</h2>
+<h4 id="Cgroup_&#x5305;&#x5185;&#x6587;&#x4EF6;&#x8BF4;&#x660E;">5.0.1. Cgroup &#x5305;&#x5185;&#x6587;&#x4EF6;&#x8BF4;&#x660E;</h4>
+<pre class="language-"><code class="lang-shell">&#x251C;&#x2500;&#x2500; cgroups.go             ----------------------------<span class="token operator">&gt;</span><span class="token operator">|</span> &#x5B9A;&#x4E49;cgroup Manager&#x63A5;&#x53E3;&#x64CD;&#x4F5C;  
+&#x251C;&#x2500;&#x2500; cgroups_test.go
+&#x251C;&#x2500;&#x2500; cgroups_unsupported.go
+&#x251C;&#x2500;&#x2500; fs
+&#x2502;   &#x251C;&#x2500;&#x2500; apply_raw.go      ----------------------------<span class="token operator">&gt;</span><span class="token operator">|</span> cgroupfs driver Manager&#x5B9E;&#x73B0; 
+&#x2502;   &#x251C;&#x2500;&#x2500; apply_raw_test.go              
+&#x2502;   &#x251C;&#x2500;&#x2500; blkio.go          -------<span class="token punctuation">[</span>blkio&#x5B50;&#x7CFB;&#x7EDF;<span class="token punctuation">]</span>---------<span class="token operator">&gt;</span><span class="token operator">|</span>
+&#x2502;   &#x251C;&#x2500;&#x2500; blkio_test.go                                  <span class="token operator">|</span>
+&#x2502;   &#x251C;&#x2500;&#x2500; cpu.go            -------<span class="token punctuation">[</span>cpu&#x5B50;&#x7CFB;&#x7EDF;<span class="token punctuation">]</span>-----------<span class="token operator">&gt;</span><span class="token operator">|</span>
+&#x2502;   &#x251C;&#x2500;&#x2500; cpu_test.go                                    <span class="token operator">|</span>    
+&#x2502;   &#x251C;&#x2500;&#x2500; cpuacct.go        -------<span class="token punctuation">[</span>cpuacct&#x5B50;&#x7CFB;&#x7EDF;<span class="token punctuation">]</span>-------<span class="token operator">&gt;</span><span class="token operator">|</span>
+&#x2502;   &#x251C;&#x2500;&#x2500; cpuset.go         -------<span class="token punctuation">[</span>cpuset&#x5B50;&#x7CFB;&#x7EDF;<span class="token punctuation">]</span>--------<span class="token operator">&gt;</span><span class="token operator">|</span>
+&#x2502;   &#x251C;&#x2500;&#x2500; cpuset_test.go                                 <span class="token operator">|</span>  
+&#x2502;   &#x251C;&#x2500;&#x2500; devices.go        -------<span class="token punctuation">[</span>devices&#x5B50;&#x7CFB;&#x7EDF;<span class="token punctuation">]</span>-------<span class="token operator">&gt;</span><span class="token operator">|</span>\
+&#x2502;   &#x251C;&#x2500;&#x2500; devices_test.go                                <span class="token operator">|</span> <span class="token operator">|</span>\  &#x5404;&#x5B50;&#x7CFB;&#x7EDF;&#x5B9E;&#x73B0;&#xFF0C;Cgroupfs&#x76EE;&#x5F55;&#x6587;&#x4EF6;
+&#x2502;   &#x251C;&#x2500;&#x2500; freezer.go        -------<span class="token punctuation">[</span>freezer&#x5B50;&#x7CFB;&#x7EDF;<span class="token punctuation">]</span>-------<span class="token operator">&gt;</span><span class="token operator">|</span> <span class="token operator">|</span>/  &#x7684;CRUD&#x65B9;&#x6CD5;
+&#x2502;   &#x251C;&#x2500;&#x2500; freezer_test.go                                <span class="token operator">|</span>/
+&#x2502;   &#x251C;&#x2500;&#x2500; fs_unsupported.go                              <span class="token operator">|</span>
+&#x2502;   &#x251C;&#x2500;&#x2500; hugetlb.go        -------<span class="token punctuation">[</span>hugetlb&#x5B50;&#x7CFB;&#x7EDF;<span class="token punctuation">]</span>-------<span class="token operator">&gt;</span><span class="token operator">|</span>
+&#x2502;   &#x251C;&#x2500;&#x2500; hugetlb_test.go                                <span class="token operator">|</span>
+&#x2502;   &#x251C;&#x2500;&#x2500; kmem.go                                        <span class="token operator">|</span>
+&#x2502;   &#x251C;&#x2500;&#x2500; kmem_disabled.go                               <span class="token operator">|</span>
+&#x2502;   &#x251C;&#x2500;&#x2500; memory.go         -------<span class="token punctuation">[</span>memory&#x5B50;&#x7CFB;&#x7EDF;<span class="token punctuation">]</span>--------<span class="token operator">&gt;</span><span class="token operator">|</span>
+&#x2502;   &#x251C;&#x2500;&#x2500; memory_test.go                                 <span class="token operator">|</span>
+&#x2502;   &#x251C;&#x2500;&#x2500; name.go           -------<span class="token punctuation">[</span>systemd&#x5B50;&#x7CFB;&#x7EDF;<span class="token punctuation">]</span>-------<span class="token operator">&gt;</span><span class="token operator">|</span>
+&#x2502;   &#x251C;&#x2500;&#x2500; net_cls.go        -------<span class="token punctuation">[</span>netcls&#x5B50;&#x7CFB;&#x7EDF;<span class="token punctuation">]</span>--------<span class="token operator">&gt;</span><span class="token operator">|</span>
+&#x2502;   &#x251C;&#x2500;&#x2500; net_cls_test.go                                <span class="token operator">|</span>
+&#x2502;   &#x251C;&#x2500;&#x2500; net_prio.go       -------<span class="token punctuation">[</span>netprio&#x5B50;&#x7CFB;&#x7EDF;<span class="token punctuation">]</span>-------<span class="token operator">&gt;</span><span class="token operator">|</span>
+&#x2502;   &#x251C;&#x2500;&#x2500; net_prio_test.go                               <span class="token operator">|</span>
+&#x2502;   &#x251C;&#x2500;&#x2500; perf_event.go     -------<span class="token punctuation">[</span>perf event&#x5B50;&#x7CFB;&#x7EDF;<span class="token punctuation">]</span>----<span class="token operator">&gt;</span><span class="token operator">|</span>
+&#x2502;   &#x251C;&#x2500;&#x2500; pids.go           -------<span class="token punctuation">[</span>pid&#x5B50;&#x7CFB;&#x7EDF;<span class="token punctuation">]</span>-----------<span class="token operator">&gt;</span><span class="token operator">|</span>
+&#x2502;   &#x251C;&#x2500;&#x2500; pids_test.go
+&#x2502;   &#x251C;&#x2500;&#x2500; stats_util_test.go
+&#x2502;   &#x251C;&#x2500;&#x2500; util_test.go      
+&#x2502;   &#x251C;&#x2500;&#x2500; utils.go         ----------------------------<span class="token operator">&gt;</span><span class="token operator">|</span> fs&#x5305;&#x5185;&#x5171;&#x4EAB;&#x7684;&#x5DE5;&#x5177;&#x65B9;&#x6CD5;
+&#x2502;   &#x2514;&#x2500;&#x2500; utils_test.go
+&#x251C;&#x2500;&#x2500; stats.go             ----------------------------<span class="token operator">&gt;</span><span class="token operator">|</span> cgroup stats &#x5B9A;&#x4E49;&#x4E0E;&#x5BF9;&#x8C61;&#x6784;&#x5EFA;
+&#x251C;&#x2500;&#x2500; systemd
+&#x2502;   &#x251C;&#x2500;&#x2500; apply_nosystemd.go
+&#x2502;   &#x2514;&#x2500;&#x2500; apply_systemd.go ----------------------------<span class="token operator">&gt;</span><span class="token operator">|</span> cgroup systemd driver manager &#x5B9E;&#x73B0; 
+&#x251C;&#x2500;&#x2500; utils.go             ----------------------------<span class="token operator">&gt;</span><span class="token operator">|</span> &#x5305;&#x5185;&#x5171;&#x4EAB;&#x7684;&#x5DE5;&#x5177;&#x65B9;&#x6CD5;
+&#x2514;&#x2500;&#x2500; utils_test.go
+</code></pre>
+<h4 id="Cgroup_&#x5B50;&#x7CFB;&#x7EDF;&#x8D44;&#x6E90;&#x914D;&#x7F6E;&#x9879;&#x76F8;&#x5173;&#x8BF4;&#x660E;">5.0.2. Cgroup &#x5B50;&#x7CFB;&#x7EDF;&#x8D44;&#x6E90;&#x914D;&#x7F6E;&#x9879;&#x76F8;&#x5173;&#x8BF4;&#x660E;</h4>
+<pre class="language-"><code class="lang-go"><span class="token number">1.</span> <span class="token punctuation">[</span>pids<span class="token punctuation">]</span> <span class="token operator">--</span><span class="token operator">-</span> &#x9650;&#x5236;cgroup&#x53CA;&#x5176;&#x6240;&#x6709;&#x5B50;&#x5B59;cgroup&#x91CC;&#x9762;&#x80FD;&#x521B;&#x5EFA;&#x7684;&#x603B;&#x7684;task&#x6570;&#x91CF;
+   pids<span class="token punctuation">.</span>max &#x6240;&#x5141;&#x8BB8;&#x521B;&#x5EFA;&#x7684;&#x603B;&#x7684;&#x6700;&#x5927;&#x8FDB;&#x7A0B;&#x6570;&#x91CF;
+   pids<span class="token punctuation">.</span>current &#x73B0;&#x6709;&#x7684;&#x603B;&#x7684;&#x8FDB;&#x7A0B;&#x6570;&#x91CF;
+
+<span class="token number">2.</span> <span class="token punctuation">[</span>memory<span class="token punctuation">]</span> <span class="token operator">--</span><span class="token operator">-</span> &#x9650;&#x5236;&#x5185;&#x5B58;&#x5B50;&#x7CFB;&#x7EDF;&#x9650;&#x5236;&#x5185;&#x5B58;&#x4F7F;&#x7528;&#x91CF;
+   memory<span class="token punctuation">.</span>memsw<span class="token punctuation">.</span>limit_in_bytes &#x5185;&#x5B58;&#xFF0B;swap&#x7A7A;&#x95F4;&#x4F7F;&#x7528;&#x7684;&#x603B;&#x91CF;&#x9650;&#x5236;
+   memory<span class="token punctuation">.</span>limit_in_bytes &#x5185;&#x5B58;&#x4F7F;&#x7528;&#x91CF;&#x9650;&#x5236;
+   memory<span class="token punctuation">.</span>kmem<span class="token punctuation">.</span>limit_in_bytes &#x9650;&#x5236;&#x5185;&#x6838;&#x4F7F;&#x7528;&#x7684;&#x5185;&#x5B58;&#x5927;&#x5C0F;
+   memory<span class="token punctuation">.</span>soft_limit_in_bytes &#x5185;&#x5B58;&#x8F6F;&#x9650;&#x5236;
+   memory<span class="token punctuation">.</span>kmem<span class="token punctuation">.</span>tcp<span class="token punctuation">.</span>limit_in_bytes &#x8BBE;&#x7F6E;tcp &#x7F13;&#x5B58;&#x5185;&#x5B58;&#x7684;hard limit
+   memory<span class="token punctuation">.</span>oom_control &#x8BBE;&#x7F6E;<span class="token operator">/</span>&#x8BFB;&#x53D6;&#x5185;&#x5B58;&#x8D85;&#x9650;&#x63A7;&#x5236;&#x4FE1;&#x606F;
+   memory<span class="token punctuation">.</span>swappiness &#x7528;&#x6765;&#x8C03;&#x6574;cgroup&#x4F7F;&#x7528;swap&#x7684;&#x72B6;&#x6001;&#xFF0C;&#x8868;&#x793A;&#x4E0D;&#x4F7F;&#x7528;&#x4EA4;&#x6362;&#x5206;&#x533A;
+
+<span class="token number">3.</span> <span class="token punctuation">[</span>cpu<span class="token punctuation">]</span> <span class="token operator">--</span><span class="token operator">-</span> &#x9650;&#x5236;&#x8FDB;&#x7A0B;&#x7684;cpu&#x603B;&#x4F53;&#x5360;&#x7528;&#x7387;
+   cpu<span class="token punctuation">.</span>rt_period_us  &#x5B9E;&#x65F6;&#x4EFB;&#x52A1;&#x7EDF;&#x8BA1;CPU&#x4F7F;&#x7528;&#x65F6;&#x95F4;&#x7684;&#x5468;&#x671F;
+   cpu<span class="token punctuation">.</span>rt_runtime_us &#x5B9E;&#x65F6;&#x4EFB;&#x52A1;&#x5468;&#x671F;&#x5185;&#x5141;&#x8BB8;&#x4EFB;&#x52A1;&#x4F7F;&#x7528;&#x5355;&#x4E2A;CPU&#x6838;&#x7684;&#x65F6;&#x95F4;&#xFF0C;&#x5982;&#x679C;&#x7CFB;&#x7EDF;&#x4E2D;&#x6709;&#x591A;&#x4E2A;&#x6838;&#xFF0C;&#x5219;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;&#x6838;&#x500D;&#x6570;&#x7684;&#x65F6;&#x95F4;
+   cpu<span class="token punctuation">.</span>shares  &#x63A7;&#x5236;&#x5404;&#x4E2A;cgroup&#x7EC4;&#x4E4B;&#x95F4;&#x7684;&#x914D;&#x989D;&#x5360;&#x6BD4;
+   <span class="token comment">//&#x4E0B;&#x9762;&#x4E24;&#x4E2A;&#x7EC4;&#x5408;&#x4F7F;&#x7528;&#xFF0C;&#x9650;&#x5236;&#x8BE5;&#x7EC4;&#x4E2D;&#x7684;&#x6240;&#x6709;&#x8FDB;&#x7A0B;&#x5728;&#x5355;&#x4F4D;&#x65F6;&#x95F4;&#x91CC;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;&#x7684; cpu &#x65F6;&#x95F4;</span>
+   <span class="token comment">//&#x5982;:&#x5C06; cpu.cfs_quota_us &#x8BBE;&#x4E3A; 50000&#xFF0C;&#x76F8;&#x5BF9;&#x4E8E; cpu.cfs_period_us &#x7684; 100000 &#x5373; 50%</span>
+   <span class="token comment">//cfs_quota_us &#x4E5F;&#x662F;&#x53EF;&#x4EE5;&#x5927;&#x4E8E; cfs_period_us &#x7684;&#xFF0C;&#x8FD9;&#x4E3B;&#x8981;&#x662F;&#x5BF9;&#x4E8E;&#x591A;&#x6838;&#x60C5;&#x51B5;</span>
+   cpu<span class="token punctuation">.</span>cfs_period_us  &#x65F6;&#x95F4;&#x5468;&#x671F;&#xFF0C;&#x9ED8;&#x8BA4;&#x4E3A; <span class="token number">100000</span>&#xFF0C;&#x5373;&#x767E;&#x6BEB;&#x79D2;
+   cpu<span class="token punctuation">.</span>cfs_quota_us   &#x671F;&#x95F4;&#x5185;&#x53EF;&#x4F7F;&#x7528;&#x7684; cpu &#x65F6;&#x95F4;&#xFF0C;&#x9ED8;&#x8BA4; <span class="token operator">-</span><span class="token number">1</span>&#xFF0C;&#x5373;&#x65E0;&#x9650;&#x5236;
+
+<span class="token number">4.</span> <span class="token punctuation">[</span>cpuset<span class="token punctuation">]</span> <span class="token operator">--</span><span class="token operator">-</span> &#x591A;&#x6838;&#x5FC3;&#x7684;cpu&#x73AF;&#x5883;&#xFF0C;&#x4E3A;cgroup&#x4EFB;&#x52A1;&#x5206;&#x914D;&#x72EC;&#x7ACB;&#x7684;&#x5185;&#x5B58;&#x8282;&#x70B9;&#x548C;CPU&#x8282;&#x70B9;
+   cpuset<span class="token punctuation">.</span>cpus  &#x9650;&#x5236;&#x53EA;&#x80FD;&#x4F7F;&#x7528;&#x7279;&#x5B9A;CPU&#x8282;&#x70B9;
+   cpuset<span class="token punctuation">.</span>mems  &#x9650;&#x5236;&#x53EA;&#x80FD;&#x4F7F;&#x7528;&#x7279;&#x5B9A;&#x5185;&#x5B58;&#x8282;&#x70B9;
+
+<span class="token number">5.</span> <span class="token punctuation">[</span>devices<span class="token punctuation">]</span> <span class="token operator">--</span><span class="token operator">-</span> &#x4EE5;&#x63A7;&#x5236;&#x8FDB;&#x7A0B;&#x80FD;&#x591F;&#x8BBF;&#x95EE;&#x67D0;&#x4E9B;&#x8BBE;&#x5907;
+    <span class="token comment">// echo &quot;a 1:5 r&quot; &gt; devices.deny</span>
+    <span class="token comment">// a|b|C     all/block/character</span>
+    <span class="token comment">// r|w|m     read/write/create</span>
+   devices<span class="token punctuation">.</span>deny  &#x62D2;&#x7EDD;
+   devices<span class="token punctuation">.</span>allow &#x5141;&#x8BB8;
+
+<span class="token number">6.</span> <span class="token punctuation">[</span>blkio<span class="token punctuation">]</span> <span class="token operator">--</span><span class="token operator">-</span> &#x8BBE;&#x7F6E;&#x9650;&#x5236;&#x6BCF;&#x4E2A;&#x5757;&#x8BBE;&#x5907;&#x7684;&#x8F93;&#x5165;&#x8F93;&#x51FA;&#x63A7;&#x5236;&#x3002;&#x4F8B;&#x5982;<span class="token punctuation">:</span>&#x78C1;&#x76D8;&#xFF0C;&#x5149;&#x76D8;&#x4EE5;&#x53CA;usb&#x7B49;&#x7B49;
+    <span class="token comment">// CFQ Completely Fair Queuing &#x5B8C;&#x5168;&#x516C;&#x5E73;&#x961F;&#x5217;</span>
+   blkio<span class="token punctuation">.</span>weight   &#x6743;&#x91CD;&#x503C;<span class="token punctuation">(</span>&#x8303;&#x56F4;<span class="token number">100</span><span class="token operator">-</span><span class="token number">1000</span><span class="token punctuation">)</span>
+   blkio<span class="token punctuation">.</span>leaf_weight
+   blkio<span class="token punctuation">.</span>weight_device   &#x5757;&#x8BBE;&#x5907;&#x7EA7;&#x7684;&#x503C; <span class="token punctuation">(</span>major<span class="token punctuation">:</span>minor weight<span class="token punctuation">)</span> &#xFF08;&#x4F18;&#x5148;&#x7EA7;&#x9AD8;&#x4E8E;blkio<span class="token punctuation">.</span>weight&#xFF09;
+   blkio<span class="token punctuation">.</span>leaf_weight_device
+    <span class="token comment">// &#x9650;&#x5236;IOPS&#x4F7F;&#x7528;&#x4E0A;&#x9650;</span>
+   blkio<span class="token punctuation">.</span>throttle<span class="token punctuation">.</span>read_bps_device   &#x8BFB;&#x8BBE;&#x5907; bytes<span class="token operator">/</span>s 
+   blkio<span class="token punctuation">.</span>throttle<span class="token punctuation">.</span>write_bps_device  &#x5199;&#x8BBE;&#x5907; bytes<span class="token operator">/</span>s 
+   blkio<span class="token punctuation">.</span>throttle<span class="token punctuation">.</span>read_iops_device  &#x8BFB;&#x8BBE;&#x5907; io<span class="token operator">/</span>s  
+   blkio<span class="token punctuation">.</span>throttle<span class="token punctuation">.</span>write_iops_device &#x5199;&#x8BBE;&#x5907; io<span class="token operator">/</span>s  
+
+<span class="token number">7.</span> <span class="token punctuation">[</span>net_prio<span class="token punctuation">]</span> <span class="token operator">--</span><span class="token operator">-</span> &#x914D;&#x7F6E;&#x6BCF;&#x4E2A;&#x7F51;&#x7EDC;&#x63A5;&#x53E3;&#x7684;&#x6D41;&#x91CF;&#x4F18;&#x5148;&#x7EA7;
+   net_prio<span class="token punctuation">.</span>ifpriomap &#x4F18;&#x5148;&#x7EA7;&#x56FE;&#x8C31;
+
+<span class="token number">8.</span> <span class="token punctuation">[</span>net_cls<span class="token punctuation">]</span> <span class="token operator">--</span><span class="token operator">-</span> &#x6807;&#x8BB0;&#x6BCF;&#x4E2A;&#x7F51;&#x7EDC;&#x5305;<span class="token punctuation">,</span>&#x53EF;&#x4F9B;QOS<span class="token operator">/</span>netfilter&#x4F7F;&#x7528;
+   net_cls<span class="token punctuation">.</span>classid  &#x6807;&#x7B7E;id
+
+<span class="token number">9.</span> <span class="token punctuation">[</span>freezer<span class="token punctuation">]</span> <span class="token operator">--</span><span class="token operator">-</span>  &#x6682;&#x505C;&#x548C;&#x6062;&#x590D;cgroup&#x4EFB;&#x52A1;
+   freezer<span class="token punctuation">.</span>state  &#x5F53;&#x524D;&#x7684;&#x72B6;&#x6001;<span class="token punctuation">,</span>&#x4E24;&#x4E2A;&#x72B6;&#x6001;&#x662F;&#x5199;&#x6709;&#x6548;<span class="token punctuation">(</span>Frozen&#x5DF2;&#x51BB;&#x7ED3;<span class="token operator">/</span>Thawed&#x89E3;&#x51BB;&#x72B6;&#x6001;<span class="token punctuation">)</span>
+
+<span class="token number">10.</span><span class="token punctuation">[</span>hugetlb<span class="token punctuation">]</span> <span class="token operator">--</span><span class="token operator">-</span> &#x5BF9;&#x4E8E;HugeTLB&#x7CFB;&#x7EDF;&#x8FDB;&#x884C;&#x9650;&#x5236;&#xFF0C;&#x8FD9;&#x662F;&#x4E00;&#x4E2A;&#x5927;&#x9875;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;
+   hugetlb<span class="token punctuation">.</span>XX<span class="token punctuation">.</span>limit_in_bytes &#x9650;&#x5236;&#x5927;&#x9875;&#x5B57;&#x8282;&#x6570;
+</code></pre>
+<h2 id="&#x9644;&#x5F55;_&#x4E8C;">6. &#x9644;&#x5F55; &#x4E8C;</h2>
+<p>cgroups &#x5305;&#x4E0B; utils &#x5B9A;&#x4E49;&#x7684;&#x65B9;&#x6CD5;&#x7528;&#x9014;&#x7B80;&#x6790;</p>
+<div><p class="code-filename">libcontainer/cgroups/utils.go</p></div>
+<pre class="language-"><code class="lang-go"><span class="token comment">// &#x67E5;&#x627E;/proc/self/mountinfo&#x4E0B;&#x6EE1;&#x8DB3;&#x6761;&#x4EF6;&#x201C;cgroupPath&#xFF0C;subsystem&#x201D;&#x7684;&#x9879;&#xFF0C;&#x8FD4;&#x56DE;&quot;Cgroup&#x6839;&#x76EE;&#x5F55;&#x4E0E;&#x6302;&#x8F7D;&#x70B9;&quot;</span>
+<span class="token keyword">func</span> <span class="token function">FindCgroupMountpointAndRoot</span><span class="token punctuation">(</span>cgroupPath<span class="token punctuation">,</span> subsystem <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">error</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token operator">...</span><span class="token punctuation">}</span>
+<span class="token keyword">func</span> <span class="token function">findCgroupMountpointAndRootFromReader</span><span class="token punctuation">(</span>reader io<span class="token punctuation">.</span>Reader<span class="token punctuation">,</span> cgroupPath<span class="token punctuation">,</span> subsystem <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">error</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token operator">...</span><span class="token punctuation">}</span>
+<span class="token comment">// &#x83B7;&#x53D6;&quot;/proc/self/cgroup&quot;&#x8FDB;&#x884C;&#x5339;&#x914D;&#x662F;&#x5426;&#x5B58;&#x5728;subsystem</span>
+<span class="token keyword">func</span> <span class="token function">isSubsystemAvailable</span><span class="token punctuation">(</span>subsystem <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token builtin">bool</span><span class="token punctuation">{</span><span class="token operator">...</span><span class="token punctuation">}</span>  
+
+<span class="token comment">// &#x67E5;&quot;/proc/self/mountinfo&quot;&#x6EE1;&#x8DB3;&#x6761;&#x4EF6;&quot;filesystem&#x5217;&#x4E3A;cgroup&quot;&#x7684;&#x6302;&#x8F7D;&#x70B9;&#x76EE;&#x5F55;&#xFF1B;</span>
+<span class="token comment">// &#x4E00;&#x822C;&#x4E3A;&quot;/sys/fs/cgroup/&quot;</span>
+<span class="token keyword">func</span> <span class="token function">FindCgroupMountpointDir</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">error</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token operator">...</span><span class="token punctuation">}</span>
+<span class="token comment">// &#x83B7;&#x53D6;&#x6240;&#x6709;Cgroup&#x4FE1;&#x606F;&#x7ED3;&#x6784;&#x5316;Mount slice&#x8FD4;&#x56DE;&#xFF1B;[]Mount{Mountpoint/Root/Subsystems[]}</span>
+<span class="token keyword">func</span> <span class="token function">GetCgroupMounts</span><span class="token punctuation">(</span>all <span class="token builtin">bool</span><span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">]</span>Mount<span class="token punctuation">,</span> <span class="token builtin">error</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token operator">...</span><span class="token punctuation">}</span>
+<span class="token keyword">func</span> <span class="token function">getCgroupMountsHelper</span><span class="token punctuation">(</span>ss <span class="token keyword">map</span><span class="token punctuation">[</span><span class="token builtin">string</span><span class="token punctuation">]</span><span class="token builtin">bool</span><span class="token punctuation">,</span>mi io<span class="token punctuation">.</span>Reader<span class="token punctuation">,</span> all <span class="token builtin">bool</span><span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">]</span>Mount<span class="token punctuation">,</span> <span class="token builtin">error</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token operator">...</span><span class="token punctuation">}</span>
+
+<span class="token comment">// &#x6253;&#x5F00;/proc/&lt;pid&gt;/cgroup&#x6587;&#x4EF6;&#x8C03;&#x7528;parseCgroupFromReader()</span>
+<span class="token keyword">func</span> <span class="token function">ParseCgroupFile</span><span class="token punctuation">(</span>path <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token keyword">map</span><span class="token punctuation">[</span><span class="token builtin">string</span><span class="token punctuation">]</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">error</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token operator">...</span><span class="token punctuation">}</span>
+<span class="token comment">// &#x89E3;&#x6790;&quot;/proc/[pid]/cgroup&quot;&#x8F93;&#x51FA;map[subsystem]cgroup-path</span>
+<span class="token keyword">func</span> <span class="token function">parseCgroupFromReader</span><span class="token punctuation">(</span>r io<span class="token punctuation">.</span>Reader<span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token keyword">map</span><span class="token punctuation">[</span><span class="token builtin">string</span><span class="token punctuation">]</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">error</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token operator">...</span><span class="token punctuation">}</span>
+
+<span class="token comment">// &#x8FD4;&#x56DE;subsystem&#x7684;cgroup-path</span>
+<span class="token keyword">func</span> <span class="token function">getControllerPath</span><span class="token punctuation">(</span>subsystem <span class="token builtin">string</span><span class="token punctuation">,</span> cgroups <span class="token keyword">map</span><span class="token punctuation">[</span><span class="token builtin">string</span><span class="token punctuation">]</span><span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">error</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token operator">...</span><span class="token punctuation">}</span>
+
+<span class="token comment">// &#x83B7;&#x53D6;&#x5F53;&#x524D;&#x8FDB;&#x7A0B;&#x7684;(root)Cgroup-path,&#x901A;&#x8FC7;&#x89E3;&#x6790;&quot;/proc/self/cgroup&quot;&#x6587;&#x4EF6;</span>
+<span class="token keyword">func</span> <span class="token function">GetOwnCgroup</span><span class="token punctuation">(</span>subsystem <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">error</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token operator">...</span><span class="token punctuation">}</span>
+<span class="token comment">// &#x83B7;&#x53D6;&#x5F53;&#x524D;&#x8FDB;&#x7A0B;&#x7684;(mnt)Cgroup-path</span>
+<span class="token keyword">func</span> <span class="token function">GetOwnCgroupPath</span><span class="token punctuation">(</span>subsystem <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">error</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token operator">...</span><span class="token punctuation">}</span>
+
+<span class="token comment">// &#x83B7;&#x53D6;init&#x8FDB;&#x7A0B;&#x7684;(root)Cgroup-path,&#x901A;&#x8FC7;&#x89E3;&#x6790;&quot;/proc/1/cgroup&quot;&#x6587;&#x4EF6;</span>
+<span class="token keyword">func</span> <span class="token function">GetInitCgroup</span><span class="token punctuation">(</span>subsystem <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">error</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token operator">...</span><span class="token punctuation">}</span>
+<span class="token comment">// &#x83B7;&#x53D6;init&#x8FDB;&#x7A0B;&#x7684;(mnt)Cgroup-path</span>
+<span class="token keyword">func</span> <span class="token function">GetInitCgroupPath</span><span class="token punctuation">(</span>subsystem <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">error</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token operator">...</span><span class="token punctuation">}</span>
+<span class="token comment">// &#x83B7;&#x53D6;Cgroup mnt path</span>
+<span class="token keyword">func</span> <span class="token function">getCgroupPathHelper</span><span class="token punctuation">(</span>subsystem<span class="token punctuation">,</span> cgroup <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">error</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token operator">...</span><span class="token punctuation">}</span>
+
+<span class="token comment">// &#x83B7;&#x53D6;&#x6307;&#x5B9A;&#x88AB;&#x52A0;&#x5165;cgroup path&#x7684;&#x6240;&#x6709;pid</span>
+<span class="token keyword">func</span> <span class="token function">GetPids</span><span class="token punctuation">(</span>path <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">int</span><span class="token punctuation">,</span> <span class="token builtin">error</span><span class="token punctuation">)</span><span class="token punctuation">{</span><span class="token operator">...</span><span class="token punctuation">}</span>
+<span class="token comment">// &#x83B7;&#x53D6;&#x6307;&#x5B9A;&#x88AB;&#x52A0;&#x5165;cgroup path&#x548C;subcgroups&#x7684;&#x6240;&#x6709;pid</span>
+<span class="token keyword">func</span> <span class="token function">GetAllPids</span><span class="token punctuation">(</span>path <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">int</span><span class="token punctuation">,</span> <span class="token builtin">error</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token operator">...</span><span class="token punctuation">}</span>
+<span class="token comment">// &#x6253;&#x5F00;&#x6307;&#x5B9A;dir&#x7684;cgroup subsystem&#x7684;&quot;cgroup.procs&quot; &#x8BFB;&#x53D6;pids</span>
+<span class="token keyword">func</span> <span class="token function">readProcsFile</span><span class="token punctuation">(</span>dir <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">int</span><span class="token punctuation">,</span> <span class="token builtin">error</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token operator">...</span><span class="token punctuation">}</span>
+<span class="token comment">// &#x5199;&#x5165;&#x6307;&#x5B9A;&#x7684; pid &#x81F3; Cgroup subsystem &quot;cgroup.procs&quot;&#x6587;&#x4EF6;</span>
+<span class="token keyword">func</span> <span class="token function">EnterPid</span><span class="token punctuation">(</span>cgroupPaths <span class="token keyword">map</span><span class="token punctuation">[</span><span class="token builtin">string</span><span class="token punctuation">]</span><span class="token builtin">string</span><span class="token punctuation">,</span> pid <span class="token builtin">int</span><span class="token punctuation">)</span> <span class="token builtin">error</span>
+<span class="token comment">// &#x6253;&#x5F00;&#x6307;&#x5B9A;dir&#x7684;cgroup subsystem&#x7684;&quot;cgroup.procs&quot;&#x5199;&#x5165;&#x6307;&#x5B9A;&#x7684;pid</span>
+<span class="token keyword">func</span> <span class="token function">WriteCgroupProc</span><span class="token punctuation">(</span>dir <span class="token builtin">string</span><span class="token punctuation">,</span> pid <span class="token builtin">int</span><span class="token punctuation">)</span> <span class="token builtin">error</span> <span class="token punctuation">{</span><span class="token operator">...</span><span class="token punctuation">}</span>
+
+<span class="token comment">// &#x83B7;&#x53D6;&#x5927;&#x9875;&#x5927;&#x5C0F;&#x5217;&#x8868;</span>
+<span class="token keyword">func</span> <span class="token function">GetHugePageSize</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">error</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token operator">...</span><span class="token punctuation">}</span>
+<span class="token comment">// &#x8BFB;&quot;/sys/kernel/mm/hugepages&quot;&#x76EE;&#x5F55;&#x4E0B;&#x6587;&#x4EF6;&#xFF0C;&#x89E3;&#x6790;&#x6587;&#x4EF6;&#x540D;&#x83B7;&#x53D6;hg&#x5927;&#x5C0F;</span>
+<span class="token keyword">func</span> <span class="token function">getHugePageSizeFromFilenames</span><span class="token punctuation">(</span>fileNames <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">error</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token operator">...</span><span class="token punctuation">}</span>
+</code></pre>
+<p><strong>&#x76F8;&#x5173;&#x6587;&#x6863;</strong>&#xFF1A; // TODO &#x8865;&#x5145;&#x94FE;&#x63A5;</p>
+<ul>
+<li>&#x300A;RunC &#x6E90;&#x7801;&#x901A;&#x8BFB;&#x6307;&#x5357;&#x4E4B; Run&#x300B;</li>
+<li>&#x300A;RunC &#x6E90;&#x7801;&#x901A;&#x8BFB;&#x6307;&#x5357;&#x4E4B; Create &amp; Start&#x300B;</li>
+<li>&#x300A;RunC &#x6E90;&#x7801;&#x901A;&#x8BFB;&#x6307;&#x5357;&#x4E4B; Namespace&#x300B;</li>
+<li>&#x300A;RunC &#x6E90;&#x7801;&#x901A;&#x8BFB;&#x6307;&#x5357;&#x4E4B; Networks&#x300B;</li>
+</ul>
+<p><strong>~&#x672C;&#x6587; END~</strong></p>
+<footer class="page-footer"><span class="copyright">Copyright &#xA9; farmer.hutao@outlook.com 2019 all right reserved&#xFF0C;powered by Gitbook</span><span class="footer-modification">&#x8BE5;&#x6587;&#x4EF6;&#x4FEE;&#x8BA2;&#x65F6;&#x95F4;&#xFF1A;
+2019-08-27 15:36:44
+</span></footer><div id="anchors-navbar"><i class="fa fa-anchor"></i><ul><p><a href="#RunC_&#x6E90;&#x7801;&#x901A;&#x8BFB;&#x6307;&#x5357;&#x4E4B;_Cgroup">RunC &#x6E90;&#x7801;&#x901A;&#x8BFB;&#x6307;&#x5357;&#x4E4B; Cgroup</a></p><li><a href="#&#x6982;&#x8FF0;">1. &#x6982;&#x8FF0;</a></li><li><a href="#RunC_&#x6267;&#x884C;&#x6D41;&#x7A0B;&#x4E0E;_cgroup_&#x7684;&#x5E94;&#x7528;">2. RunC &#x6267;&#x884C;&#x6D41;&#x7A0B;&#x4E0E; cgroup &#x7684;&#x5E94;&#x7528;</a></li><li><a href="#Cgroup_manager_&#x5B9E;&#x73B0;">3. Cgroup manager &#x5B9E;&#x73B0;</a></li><li><a href="#Cgroup__subsystem_&#x5B9E;&#x73B0;">4. Cgroup  subsystem &#x5B9E;&#x73B0;</a></li><li><a href="#&#x9644;&#x5F55;_&#x4E00;">5. &#x9644;&#x5F55; &#x4E00;</a></li><ul><li><a href="#">none</a></li><ul><li><a href="#Cgroup_&#x5305;&#x5185;&#x6587;&#x4EF6;&#x8BF4;&#x660E;">5.0.1. Cgroup &#x5305;&#x5185;&#x6587;&#x4EF6;&#x8BF4;&#x660E;</a></li><li><a href="#Cgroup_&#x5B50;&#x7CFB;&#x7EDF;&#x8D44;&#x6E90;&#x914D;&#x7F6E;&#x9879;&#x76F8;&#x5173;&#x8BF4;&#x660E;">5.0.2. Cgroup &#x5B50;&#x7CFB;&#x7EDF;&#x8D44;&#x6E90;&#x914D;&#x7F6E;&#x9879;&#x76F8;&#x5173;&#x8BF4;&#x660E;</a></li></ul></ul><li><a href="#&#x9644;&#x5F55;_&#x4E8C;">6. &#x9644;&#x5F55; &#x4E8C;</a></li></ul></div><a href="#&#x6982;&#x8FF0;" id="goTop"><i class="fa fa-arrow-up"></i></a>
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="namespace.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page: RunC 源码通读之 NameSpace">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"RunC 源码通读之 Cgroup","level":"3.3.2","depth":2,"previous":{"title":"RunC 源码通读之 NameSpace","level":"3.3.1","depth":2,"path":"around/runc/namespace.md","ref":"./around/runc/namespace.md","articles":[]},"dir":"ltr"},"config":{"plugins":["theme-comscore","codeblock-filename","navigator","simple-page-toc","expandable-chapters-small","search-pro","splitter","multipart","tbfed-pagefooter","prism","-highlight","editlink","github","github-buttons@2.1.0","donate","copy-code-button"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"tbfed-pagefooter":{"copyright":"Copyright &copy farmer.hutao@outlook.com 2019","modify_label":"该文件修订时间：","modify_format":"YYYY-MM-DD HH:mm:ss"},"prism":{},"github":{"url":"https://github.com/farmer-hutao/k8s-source-code-analysis"},"editlink":{"label":"编辑本页","multilingual":false,"base":"https://github.com/farmer-hutao/k8s-source-code-analysis/edit/master"},"simple-page-toc":{"maxDepth":4,"skipFirstH1":true},"splitter":{},"search-pro":{"cutWordLib":"nodejieba","defineWord":["Gitbook Use"]},"search":{},"multipart":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"donate":{"alipay":"","alipayText":"支付宝打赏","button":"鼓励作者","title":"催作者快快更新","wechat":"./image/wx.jpg","wechatText":"微信小额捐赠，鼓励作者尽快更新～"},"fontsettings":{"theme":"white","family":"sans","size":2},"codeblock-filename":{},"theme-comscore":{},"navigator":{},"github-buttons":{"repo":"farmer-hutao/k8s-source-code-analysis","types":["star"],"size":"small"},"expandable-chapters-small":{},"copy-code-button":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":true}},"theme":"default","author":"Tao Hu <farmer.hutao@outlook.com>","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"《k8s-1.13版本源码分析》","gitbook":"*","description":"k8s source code analysis"},"file":{"path":"around/runc/cgroup.md","mtime":"2019-08-27T07:36:44.400Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-08-27T11:22:39.392Z"},"basePath":"../..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../../gitbook/gitbook.js"></script>
+    <script src="../../gitbook/theme.js"></script>
+    
+        
+        <script src="../../gitbook/gitbook-plugin-expandable-chapters-small/expandable-chapters-small.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-search-pro/jquery.mark.min.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-search-pro/search.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-splitter/splitter.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-editlink/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-github/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-github-buttons/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-donate/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-copy-code-button/toggle.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-theme-comscore/test.js"></script>
+        
+    
+
+    </body>
+</html>
+

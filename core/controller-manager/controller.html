@@ -663,6 +663,57 @@
             
         </li>
     
+        <li class="chapter " data-level="3.3" data-path="../../around/runc/">
+            
+                <a href="../../around/runc/">
+            
+                    
+                        <b>3.3.</b>
+                    
+                    RunC
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.3.1" data-path="../../around/runc/namespace.html">
+            
+                <a href="../../around/runc/namespace.html">
+            
+                    
+                        <b>3.3.1.</b>
+                    
+                    RunC 源码通读之 NameSpace
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.3.2" data-path="../../around/runc/cgroup.html">
+            
+                <a href="../../around/runc/cgroup.html">
+            
+                    
+                        <b>3.3.2.</b>
+                    
+                    RunC 源码通读之 Cgroup
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
 
     
 
@@ -712,10 +763,354 @@
                                 <section class="normal markdown-section">
                                 
                                 <h1 id="&#x63A7;&#x5236;&#x5668;&#x6982;&#x8FF0;">&#x63A7;&#x5236;&#x5668;&#x6982;&#x8FF0;</h1>
+<p><strong>&#x7F16;&#x8F91;&#x4E2D;&#xFF01;&#xFF01;&#xFF01;</strong></p>
+<p><strong>&#x7F16;&#x8F91;&#x4E2D;&#xFF01;&#xFF01;&#xFF01;</strong></p>
+<p><strong>&#x7F16;&#x8F91;&#x4E2D;&#xFF01;&#xFF01;&#xFF01;</strong></p>
 <!-- toc -->
 <!-- tocstop -->
+<p><img src="image/controller/1561020070538.png" alt="1561020070538"></p>
+<div><p class="code-filename">cmd/kube-controller-manager/controller-manager.go:37</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+   rand<span class="token punctuation">.</span><span class="token function">Seed</span><span class="token punctuation">(</span>time<span class="token punctuation">.</span><span class="token function">Now</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">UnixNano</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+   command <span class="token operator">:=</span> app<span class="token punctuation">.</span><span class="token function">NewControllerManagerCommand</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+   logs<span class="token punctuation">.</span><span class="token function">InitLogs</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+   <span class="token keyword">defer</span> logs<span class="token punctuation">.</span><span class="token function">FlushLogs</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+   <span class="token keyword">if</span> err <span class="token operator">:=</span> command<span class="token punctuation">.</span><span class="token function">Execute</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+      fmt<span class="token punctuation">.</span><span class="token function">Fprintf</span><span class="token punctuation">(</span>os<span class="token punctuation">.</span>Stderr<span class="token punctuation">,</span> <span class="token string">&quot;%v\n&quot;</span><span class="token punctuation">,</span> err<span class="token punctuation">)</span>
+      os<span class="token punctuation">.</span><span class="token function">Exit</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span>
+   <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<div><p class="code-filename">cmd/kube-controller-manager/app/controllermanager.go:98</p></div>
+<pre class="language-"><code class="lang-go">Run<span class="token punctuation">:</span> <span class="token keyword">func</span><span class="token punctuation">(</span>cmd <span class="token operator">*</span>cobra<span class="token punctuation">.</span>Command<span class="token punctuation">,</span> args <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+   verflag<span class="token punctuation">.</span><span class="token function">PrintAndExitIfRequested</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+   utilflag<span class="token punctuation">.</span><span class="token function">PrintFlags</span><span class="token punctuation">(</span>cmd<span class="token punctuation">.</span><span class="token function">Flags</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+   c<span class="token punctuation">,</span> err <span class="token operator">:=</span> s<span class="token punctuation">.</span><span class="token function">Config</span><span class="token punctuation">(</span><span class="token function">KnownControllers</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> ControllersDisabledByDefault<span class="token punctuation">.</span><span class="token function">List</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+   <span class="token keyword">if</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+      fmt<span class="token punctuation">.</span><span class="token function">Fprintf</span><span class="token punctuation">(</span>os<span class="token punctuation">.</span>Stderr<span class="token punctuation">,</span> <span class="token string">&quot;%v\n&quot;</span><span class="token punctuation">,</span> err<span class="token punctuation">)</span>
+      os<span class="token punctuation">.</span><span class="token function">Exit</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span>
+   <span class="token punctuation">}</span>
+
+   <span class="token keyword">if</span> err <span class="token operator">:=</span> <span class="token function">Run</span><span class="token punctuation">(</span>c<span class="token punctuation">.</span><span class="token function">Complete</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> wait<span class="token punctuation">.</span>NeverStop<span class="token punctuation">)</span><span class="token punctuation">;</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+      fmt<span class="token punctuation">.</span><span class="token function">Fprintf</span><span class="token punctuation">(</span>os<span class="token punctuation">.</span>Stderr<span class="token punctuation">,</span> <span class="token string">&quot;%v\n&quot;</span><span class="token punctuation">,</span> err<span class="token punctuation">)</span>
+      os<span class="token punctuation">.</span><span class="token function">Exit</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span>
+   <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span>
+</code></pre>
+<p>!FILENAME cmd/kube-controller-manager/app/controllermanager.go:149</p>
+<p>// Run runs the KubeControllerManagerOptions.  This should never exit.</p>
+<p>func Run(c *config.CompletedConfig, stopCh &lt;-chan struct{}) error </p>
+<div><p class="code-filename">cmd/kube-controller-manager/app/controllermanager.go:212</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">if</span> err <span class="token operator">:=</span> <span class="token function">StartControllers</span><span class="token punctuation">(</span>controllerContext<span class="token punctuation">,</span> saTokenControllerInitFunc<span class="token punctuation">,</span> <span class="token function">NewControllerInitializers</span><span class="token punctuation">(</span>controllerContext<span class="token punctuation">.</span>LoopMode<span class="token punctuation">)</span><span class="token punctuation">,</span> unsecuredMux<span class="token punctuation">)</span><span class="token punctuation">;</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+   klog<span class="token punctuation">.</span><span class="token function">Fatalf</span><span class="token punctuation">(</span><span class="token string">&quot;error starting controllers: %v&quot;</span><span class="token punctuation">,</span> err<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<div><p class="code-filename">cmd/kube-controller-manager/app/controllermanager.go:480</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token function">StartControllers</span><span class="token punctuation">(</span>ctx ControllerContext<span class="token punctuation">,</span> startSATokenController InitFunc<span class="token punctuation">,</span> controllers <span class="token keyword">map</span><span class="token punctuation">[</span><span class="token builtin">string</span><span class="token punctuation">]</span>InitFunc<span class="token punctuation">,</span> unsecuredMux <span class="token operator">*</span>mux<span class="token punctuation">.</span>PathRecorderMux<span class="token punctuation">)</span> <span class="token builtin">error</span> <span class="token punctuation">{</span>
+   <span class="token comment">// Always start the SA token controller first using a full-power client, since it needs to mint tokens for the rest</span>
+   <span class="token comment">// If this fails, just return here and fail since other controllers won&apos;t be able to get credentials.</span>
+   <span class="token keyword">if</span> <span class="token boolean">_</span><span class="token punctuation">,</span> <span class="token boolean">_</span><span class="token punctuation">,</span> err <span class="token operator">:=</span> <span class="token function">startSATokenController</span><span class="token punctuation">(</span>ctx<span class="token punctuation">)</span><span class="token punctuation">;</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+      <span class="token keyword">return</span> err
+   <span class="token punctuation">}</span>
+
+   <span class="token comment">// Initialize the cloud provider with a reference to the clientBuilder only after token controller</span>
+   <span class="token comment">// has started in case the cloud provider uses the client builder.</span>
+   <span class="token keyword">if</span> ctx<span class="token punctuation">.</span>Cloud <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+      ctx<span class="token punctuation">.</span>Cloud<span class="token punctuation">.</span><span class="token function">Initialize</span><span class="token punctuation">(</span>ctx<span class="token punctuation">.</span>ClientBuilder<span class="token punctuation">,</span> ctx<span class="token punctuation">.</span>Stop<span class="token punctuation">)</span>
+   <span class="token punctuation">}</span>
+
+   <span class="token keyword">for</span> controllerName<span class="token punctuation">,</span> initFn <span class="token operator">:=</span> <span class="token keyword">range</span> controllers <span class="token punctuation">{</span>
+      <span class="token keyword">if</span> <span class="token operator">!</span>ctx<span class="token punctuation">.</span><span class="token function">IsControllerEnabled</span><span class="token punctuation">(</span>controllerName<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+         klog<span class="token punctuation">.</span><span class="token function">Warningf</span><span class="token punctuation">(</span><span class="token string">&quot;%q is disabled&quot;</span><span class="token punctuation">,</span> controllerName<span class="token punctuation">)</span>
+         <span class="token keyword">continue</span>
+      <span class="token punctuation">}</span>
+
+      time<span class="token punctuation">.</span><span class="token function">Sleep</span><span class="token punctuation">(</span>wait<span class="token punctuation">.</span><span class="token function">Jitter</span><span class="token punctuation">(</span>ctx<span class="token punctuation">.</span>ComponentConfig<span class="token punctuation">.</span>Generic<span class="token punctuation">.</span>ControllerStartInterval<span class="token punctuation">.</span>Duration<span class="token punctuation">,</span> ControllerStartJitter<span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+      klog<span class="token punctuation">.</span><span class="token function">V</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">Infof</span><span class="token punctuation">(</span><span class="token string">&quot;Starting %q&quot;</span><span class="token punctuation">,</span> controllerName<span class="token punctuation">)</span>
+      debugHandler<span class="token punctuation">,</span> started<span class="token punctuation">,</span> err <span class="token operator">:=</span> <span class="token function">initFn</span><span class="token punctuation">(</span>ctx<span class="token punctuation">)</span>
+      <span class="token keyword">if</span> err <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+         klog<span class="token punctuation">.</span><span class="token function">Errorf</span><span class="token punctuation">(</span><span class="token string">&quot;Error starting %q&quot;</span><span class="token punctuation">,</span> controllerName<span class="token punctuation">)</span>
+         <span class="token keyword">return</span> err
+      <span class="token punctuation">}</span>
+      <span class="token keyword">if</span> <span class="token operator">!</span>started <span class="token punctuation">{</span>
+         klog<span class="token punctuation">.</span><span class="token function">Warningf</span><span class="token punctuation">(</span><span class="token string">&quot;Skipping %q&quot;</span><span class="token punctuation">,</span> controllerName<span class="token punctuation">)</span>
+         <span class="token keyword">continue</span>
+      <span class="token punctuation">}</span>
+      <span class="token keyword">if</span> debugHandler <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token operator">&amp;&amp;</span> unsecuredMux <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+         basePath <span class="token operator">:=</span> <span class="token string">&quot;/debug/controllers/&quot;</span> <span class="token operator">+</span> controllerName
+         unsecuredMux<span class="token punctuation">.</span><span class="token function">UnlistedHandle</span><span class="token punctuation">(</span>basePath<span class="token punctuation">,</span> http<span class="token punctuation">.</span><span class="token function">StripPrefix</span><span class="token punctuation">(</span>basePath<span class="token punctuation">,</span> debugHandler<span class="token punctuation">)</span><span class="token punctuation">)</span>
+         unsecuredMux<span class="token punctuation">.</span><span class="token function">UnlistedHandlePrefix</span><span class="token punctuation">(</span>basePath<span class="token operator">+</span><span class="token string">&quot;/&quot;</span><span class="token punctuation">,</span> http<span class="token punctuation">.</span><span class="token function">StripPrefix</span><span class="token punctuation">(</span>basePath<span class="token punctuation">,</span> debugHandler<span class="token punctuation">)</span><span class="token punctuation">)</span>
+      <span class="token punctuation">}</span>
+      klog<span class="token punctuation">.</span><span class="token function">Infof</span><span class="token punctuation">(</span><span class="token string">&quot;Started %q&quot;</span><span class="token punctuation">,</span> controllerName<span class="token punctuation">)</span>
+   <span class="token punctuation">}</span>
+
+   <span class="token keyword">return</span> <span class="token boolean">nil</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<div><p class="code-filename">cmd/kube-controller-manager/app/controllermanager.go:362</p></div>
+<pre class="language-"><code class="lang-go"><span class="token comment">// NewControllerInitializers is a public map of named controller groups (you can start more than one in an init func)</span>
+<span class="token comment">// paired to their InitFunc.  This allows for structured downstream composition and subdivision.</span>
+<span class="token keyword">func</span> <span class="token function">NewControllerInitializers</span><span class="token punctuation">(</span>loopMode ControllerLoopMode<span class="token punctuation">)</span> <span class="token keyword">map</span><span class="token punctuation">[</span><span class="token builtin">string</span><span class="token punctuation">]</span>InitFunc <span class="token punctuation">{</span>
+   controllers <span class="token operator">:=</span> <span class="token keyword">map</span><span class="token punctuation">[</span><span class="token builtin">string</span><span class="token punctuation">]</span>InitFunc<span class="token punctuation">{</span><span class="token punctuation">}</span>
+   controllers<span class="token punctuation">[</span><span class="token string">&quot;endpoint&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span> startEndpointController
+   controllers<span class="token punctuation">[</span><span class="token string">&quot;replicationcontroller&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span> startReplicationController
+   controllers<span class="token punctuation">[</span><span class="token string">&quot;podgc&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span> startPodGCController
+   controllers<span class="token punctuation">[</span><span class="token string">&quot;resourcequota&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span> startResourceQuotaController
+   controllers<span class="token punctuation">[</span><span class="token string">&quot;namespace&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span> startNamespaceController
+   controllers<span class="token punctuation">[</span><span class="token string">&quot;serviceaccount&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span> startServiceAccountController
+   controllers<span class="token punctuation">[</span><span class="token string">&quot;garbagecollector&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span> startGarbageCollectorController
+   controllers<span class="token punctuation">[</span><span class="token string">&quot;daemonset&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span> startDaemonSetController
+   controllers<span class="token punctuation">[</span><span class="token string">&quot;job&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span> startJobController
+   controllers<span class="token punctuation">[</span><span class="token string">&quot;deployment&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span> startDeploymentController
+   controllers<span class="token punctuation">[</span><span class="token string">&quot;replicaset&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span> startReplicaSetController
+   controllers<span class="token punctuation">[</span><span class="token string">&quot;horizontalpodautoscaling&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span> startHPAController
+   controllers<span class="token punctuation">[</span><span class="token string">&quot;disruption&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span> startDisruptionController
+   controllers<span class="token punctuation">[</span><span class="token string">&quot;statefulset&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span> startStatefulSetController
+   controllers<span class="token punctuation">[</span><span class="token string">&quot;cronjob&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span> startCronJobController
+   controllers<span class="token punctuation">[</span><span class="token string">&quot;csrsigning&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span> startCSRSigningController
+   controllers<span class="token punctuation">[</span><span class="token string">&quot;csrapproving&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span> startCSRApprovingController
+   controllers<span class="token punctuation">[</span><span class="token string">&quot;csrcleaner&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span> startCSRCleanerController
+   controllers<span class="token punctuation">[</span><span class="token string">&quot;ttl&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span> startTTLController
+   controllers<span class="token punctuation">[</span><span class="token string">&quot;bootstrapsigner&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span> startBootstrapSignerController
+   controllers<span class="token punctuation">[</span><span class="token string">&quot;tokencleaner&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span> startTokenCleanerController
+   controllers<span class="token punctuation">[</span><span class="token string">&quot;nodeipam&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span> startNodeIpamController
+   <span class="token keyword">if</span> loopMode <span class="token operator">==</span> IncludeCloudLoops <span class="token punctuation">{</span>
+      controllers<span class="token punctuation">[</span><span class="token string">&quot;service&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span> startServiceController
+      controllers<span class="token punctuation">[</span><span class="token string">&quot;route&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span> startRouteController
+      <span class="token comment">// TODO: volume controller into the IncludeCloudLoops only set.</span>
+      <span class="token comment">// TODO: Separate cluster in cloud check from node lifecycle controller.</span>
+   <span class="token punctuation">}</span>
+   controllers<span class="token punctuation">[</span><span class="token string">&quot;nodelifecycle&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span> startNodeLifecycleController
+   controllers<span class="token punctuation">[</span><span class="token string">&quot;persistentvolume-binder&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span> startPersistentVolumeBinderController
+   controllers<span class="token punctuation">[</span><span class="token string">&quot;attachdetach&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span> startAttachDetachController
+   controllers<span class="token punctuation">[</span><span class="token string">&quot;persistentvolume-expander&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span> startVolumeExpandController
+   controllers<span class="token punctuation">[</span><span class="token string">&quot;clusterrole-aggregation&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span> startClusterRoleAggregrationController
+   controllers<span class="token punctuation">[</span><span class="token string">&quot;pvc-protection&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span> startPVCProtectionController
+   controllers<span class="token punctuation">[</span><span class="token string">&quot;pv-protection&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span> startPVProtectionController
+   controllers<span class="token punctuation">[</span><span class="token string">&quot;ttl-after-finished&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span> startTTLAfterFinishedController
+   controllers<span class="token punctuation">[</span><span class="token string">&quot;root-ca-cert-publisher&quot;</span><span class="token punctuation">]</span> <span class="token operator">=</span> startRootCACertPublisher
+
+   <span class="token keyword">return</span> controllers
+<span class="token punctuation">}</span>
+</code></pre>
+<div><p class="code-filename">cmd/kube-controller-manager/app/controllermanager.go:335</p></div>
+<pre class="language-"><code class="lang-go"><span class="token comment">// InitFunc is used to launch a particular controller.  It may run additional &quot;should I activate checks&quot;.</span>
+<span class="token comment">// Any error returned will cause the controller process to `Fatal`</span>
+<span class="token comment">// The bool indicates whether the controller was enabled.</span>
+<span class="token keyword">type</span> InitFunc <span class="token keyword">func</span><span class="token punctuation">(</span>ctx ControllerContext<span class="token punctuation">)</span> <span class="token punctuation">(</span>debuggingHandler http<span class="token punctuation">.</span>Handler<span class="token punctuation">,</span> enabled <span class="token builtin">bool</span><span class="token punctuation">,</span> err <span class="token builtin">error</span><span class="token punctuation">)</span>
+</code></pre>
+<div><p class="code-filename">cmd/kube-controller-manager/app/controllermanager.go:263</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">type</span> ControllerContext <span class="token keyword">struct</span> <span class="token punctuation">{</span>
+   <span class="token comment">// ClientBuilder will provide a client for this controller to use</span>
+   ClientBuilder controller<span class="token punctuation">.</span>ControllerClientBuilder
+
+   <span class="token comment">// InformerFactory gives access to informers for the controller.</span>
+   InformerFactory informers<span class="token punctuation">.</span>SharedInformerFactory
+
+   <span class="token comment">// ComponentConfig provides access to init options for a given controller</span>
+   ComponentConfig kubectrlmgrconfig<span class="token punctuation">.</span>KubeControllerManagerConfiguration
+
+   <span class="token comment">// DeferredDiscoveryRESTMapper is a RESTMapper that will defer</span>
+   <span class="token comment">// initialization of the RESTMapper until the first mapping is</span>
+   <span class="token comment">// requested.</span>
+   RESTMapper <span class="token operator">*</span>restmapper<span class="token punctuation">.</span>DeferredDiscoveryRESTMapper
+
+   <span class="token comment">// AvailableResources is a map listing currently available resources</span>
+   AvailableResources <span class="token keyword">map</span><span class="token punctuation">[</span>schema<span class="token punctuation">.</span>GroupVersionResource<span class="token punctuation">]</span><span class="token builtin">bool</span>
+
+   <span class="token comment">// Cloud is the cloud provider interface for the controllers to use.</span>
+   <span class="token comment">// It must be initialized and ready to use.</span>
+   Cloud cloudprovider<span class="token punctuation">.</span>Interface
+
+   <span class="token comment">// Control for which control loops to be run</span>
+   <span class="token comment">// IncludeCloudLoops is for a kube-controller-manager running all loops</span>
+   <span class="token comment">// ExternalLoops is for a kube-controller-manager running with a cloud-controller-manager</span>
+   LoopMode ControllerLoopMode
+
+   <span class="token comment">// Stop is the stop channel</span>
+   Stop <span class="token operator">&lt;-</span><span class="token keyword">chan</span> <span class="token keyword">struct</span><span class="token punctuation">{</span><span class="token punctuation">}</span>
+
+   <span class="token comment">// InformersStarted is closed after all of the controllers have been initialized and are running.  After this point it is safe,</span>
+   <span class="token comment">// for an individual controller to start the shared informers. Before it is closed, they should not.</span>
+   InformersStarted <span class="token keyword">chan</span> <span class="token keyword">struct</span><span class="token punctuation">{</span><span class="token punctuation">}</span>
+
+   <span class="token comment">// ResyncPeriod generates a duration each time it is invoked; this is so that</span>
+   <span class="token comment">// multiple controllers don&apos;t get into lock-step and all hammer the apiserver</span>
+   <span class="token comment">// with list requests simultaneously.</span>
+   ResyncPeriod <span class="token keyword">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span> time<span class="token punctuation">.</span>Duration
+<span class="token punctuation">}</span>
+</code></pre>
+<div><p class="code-filename">cmd/kube-controller-manager/app/apps.go:69</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token function">startReplicaSetController</span><span class="token punctuation">(</span>ctx ControllerContext<span class="token punctuation">)</span> <span class="token punctuation">(</span>http<span class="token punctuation">.</span>Handler<span class="token punctuation">,</span> <span class="token builtin">bool</span><span class="token punctuation">,</span> <span class="token builtin">error</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+   <span class="token keyword">if</span> <span class="token operator">!</span>ctx<span class="token punctuation">.</span>AvailableResources<span class="token punctuation">[</span>schema<span class="token punctuation">.</span>GroupVersionResource<span class="token punctuation">{</span>Group<span class="token punctuation">:</span> <span class="token string">&quot;apps&quot;</span><span class="token punctuation">,</span> Version<span class="token punctuation">:</span> <span class="token string">&quot;v1&quot;</span><span class="token punctuation">,</span> Resource<span class="token punctuation">:</span> <span class="token string">&quot;replicasets&quot;</span><span class="token punctuation">}</span><span class="token punctuation">]</span> <span class="token punctuation">{</span>
+      <span class="token keyword">return</span> <span class="token boolean">nil</span><span class="token punctuation">,</span> <span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token boolean">nil</span>
+   <span class="token punctuation">}</span>
+   <span class="token keyword">go</span> replicaset<span class="token punctuation">.</span><span class="token function">NewReplicaSetController</span><span class="token punctuation">(</span>
+      ctx<span class="token punctuation">.</span>InformerFactory<span class="token punctuation">.</span><span class="token function">Apps</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">V1</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">ReplicaSets</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+      ctx<span class="token punctuation">.</span>InformerFactory<span class="token punctuation">.</span><span class="token function">Core</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">V1</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">Pods</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+      ctx<span class="token punctuation">.</span>ClientBuilder<span class="token punctuation">.</span><span class="token function">ClientOrDie</span><span class="token punctuation">(</span><span class="token string">&quot;replicaset-controller&quot;</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+      replicaset<span class="token punctuation">.</span>BurstReplicas<span class="token punctuation">,</span>
+   <span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">Run</span><span class="token punctuation">(</span><span class="token function">int</span><span class="token punctuation">(</span>ctx<span class="token punctuation">.</span>ComponentConfig<span class="token punctuation">.</span>ReplicaSetController<span class="token punctuation">.</span>ConcurrentRSSyncs<span class="token punctuation">)</span><span class="token punctuation">,</span> ctx<span class="token punctuation">.</span>Stop<span class="token punctuation">)</span>
+   <span class="token keyword">return</span> <span class="token boolean">nil</span><span class="token punctuation">,</span> <span class="token boolean">true</span><span class="token punctuation">,</span> <span class="token boolean">nil</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<div><p class="code-filename">pkg/controller/replicaset/replica_set.go:109</p></div>
+<pre class="language-"><code class="lang-go"><span class="token comment">// NewReplicaSetController configures a replica set controller with the specified event recorder</span>
+<span class="token keyword">func</span> <span class="token function">NewReplicaSetController</span><span class="token punctuation">(</span>rsInformer appsinformers<span class="token punctuation">.</span>ReplicaSetInformer<span class="token punctuation">,</span> podInformer coreinformers<span class="token punctuation">.</span>PodInformer<span class="token punctuation">,</span> kubeClient clientset<span class="token punctuation">.</span>Interface<span class="token punctuation">,</span> burstReplicas <span class="token builtin">int</span><span class="token punctuation">)</span> <span class="token operator">*</span>ReplicaSetController <span class="token punctuation">{</span>
+   eventBroadcaster <span class="token operator">:=</span> record<span class="token punctuation">.</span><span class="token function">NewBroadcaster</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+   eventBroadcaster<span class="token punctuation">.</span><span class="token function">StartLogging</span><span class="token punctuation">(</span>klog<span class="token punctuation">.</span>Infof<span class="token punctuation">)</span>
+   eventBroadcaster<span class="token punctuation">.</span><span class="token function">StartRecordingToSink</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>v1core<span class="token punctuation">.</span>EventSinkImpl<span class="token punctuation">{</span>Interface<span class="token punctuation">:</span> kubeClient<span class="token punctuation">.</span><span class="token function">CoreV1</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">Events</span><span class="token punctuation">(</span><span class="token string">&quot;&quot;</span><span class="token punctuation">)</span><span class="token punctuation">}</span><span class="token punctuation">)</span>
+   <span class="token keyword">return</span> <span class="token function">NewBaseController</span><span class="token punctuation">(</span>rsInformer<span class="token punctuation">,</span> podInformer<span class="token punctuation">,</span> kubeClient<span class="token punctuation">,</span> burstReplicas<span class="token punctuation">,</span>
+      apps<span class="token punctuation">.</span>SchemeGroupVersion<span class="token punctuation">.</span><span class="token function">WithKind</span><span class="token punctuation">(</span><span class="token string">&quot;ReplicaSet&quot;</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+      <span class="token string">&quot;replicaset_controller&quot;</span><span class="token punctuation">,</span>
+      <span class="token string">&quot;replicaset&quot;</span><span class="token punctuation">,</span>
+      controller<span class="token punctuation">.</span>RealPodControl<span class="token punctuation">{</span>
+         KubeClient<span class="token punctuation">:</span> kubeClient<span class="token punctuation">,</span>
+         Recorder<span class="token punctuation">:</span>   eventBroadcaster<span class="token punctuation">.</span><span class="token function">NewRecorder</span><span class="token punctuation">(</span>scheme<span class="token punctuation">.</span>Scheme<span class="token punctuation">,</span> v1<span class="token punctuation">.</span>EventSource<span class="token punctuation">{</span>Component<span class="token punctuation">:</span> <span class="token string">&quot;replicaset-controller&quot;</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+      <span class="token punctuation">}</span><span class="token punctuation">,</span>
+   <span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<div><p class="code-filename">pkg/controller/replicaset/replica_set.go:126</p></div>
+<pre class="language-"><code class="lang-go"><span class="token comment">// NewBaseController is the implementation of NewReplicaSetController with additional injected</span>
+<span class="token comment">// parameters so that it can also serve as the implementation of NewReplicationController.</span>
+<span class="token keyword">func</span> <span class="token function">NewBaseController</span><span class="token punctuation">(</span>rsInformer appsinformers<span class="token punctuation">.</span>ReplicaSetInformer<span class="token punctuation">,</span> podInformer coreinformers<span class="token punctuation">.</span>PodInformer<span class="token punctuation">,</span> kubeClient clientset<span class="token punctuation">.</span>Interface<span class="token punctuation">,</span> burstReplicas <span class="token builtin">int</span><span class="token punctuation">,</span>
+   gvk schema<span class="token punctuation">.</span>GroupVersionKind<span class="token punctuation">,</span> metricOwnerName<span class="token punctuation">,</span> queueName <span class="token builtin">string</span><span class="token punctuation">,</span> podControl controller<span class="token punctuation">.</span>PodControlInterface<span class="token punctuation">)</span> <span class="token operator">*</span>ReplicaSetController <span class="token punctuation">{</span>
+   <span class="token keyword">if</span> kubeClient <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token operator">&amp;&amp;</span> kubeClient<span class="token punctuation">.</span><span class="token function">CoreV1</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">RESTClient</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">GetRateLimiter</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+      metrics<span class="token punctuation">.</span><span class="token function">RegisterMetricAndTrackRateLimiterUsage</span><span class="token punctuation">(</span>metricOwnerName<span class="token punctuation">,</span> kubeClient<span class="token punctuation">.</span><span class="token function">CoreV1</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">RESTClient</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">GetRateLimiter</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+   <span class="token punctuation">}</span>
+
+   rsc <span class="token operator">:=</span> <span class="token operator">&amp;</span>ReplicaSetController<span class="token punctuation">{</span>
+      GroupVersionKind<span class="token punctuation">:</span> gvk<span class="token punctuation">,</span>
+      kubeClient<span class="token punctuation">:</span>       kubeClient<span class="token punctuation">,</span>
+      podControl<span class="token punctuation">:</span>       podControl<span class="token punctuation">,</span>
+      burstReplicas<span class="token punctuation">:</span>    burstReplicas<span class="token punctuation">,</span>
+      expectations<span class="token punctuation">:</span>     controller<span class="token punctuation">.</span><span class="token function">NewUIDTrackingControllerExpectations</span><span class="token punctuation">(</span>controller<span class="token punctuation">.</span><span class="token function">NewControllerExpectations</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+      queue<span class="token punctuation">:</span>            workqueue<span class="token punctuation">.</span><span class="token function">NewNamedRateLimitingQueue</span><span class="token punctuation">(</span>workqueue<span class="token punctuation">.</span><span class="token function">DefaultControllerRateLimiter</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> queueName<span class="token punctuation">)</span><span class="token punctuation">,</span>
+   <span class="token punctuation">}</span>
+
+   rsInformer<span class="token punctuation">.</span><span class="token function">Informer</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">AddEventHandler</span><span class="token punctuation">(</span>cache<span class="token punctuation">.</span>ResourceEventHandlerFuncs<span class="token punctuation">{</span>
+      AddFunc<span class="token punctuation">:</span>    rsc<span class="token punctuation">.</span>enqueueReplicaSet<span class="token punctuation">,</span>
+      UpdateFunc<span class="token punctuation">:</span> rsc<span class="token punctuation">.</span>updateRS<span class="token punctuation">,</span>
+      <span class="token comment">// This will enter the sync loop and no-op, because the replica set has been deleted from the store.</span>
+      <span class="token comment">// Note that deleting a replica set immediately after scaling it to 0 will not work. The recommended</span>
+      <span class="token comment">// way of achieving this is by performing a `stop` operation on the replica set.</span>
+      DeleteFunc<span class="token punctuation">:</span> rsc<span class="token punctuation">.</span>enqueueReplicaSet<span class="token punctuation">,</span>
+   <span class="token punctuation">}</span><span class="token punctuation">)</span>
+   rsc<span class="token punctuation">.</span>rsLister <span class="token operator">=</span> rsInformer<span class="token punctuation">.</span><span class="token function">Lister</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+   rsc<span class="token punctuation">.</span>rsListerSynced <span class="token operator">=</span> rsInformer<span class="token punctuation">.</span><span class="token function">Informer</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>HasSynced
+
+   podInformer<span class="token punctuation">.</span><span class="token function">Informer</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">AddEventHandler</span><span class="token punctuation">(</span>cache<span class="token punctuation">.</span>ResourceEventHandlerFuncs<span class="token punctuation">{</span>
+      AddFunc<span class="token punctuation">:</span> rsc<span class="token punctuation">.</span>addPod<span class="token punctuation">,</span>
+      <span class="token comment">// This invokes the ReplicaSet for every pod change, eg: host assignment. Though this might seem like</span>
+      <span class="token comment">// overkill the most frequent pod update is status, and the associated ReplicaSet will only list from</span>
+      <span class="token comment">// local storage, so it should be ok.</span>
+      UpdateFunc<span class="token punctuation">:</span> rsc<span class="token punctuation">.</span>updatePod<span class="token punctuation">,</span>
+      DeleteFunc<span class="token punctuation">:</span> rsc<span class="token punctuation">.</span>deletePod<span class="token punctuation">,</span>
+   <span class="token punctuation">}</span><span class="token punctuation">)</span>
+   rsc<span class="token punctuation">.</span>podLister <span class="token operator">=</span> podInformer<span class="token punctuation">.</span><span class="token function">Lister</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+   rsc<span class="token punctuation">.</span>podListerSynced <span class="token operator">=</span> podInformer<span class="token punctuation">.</span><span class="token function">Informer</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>HasSynced
+
+   rsc<span class="token punctuation">.</span>syncHandler <span class="token operator">=</span> rsc<span class="token punctuation">.</span>syncReplicaSet
+
+   <span class="token keyword">return</span> rsc
+<span class="token punctuation">}</span>
+</code></pre>
+<div><p class="code-filename">pkg/controller/replicaset/replica_set.go:74</p></div>
+<pre class="language-"><code class="lang-go"><span class="token comment">// ReplicaSetController is responsible for synchronizing ReplicaSet objects stored</span>
+<span class="token comment">// in the system with actual running pods.</span>
+<span class="token keyword">type</span> ReplicaSetController <span class="token keyword">struct</span> <span class="token punctuation">{</span>
+   <span class="token comment">// GroupVersionKind indicates the controller type.</span>
+   <span class="token comment">// Different instances of this struct may handle different GVKs.</span>
+   <span class="token comment">// For example, this struct can be used (with adapters) to handle ReplicationController.</span>
+   schema<span class="token punctuation">.</span>GroupVersionKind
+
+   kubeClient clientset<span class="token punctuation">.</span>Interface
+   podControl controller<span class="token punctuation">.</span>PodControlInterface
+
+   <span class="token comment">// A ReplicaSet is temporarily suspended after creating/deleting these many replicas.</span>
+   <span class="token comment">// It resumes normal action after observing the watch events for them.</span>
+   burstReplicas <span class="token builtin">int</span>
+   <span class="token comment">// To allow injection of syncReplicaSet for testing.</span>
+   syncHandler <span class="token keyword">func</span><span class="token punctuation">(</span>rsKey <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token builtin">error</span>
+
+   <span class="token comment">// A TTLCache of pod creates/deletes each rc expects to see.</span>
+   expectations <span class="token operator">*</span>controller<span class="token punctuation">.</span>UIDTrackingControllerExpectations
+
+   <span class="token comment">// A store of ReplicaSets, populated by the shared informer passed to NewReplicaSetController</span>
+   rsLister appslisters<span class="token punctuation">.</span>ReplicaSetLister
+   <span class="token comment">// rsListerSynced returns true if the pod store has been synced at least once.</span>
+   <span class="token comment">// Added as a member to the struct to allow injection for testing.</span>
+   rsListerSynced cache<span class="token punctuation">.</span>InformerSynced
+
+   <span class="token comment">// A store of pods, populated by the shared informer passed to NewReplicaSetController</span>
+   podLister corelisters<span class="token punctuation">.</span>PodLister
+   <span class="token comment">// podListerSynced returns true if the pod store has been synced at least once.</span>
+   <span class="token comment">// Added as a member to the struct to allow injection for testing.</span>
+   podListerSynced cache<span class="token punctuation">.</span>InformerSynced
+
+   <span class="token comment">// Controllers that need to be synced</span>
+   queue workqueue<span class="token punctuation">.</span>RateLimitingInterface
+<span class="token punctuation">}</span>
+</code></pre>
+<div><p class="code-filename">pkg/controller/replicaset/replica_set.go:177</p></div>
+<pre class="language-"><code class="lang-go"><span class="token comment">// Run begins watching and syncing.</span>
+<span class="token keyword">func</span> <span class="token punctuation">(</span>rsc <span class="token operator">*</span>ReplicaSetController<span class="token punctuation">)</span> <span class="token function">Run</span><span class="token punctuation">(</span>workers <span class="token builtin">int</span><span class="token punctuation">,</span> stopCh <span class="token operator">&lt;-</span><span class="token keyword">chan</span> <span class="token keyword">struct</span><span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+   <span class="token keyword">defer</span> utilruntime<span class="token punctuation">.</span><span class="token function">HandleCrash</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+   <span class="token keyword">defer</span> rsc<span class="token punctuation">.</span>queue<span class="token punctuation">.</span><span class="token function">ShutDown</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+   controllerName <span class="token operator">:=</span> strings<span class="token punctuation">.</span><span class="token function">ToLower</span><span class="token punctuation">(</span>rsc<span class="token punctuation">.</span>Kind<span class="token punctuation">)</span>
+   klog<span class="token punctuation">.</span><span class="token function">Infof</span><span class="token punctuation">(</span><span class="token string">&quot;Starting %v controller&quot;</span><span class="token punctuation">,</span> controllerName<span class="token punctuation">)</span>
+   <span class="token keyword">defer</span> klog<span class="token punctuation">.</span><span class="token function">Infof</span><span class="token punctuation">(</span><span class="token string">&quot;Shutting down %v controller&quot;</span><span class="token punctuation">,</span> controllerName<span class="token punctuation">)</span>
+
+   <span class="token keyword">if</span> <span class="token operator">!</span>controller<span class="token punctuation">.</span><span class="token function">WaitForCacheSync</span><span class="token punctuation">(</span>rsc<span class="token punctuation">.</span>Kind<span class="token punctuation">,</span> stopCh<span class="token punctuation">,</span> rsc<span class="token punctuation">.</span>podListerSynced<span class="token punctuation">,</span> rsc<span class="token punctuation">.</span>rsListerSynced<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">return</span>
+   <span class="token punctuation">}</span>
+
+   <span class="token keyword">for</span> i <span class="token operator">:=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> workers<span class="token punctuation">;</span> i<span class="token operator">++</span> <span class="token punctuation">{</span>
+      <span class="token keyword">go</span> wait<span class="token punctuation">.</span><span class="token function">Until</span><span class="token punctuation">(</span>rsc<span class="token punctuation">.</span>worker<span class="token punctuation">,</span> time<span class="token punctuation">.</span>Second<span class="token punctuation">,</span> stopCh<span class="token punctuation">)</span>
+   <span class="token punctuation">}</span>
+
+   <span class="token operator">&lt;-</span>stopCh
+<span class="token punctuation">}</span>
+</code></pre>
+<div><p class="code-filename">pkg/controller/replicaset/replica_set.go:432</p></div>
+<pre class="language-"><code class="lang-go"><span class="token comment">// worker runs a worker thread that just dequeues items, processes them, and marks them done.</span>
+<span class="token comment">// It enforces that the syncHandler is never invoked concurrently with the same key.</span>
+<span class="token keyword">func</span> <span class="token punctuation">(</span>rsc <span class="token operator">*</span>ReplicaSetController<span class="token punctuation">)</span> <span class="token function">worker</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+   <span class="token keyword">for</span> rsc<span class="token punctuation">.</span><span class="token function">processNextWorkItem</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+   <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<div><p class="code-filename">pkg/controller/replicaset/replica_set.go:437</p></div>
+<pre class="language-"><code class="lang-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>rsc <span class="token operator">*</span>ReplicaSetController<span class="token punctuation">)</span> <span class="token function">processNextWorkItem</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token builtin">bool</span> <span class="token punctuation">{</span>
+   key<span class="token punctuation">,</span> quit <span class="token operator">:=</span> rsc<span class="token punctuation">.</span>queue<span class="token punctuation">.</span><span class="token function">Get</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+   <span class="token keyword">if</span> quit <span class="token punctuation">{</span>
+      <span class="token keyword">return</span> <span class="token boolean">false</span>
+   <span class="token punctuation">}</span>
+   <span class="token keyword">defer</span> rsc<span class="token punctuation">.</span>queue<span class="token punctuation">.</span><span class="token function">Done</span><span class="token punctuation">(</span>key<span class="token punctuation">)</span>
+
+   err <span class="token operator">:=</span> rsc<span class="token punctuation">.</span><span class="token function">syncHandler</span><span class="token punctuation">(</span>key<span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token builtin">string</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+   <span class="token keyword">if</span> err <span class="token operator">==</span> <span class="token boolean">nil</span> <span class="token punctuation">{</span>
+      rsc<span class="token punctuation">.</span>queue<span class="token punctuation">.</span><span class="token function">Forget</span><span class="token punctuation">(</span>key<span class="token punctuation">)</span>
+      <span class="token keyword">return</span> <span class="token boolean">true</span>
+   <span class="token punctuation">}</span>
+
+   utilruntime<span class="token punctuation">.</span><span class="token function">HandleError</span><span class="token punctuation">(</span>fmt<span class="token punctuation">.</span><span class="token function">Errorf</span><span class="token punctuation">(</span><span class="token string">&quot;Sync %q failed with %v&quot;</span><span class="token punctuation">,</span> key<span class="token punctuation">,</span> err<span class="token punctuation">)</span><span class="token punctuation">)</span>
+   rsc<span class="token punctuation">.</span>queue<span class="token punctuation">.</span><span class="token function">AddRateLimited</span><span class="token punctuation">(</span>key<span class="token punctuation">)</span>
+
+   <span class="token keyword">return</span> <span class="token boolean">true</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>!FILENAME pkg/controller/replicaset/replica_set.go:571</p>
+<p>func (rsc *ReplicaSetController) syncReplicaSet(key string) error </p>
 <footer class="page-footer"><span class="copyright">Copyright &#xA9; farmer.hutao@outlook.com 2019 all right reserved&#xFF0C;powered by Gitbook</span><span class="footer-modification">&#x8BE5;&#x6587;&#x4EF6;&#x4FEE;&#x8BA2;&#x65F6;&#x95F4;&#xFF1A;
-2019-06-20 14:58:28
+2019-08-26 19:46:47
 </span></footer>
                                 
                                 </section>
@@ -775,7 +1170,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"控制器概述","level":"2.3.1","depth":2,"next":{"title":"自定义控制器","level":"2.3.2","depth":2,"path":"core/controller-manager/custom-controller.md","ref":"core/controller-manager/custom-controller.md","articles":[]},"previous":{"title":"controller-manager","level":"2.3","depth":1,"path":"core/controller-manager/README.md","ref":"core/controller-manager/README.md","articles":[{"title":"控制器概述","level":"2.3.1","depth":2,"path":"core/controller-manager/controller.md","ref":"core/controller-manager/controller.md","articles":[]},{"title":"自定义控制器","level":"2.3.2","depth":2,"path":"core/controller-manager/custom-controller.md","ref":"core/controller-manager/custom-controller.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["theme-comscore","codeblock-filename","navigator","simple-page-toc","expandable-chapters-small","search-pro","splitter","multipart","tbfed-pagefooter","prism","-highlight","editlink","github","github-buttons@2.1.0","donate","copy-code-button"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"tbfed-pagefooter":{"copyright":"Copyright &copy farmer.hutao@outlook.com 2019","modify_label":"该文件修订时间：","modify_format":"YYYY-MM-DD HH:mm:ss"},"prism":{},"github":{"url":"https://github.com/farmer-hutao/k8s-source-code-analysis"},"editlink":{"label":"编辑本页","multilingual":false,"base":"https://github.com/farmer-hutao/k8s-source-code-analysis/edit/master"},"simple-page-toc":{"maxDepth":4,"skipFirstH1":true},"splitter":{},"search-pro":{"cutWordLib":"nodejieba","defineWord":["Gitbook Use"]},"search":{},"multipart":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"donate":{"alipay":"","alipayText":"支付宝打赏","button":"鼓励作者","title":"催作者快快更新","wechat":"./image/wx.jpg","wechatText":"微信小额捐赠，鼓励作者尽快更新～"},"fontsettings":{"theme":"white","family":"sans","size":2},"codeblock-filename":{},"theme-comscore":{},"navigator":{},"github-buttons":{"repo":"farmer-hutao/k8s-source-code-analysis","types":["star"],"size":"small"},"expandable-chapters-small":{},"copy-code-button":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":true}},"theme":"default","author":"Tao Hu <farmer.hutao@outlook.com>","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"《k8s-1.13版本源码分析》","gitbook":"*","description":"k8s source code analysis"},"file":{"path":"core/controller-manager/controller.md","mtime":"2019-06-20T06:58:28.298Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-06-20T07:00:23.544Z"},"basePath":"../..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"控制器概述","level":"2.3.1","depth":2,"next":{"title":"自定义控制器","level":"2.3.2","depth":2,"path":"core/controller-manager/custom-controller.md","ref":"core/controller-manager/custom-controller.md","articles":[]},"previous":{"title":"controller-manager","level":"2.3","depth":1,"path":"core/controller-manager/README.md","ref":"core/controller-manager/README.md","articles":[{"title":"控制器概述","level":"2.3.1","depth":2,"path":"core/controller-manager/controller.md","ref":"core/controller-manager/controller.md","articles":[]},{"title":"自定义控制器","level":"2.3.2","depth":2,"path":"core/controller-manager/custom-controller.md","ref":"core/controller-manager/custom-controller.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["theme-comscore","codeblock-filename","navigator","simple-page-toc","expandable-chapters-small","search-pro","splitter","multipart","tbfed-pagefooter","prism","-highlight","editlink","github","github-buttons@2.1.0","donate","copy-code-button"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"tbfed-pagefooter":{"copyright":"Copyright &copy farmer.hutao@outlook.com 2019","modify_label":"该文件修订时间：","modify_format":"YYYY-MM-DD HH:mm:ss"},"prism":{},"github":{"url":"https://github.com/farmer-hutao/k8s-source-code-analysis"},"editlink":{"label":"编辑本页","multilingual":false,"base":"https://github.com/farmer-hutao/k8s-source-code-analysis/edit/master"},"simple-page-toc":{"maxDepth":4,"skipFirstH1":true},"splitter":{},"search-pro":{"cutWordLib":"nodejieba","defineWord":["Gitbook Use"]},"search":{},"multipart":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"donate":{"alipay":"","alipayText":"支付宝打赏","button":"鼓励作者","title":"催作者快快更新","wechat":"./image/wx.jpg","wechatText":"微信小额捐赠，鼓励作者尽快更新～"},"fontsettings":{"theme":"white","family":"sans","size":2},"codeblock-filename":{},"theme-comscore":{},"navigator":{},"github-buttons":{"repo":"farmer-hutao/k8s-source-code-analysis","types":["star"],"size":"small"},"expandable-chapters-small":{},"copy-code-button":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":true}},"theme":"default","author":"Tao Hu <farmer.hutao@outlook.com>","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"《k8s-1.13版本源码分析》","gitbook":"*","description":"k8s source code analysis"},"file":{"path":"core/controller-manager/controller.md","mtime":"2019-08-26T11:46:47.294Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-08-27T11:22:39.392Z"},"basePath":"../..","book":{"language":""}});
         });
     </script>
 </div>
