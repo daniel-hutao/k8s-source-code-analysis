@@ -1,6 +1,6 @@
 # RunC 源码通读指南之 Cgroup
 
-
+<!--toc-->
 
 ## 概述
 
@@ -11,8 +11,6 @@ Runc 支持两种 cgroup driver: 一种是 cgroupfs ,一种是 systemd，在 run
 linux 系统默认情况下将 mount cgroupfs 目录" /sys/fs/cgroup/ "和" /proc/*$pid*/cgroup "两个目录下操作实现对 进程的资源限制。对于 cgroupfs 文件系统操作方式也同样是 runC 实现的 cgroup 操作的关键接口所在,这也是runC对Cgroup操作根本原理所在。
 
 本文先从 runc 执行过程中涉及 cgroup 的初始化、配置、应用的整个相关的过程分析,如要了解完整的 container run 的所有详细执行过程可参考本套 RunC 系列文档《 RunC 源码通读指南之 Run 》，本文仅指出执行流程中与 cgroup 相关初始化及应用的过程。其后分析了cgroup manager 和 subsystem 的实现详细分析，其实就是对 cgroup 的 CRUD 操作实现细节。最后在附录内附有 cgroup包的文件说明、公共 utils 方法功能解析说明以及各 subsystem 限制资源配置项的用途说明。
-
-
 
 ##  RunC 执行流程与 cgroup 的应用
 
@@ -183,8 +181,6 @@ func (p *initProcess) start() error {
 从整个执行过程来看，容器 init go 代码运行初始化配置后向exec.fifo管道写数据，阻塞，直到用户调用`runc start`，读取管道中的数据将最后执行用户定义的entrypoint程序。
 
 上面已为Cgroup在容器创建过程中的配置与应用的管理过程，而接下来我们将看看底层是如何实现cgroup的。
-
-
 
 ## Cgroup manager 实现
 
@@ -455,8 +451,6 @@ func (m *Manager) Freeze(state configs.FreezerState) error {
 
 其它 manager 方法：manager.**GetPids()**    /manager.**GetAllPids()**  / manager.**GetPaths()**  / manager.**Destroy()** / manager.**GetStats()** 略
 
-
-
 ## Cgroup  subsystem 实现
 
 Cgroupfs 子系统接口、关键类型、关键全局变量定义
@@ -628,8 +622,6 @@ func (s *CpuGroup) Remove(d *cgroupData) error {
 
 其它 cgroup 的子系统资源设置项说明可参考后面的附录。
 
-
-
 ## 附录 一  
 
 #### Cgroup 包内文件说明
@@ -742,8 +734,6 @@ func (s *CpuGroup) Remove(d *cgroupData) error {
 
 ```
 
-
-
 ## 附录 二
 
 cgroups 包下 utils 定义的方法用途简析
@@ -804,16 +794,12 @@ func getHugePageSizeFromFilenames(fileNames []string) ([]string, error) {...}
 
 
 
-**相关文档**：
+**相关文档**： // TODO 补充链接
 
-《RunC 源码通读指南之 Run》
-
-《RunC 源码通读指南之 Create & Start》
-
-《RunC 源码通读指南之 Namespace》
-
-《RunC 源码通读指南之 Networks》
-
-
+- 《RunC 源码通读指南之 Run》
+- 《RunC 源码通读指南之 Create & Start》
+- 《RunC 源码通读指南之 Namespace》
+- 《RunC 源码通读指南之 Networks》
 
 **~本文 END~**
+

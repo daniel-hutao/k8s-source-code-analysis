@@ -1,6 +1,6 @@
 # RunC 源码通读指南之 NameSpace
 
-
+<!--toc-->
 
 ## 概述
 
@@ -31,8 +31,6 @@ Parent.start() 执行其实则是 runC init 命令的执行:
 2. ParentProcess 用init管道将容器配置信息传输给runC init进程，runC init再据此配置信息进行容器的初始化操作。初始化完成之后，再向另一个管道exec.fifo进行写操作，进入阻塞状态等待runC start
 
 因此本文我们将从两个方面展开分析，第一则是 runC init 流程执行关于 namespace 设置的时机，第二则是 c 代码部分 nsenter 的实现（ namespace 关键应用代码）。
-
-
 
 ## RunC init 执行流程与 namespace 
 
@@ -237,8 +235,6 @@ func (l *linuxStandardInit) Init() error {
 
 此时整个 run 的容器执行流程在执行用户程序 entrypoint 后已接近尾声。从整个执行过程来看 namespace 的配置逻辑主要在 nsenter C 代码内，下面先简要查看 runc 内对 namespace 相关的定义与实现方法，后面将详细介绍 nsenter 的逻辑代码实现。
 
-
-
 ## RunC Namespace 定义与实现
 
 先来看一下容器内的执行进程 config 配置的 namespaces 定义
@@ -414,8 +410,6 @@ func (c *linuxContainer) bootstrapData(cloneFlags uintptr, nsMaps map[configs.Na
 	return bytes.NewReader(r.Serialize()), nil
 }
 ```
-
-
 
 ## Nsenter C代码解析
 
@@ -856,19 +850,12 @@ void nsexec(void)
 
 此时代码已 return 回到了 runC init 命令的 go 代码继续执行，执行的进程空间仍是已完成 namespace 配置后的最后的进程(即 grandchild 进程在容器流程中称为 init 进程)，后面的init go执行流程本文前面已有简单介绍，更详细的执行流程分析可参照《RunC 源码通读指南之 Run》。
 
+**相关文档**： // TODO 补充链接
 
-
-**相关文档**：
-
-《RunC 源码通读指南之 Run》
-
-《RunC 源码通读指南之 Create & Start》
-
-《RunC 源码通读指南之 Cgroup》
-
-《RunC 源码通读指南之 Networks》
-
-
+- 《RunC 源码通读指南之 Run》
+- 《RunC 源码通读指南之 Create & Start》
+- 《RunC 源码通读指南之 Cgroup》
+- 《RunC 源码通读指南之 Networks》
 
 **~本文 END~**
 
