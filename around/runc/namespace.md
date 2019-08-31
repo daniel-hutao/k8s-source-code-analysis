@@ -34,7 +34,7 @@ Parent.start() 执行其实则是 runC init 命令的执行:
 
 ## RunC init 执行流程与 namespace 
 
-创建容器的 init 进程时相关 namespace 配置项
+创建容器的 init 进程时相关 namespace 配置项
 
 !FILENAME libcontainer/container_linux.go:512
 
