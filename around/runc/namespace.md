@@ -23,7 +23,7 @@ UTS       CLONE_NEWUTS      Hostname and NIS domain name
 
 本文将聚焦在 runC 源码关于容器初始化过程中 namespace 如何应用与实现资源隔离。
 
-从容器的 run 执行流程来看： **容器对象创建阶段** startContainer() => createContainer() => loadFactory()  =>  libcontainer.New() 完成 container 对象的创建后, startContainer() 中已创建的 runner 对象 run() 方法执行，进入**容器对象运行阶段**:  startContainer() => runner.run() => newProcess() => runner.container.Run(process) => linuxContainer.strat() => linuxContainer.newParentProcess(process) => =>linuxContainer.commandTemplate() => linuxContaine.newInitProcess() =>parent.start() => initProcess.start() 。
+从容器的 run 执行流程来看： **容器对象创建阶段** startContainer() => createContainer() => loadFactory()  =>  libcontainer.New() 完成 container 对象的创建后, startContainer() 中已创建的 runner 对象 run() 方法执行，进入**容器对象运行阶段**:  startContainer() => runner.run() => newProcess() => runner.container.Run(process) => linuxContainer.start() => linuxContainer.newParentProcess(process) => =>linuxContainer.commandTemplate() => linuxContaine.newInitProcess() =>parent.start() => initProcess.start() 。
 
 Parent.start() 执行其实则是 runC init 命令的执行:
 
