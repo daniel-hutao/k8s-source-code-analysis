@@ -1049,7 +1049,7 @@ func (l *linuxStandardInit) Init() error {
 
 ## 容器用户程序与运行
 
-我们可以看到下面容器的运行是非常简单的实现，因为在容器的 init 阶段已将所有环境都准备好了，此时只需读取管道中的数据（等同时发送bootstrap进程继续执行信号），将进程处于阻塞状态的 init 进程继续后面代码执行用户定义的entrypoint程序。 
+我们可以看到下面容器的运行是非常简单的实现，因为在容器的 init 阶段已将所有环境都准备好了，此时只需读取管道中的数据（等同于 bootstrap 进程发送继续执行信号），将进程处于阻塞状态的 init 进程继续后面代码执行用户定义的entrypoint程序。 
 
 libcontainer/container_linux.go:266
 
