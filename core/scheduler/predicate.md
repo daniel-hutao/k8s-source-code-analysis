@@ -65,7 +65,7 @@ func ParallelizeUntil(ctx context.Context, workers, pieces int, doWorkPiece DoWo
     // 关闭了一个有缓存的channel
 	close(toProcess)
 	// 如果pieces数量比较少，也就是说假设node只有10个，那么workers就赋值为10个
-    // 到这里差不多可以猜到worker是并发工作数，当node大于16时并发是16，当node小于16时并法数就是node数
+    // 到这里差不多可以猜到worker是并发工作数，当node大于16时并发是16，当node小于16时并发数就是node数
 	if pieces < workers {
 		workers = pieces
 	}
