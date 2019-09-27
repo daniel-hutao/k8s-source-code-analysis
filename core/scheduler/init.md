@@ -654,6 +654,7 @@ type SchedulerPolicyConfigMapSource struct {
 !FILENAME pkg/scheduler/scheduler.go:173
 
 ```go
+var config *factory.Config
 source := schedulerAlgorithmSource
 switch {
     // 如果 Provider 配置了，就不用 policy 了
