@@ -808,4 +808,3 @@ func (c *configFactory) CreateFromKeys(predicateKeys, priorityKeys sets.String, 
 
 是不是很熟悉呢？
 
-行，今天就讲到这里～
