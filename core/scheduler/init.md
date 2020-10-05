@@ -800,7 +800,7 @@ func (c *configFactory) CreateFromKeys(predicateKeys, priorityKeys sets.String, 
 
 上面的`NewGenericScheduler()`函数接收了这些参数之后丢给了 **genericScheduler** 对象，这个对象中 predicates 属性对应参数 predicateFuncs，prioritizers 属性对应参数 priorityConfigs；
 
-从这里的代码可以看出来我们配置的算法源可以影响到 Scheduler 的初始化，最终体现在改变了 Scheduler 对象的 config 属性的 Algorithm 属性的 prioritizers 和 prioritizers 上。我们最后回顾一下这2个属性的类型，就和以前的预选、优选过程分析的时候关注的点对上了：
+从这里的代码可以看出来我们配置的算法源可以影响到 Scheduler 的初始化，最终体现在改变了 Scheduler 对象的 config 属性的 Algorithm 属性的 predicates 和 prioritizers 上。我们最后回顾一下这2个属性的类型，就和以前的预选、优选过程分析的时候关注的点对上了：
 
 - predicates --> map[string]algorithm.FitPredicate
 - prioritizers --> []algorithm.PriorityConfig
