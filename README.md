@@ -4,13 +4,13 @@
 
 本书将系统讲解kubernetes的核心组件源码，附带介绍相关的周边项目，比如client-go等。
 
-建议通过公众号`CloudGeek`（微信上直接搜索可以找到）接收更新消息，通过[<u>github pages</u>](https://farmer-hutao.github.io/k8s-source-code-analysis/)阅读本书。
+建议通过公众号`胡说云原生`（微信上直接搜索可以找到）接收更新消息，通过[<u>github pages</u>](https://daniel-hutao.github.io/k8s-source-code-analysis/)阅读本书。
 
 寻找组织可以加我微信（ITNT01），一句话证明自己是源码学习者，然后我会拉你进群。
 
 # 2、内容更新
 
-本项目会不定期更新，一般会在每周五更新一节；更新内容将同步发到公众号`CloudGeek`、博客园`CloudGeek`等。细微的更新，比如错别字修改等不会同步到其他所有平台。
+本项目会不定期更新，一般会在每周五更新一节；更新内容将同步发到公众号`胡说云原生`、博客园`胡说云原生`等。细微的更新，比如错别字修改等不会同步到其他所有平台。
 
 每次新章节会选择性提前发到微信群内，比如本周五要发出来的新内容周一可能就内部发到群里了，然后接受读者反馈，定稿后上传到github，然后同步到微信公众号等平台。
 
@@ -20,8 +20,8 @@
 
 # 4、章节规划与负责人
 
-- [Scheduler](core/scheduler/README.md) - [farmer-hutao](https://github.com/farmer-hutao)
-- [Controller-manager](core/controller-manager/README.md)  - [farmer-hutao](https://github.com/farmer-hutao)
+- [Scheduler](core/scheduler/README.md) - [daniel-hutao](https://github.com/daniel-hutao)
+- [Controller-manager](core/controller-manager/README.md)  - [daniel-hutao](https://github.com/daniel-hutao)
 - [Kube-proxy](core/kube-proxy/README.md) - [XiaoYang](https://github.com/gotoolkits)
 - [Apiserver](core/apiserver/README.md)
 - [Kubelet](core/kubelet/README.md)
